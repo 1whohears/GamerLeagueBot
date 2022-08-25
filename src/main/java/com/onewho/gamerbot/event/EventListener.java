@@ -1,6 +1,7 @@
 package com.onewho.gamerbot.event;
 
 import com.onewho.gamerbot.BotMain;
+import com.onewho.gamerbot.command.CommandParser;
 
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.emoji.EmojiAddedEvent;
@@ -21,7 +22,7 @@ public class EventListener extends ListenerAdapter {
 	public void onMessageReceived(MessageReceivedEvent event) {
 		String text = event.getMessage().getContentRaw();
 		if (text.charAt(0) != BotMain.PREFIX) return;
-		
+		CommandParser.parseCommand(event);
 	}
 	
 	@Override

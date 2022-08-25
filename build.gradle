@@ -87,7 +87,8 @@ dependencies {
             strictly '2.10.1'
         }
     }*/
-    
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+	implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.0'
     implementation("net.dv8tion:JDA:5.0.0-alpha.18")
     //compile 'com.googlecode.json-simple:json-simple:1.1.1'
     
