@@ -14,7 +14,7 @@ plugins {
     
 }
 
-mainClassName = 'onewhohears.Tournament_Manager.Bot_Main'
+mainClassName = 'com.onewho.gamerbot.BotMain'
 
 /*eclipseJdt << {
 	ant.propertyfile(file: ".settings/org.eclipse.core.resources.prefs") {
@@ -36,8 +36,8 @@ task fatJar(type: Jar) {
 	manifest {
         attributes( 
              'Implementation-Title': project.name,  
-             'Implementation-Version': 1.0,
-        	 'Main-Class': 'onewhohears.Tournament_Manager.Bot_Main'
+             'Implementation-Version': 0.1,
+        	 'Main-Class': 'com.onewho.gamerbot.BotMain'
         )
     }
     baseName = project.name
