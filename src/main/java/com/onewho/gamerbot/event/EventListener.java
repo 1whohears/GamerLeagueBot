@@ -1,7 +1,10 @@
 package com.onewho.gamerbot.event;
 
+import java.io.IOException;
+
 import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.command.CommandParser;
+import com.onewho.gamerbot.data.LeagueData;
 
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.emoji.EmojiAddedEvent;
@@ -13,9 +16,13 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 public class EventListener extends ListenerAdapter {
 	
 	@Override
-    public void onReady(ReadyEvent event)
-    {
-        System.out.println("I am ready to go!");
+    public void onReady(ReadyEvent event) {
+        try {
+			LeagueData.readJsonData();
+			System.out.println("Gaming Time in "+event.getGuildTotalCount()+" guilds!");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }
 	
 	@Override

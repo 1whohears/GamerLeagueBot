@@ -35,14 +35,19 @@ public class LeagueData {
 		return json;
 	}
 	
-	public static void saveData() throws IOException {
+	public static void saveData() {
 		String data = gson.toJson(json);
-		BufferedWriter writer = new BufferedWriter(new FileWriter(dataFileName));
-	    writer.write(data);
-	    writer.close();
+		BufferedWriter writer;
+		try {
+			writer = new BufferedWriter(new FileWriter(dataFileName));
+			writer.write(data);
+		    writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	public static JsonObject getGuildDataById(long id) throws IOException {
+	public static JsonObject getGuildDataById(long id) {
 		JsonArray guilds = json.get("guilds").getAsJsonArray();
 		for (int i = 0; i < guilds.size(); ++i) 
 			if (guilds.get(i).getAsJsonObject().get("id").getAsLong() == id) 
