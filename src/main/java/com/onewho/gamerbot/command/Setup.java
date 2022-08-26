@@ -2,17 +2,24 @@ package com.onewho.gamerbot.command;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import com.google.gson.JsonObject;
 import com.onewho.gamerbot.data.LeagueData;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 public class Setup implements ICommand {
 	
@@ -36,16 +43,14 @@ public class Setup implements ICommand {
 		System.out.println("running setup command");
 		Guild guild = event.getGuild();
 		JsonObject guildData = LeagueData.getGuildDataById(guild.getIdLong());
-		// TODO use guild data to get roles and channels by id
 		//setup roles
 		Role gamerRole = null;
 		if (guildData.get("league role id") == null) {
 			gamerRole = guild.createRole().complete();
 			guildData.addProperty("league role id", gamerRole.getIdLong());
-			LeagueData.saveData();
 		} else gamerRole = guild.getRoleById(guildData.get("league role id").getAsLong());
 		gamerRole.getManager()
-			.setName("gamers")
+			.setName("GAMERS")
 			.setColor(Color.CYAN)
 			.complete();
 		//setup category
@@ -53,7 +58,6 @@ public class Setup implements ICommand {
 		if (guildData.get("league category id") == null) {
 			gamerCat = guild.createCategory("Gamer League").complete();
 			guildData.addProperty("league category id", gamerCat.getIdLong());
-			LeagueData.saveData();
 		} else gamerCat = guild.getCategoryById(guildData.get("league category id").getAsLong());
 		Collection<Permission> perm1 = new ArrayList<Permission>();
 		Collection<Permission> perm2 = new ArrayList<Permission>();
@@ -70,26 +74,24 @@ public class Setup implements ICommand {
 		//setup channels
 		TextChannel commandsChannel = setupChannel("bot-commands", gamerCat, guild, guildData);
 		TextChannel optionsChannel = setupChannel("options", gamerCat, guild, guildData);
-		TextChannel historyChannel = setupChannel("set-history", gamerCat, guild, guildData);
-		TextChannel ranksChannel = setupChannel("ranks", gamerCat, guild, guildData);
-		TextChannel pairingsChannel = setupChannel("pairings", gamerCat, guild, guildData);
+		setupChannel("set-history", gamerCat, guild, guildData);
+		setupChannel("ranks", gamerCat, guild, guildData);
+		setupChannel("pairings", gamerCat, guild, guildData);
 		perm1.add(Permission.MESSAGE_SEND);
 		perm1.add(Permission.MESSAGE_ADD_REACTION);
 		commandsChannel.getManager()
-			.sync(gamerCat.getPermissionContainer())
 			.putRolePermissionOverride(gamerRole.getIdLong(), perm1, null)
 			.complete();
 		perm2.add(Permission.MESSAGE_ADD_REACTION);
 		optionsChannel.getManager()
-			.sync(gamerCat.getPermissionContainer())
 			.putRolePermissionOverride(gamerRole.getIdLong(), perm2, null)
 			.complete();
 		perm1.clear();
 		perm2.clear();
-		historyChannel.getManager().sync(gamerCat.getPermissionContainer()).complete();
-		ranksChannel.getManager().sync(gamerCat.getPermissionContainer()).complete();
-		pairingsChannel.getManager().sync(gamerCat.getPermissionContainer()).complete();
+		//setup options channel
+		setupOptions(optionsChannel, guildData);
 		//finish
+		LeagueData.saveData();
 		System.out.println("setup command complete");
 		event.getChannel().sendMessage("Bot Channel Setup Complete!").queue();
 		return true;
@@ -100,9 +102,29 @@ public class Setup implements ICommand {
 		if (data.get(name+" id") == null) {
 			channel = cat.createTextChannel(name).complete();
 			data.addProperty(name+" id", channel.getIdLong());
-			LeagueData.saveData();
 		} else channel = guild.getTextChannelById(data.get(name+" id").getAsLong());
+		channel.getManager().sync(cat.getPermissionContainer()).complete();
 		return channel;
+	}
+	
+	private void setupOptions(TextChannel channel, JsonObject data) {
+		if (data.get("join league option id") == null) {
+			EmbedBuilder jleb = new EmbedBuilder();
+			jleb.setTitle("Join this Server's Gamer League?");
+			jleb.setColor(Color.GREEN);
+			jleb.setDescription("You will be pinged often and must complete your assigned matches!");
+			Button join = Button.success("join-gamer-league", "Join");
+			Button quit = Button.danger("quit-gamer-league", "Quit");
+			MessageCreateData jlc = new MessageCreateBuilder()
+					.addEmbeds(jleb.build())
+					.addActionRow(Arrays.asList(join, quit))
+					.build();
+			Message jlb = channel.sendMessage(jlc).complete();
+			data.addProperty("join league option id", jlb.getIdLong());
+			jlb.addReaction(Emoji.fromUnicode("U+2714"));
+		}
+		
+		LeagueData.saveData();
 	}
 
 }
