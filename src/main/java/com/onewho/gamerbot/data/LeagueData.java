@@ -54,9 +54,15 @@ public class LeagueData {
 				return guilds.get(i).getAsJsonObject();
 		JsonObject guild = new JsonObject();
 		guild.addProperty("id", id);
+		guild.add("users", new JsonArray());
+		guild.add("sets", new JsonArray());
 		guilds.add(guild);
 		saveData();
 		return guild;
+	}
+	
+	public static JsonObject getUserDataById(long id, JsonObject guildData) {
+		
 	}
 	
 }
