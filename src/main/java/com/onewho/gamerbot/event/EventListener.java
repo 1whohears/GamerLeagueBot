@@ -8,6 +8,7 @@ import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.interact.ButtonManager;
 
 import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.events.ReconnectedEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -24,6 +25,15 @@ public class EventListener extends ListenerAdapter {
 		}
     }
 	
+	@Override
+	public void onReconnected(ReconnectedEvent event) {
+		try {
+			LeagueData.readJsonData();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
 		String text = event.getMessage().getContentRaw();
