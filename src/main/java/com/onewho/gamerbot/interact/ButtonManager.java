@@ -1,29 +1,33 @@
 package com.onewho.gamerbot.interact;
 
-import com.google.gson.JsonObject;
-import com.onewho.gamerbot.data.LeagueData;
+import com.onewho.gamerbot.util.UtilUsers;
 
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 
 public class ButtonManager {
 	
 	public static void handleButton(ButtonInteractionEvent event) {
-		JsonObject data = LeagueData.getGuildDataById(event.getGuild().getIdLong());
-		switch (event.getButton().getId()) {
+		String id = event.getButton().getId();
+		if (id.startsWith("setsaweek-")) {
+			int sets = Integer.parseInt(id.substring("setsaweek-".length(), id.length()));
+			if (UtilUsers.userSetsAWeek(event.getGuild(), event.getUser(), sets)) 
+				event.reply("I will try to give you "+sets+" pairings next week!").setEphemeral(true).queue();
+			else event.reply("You must join the Gamer League first!").setEphemeral(true).queue();
+			return;
+		}
+		switch (id) {
 		case "join-gamer-league":
-			System.out.println(event.getUser().getName()+" pressed the join button");
-			event.getGuild().addRoleToMember(event.getUser(), event.getGuild().getRoleById(data.get("league role id").getAsLong())).queue();
+			UtilUsers.userJoinLeague(event.getGuild(), event.getUser());
+			//debug
 			event.reply("You have joined the Gamer League! Please select how many sets you want to do per week!"
 					+ " Use ~help in #bot-commands for more info!").setEphemeral(true).queue();
-			// TODO update league data
 			break;
 		case "quit-gamer-league":
-			System.out.println(event.getUser().getName()+" pressed the quit button");
-			event.getGuild().removeRoleFromMember(event.getUser(), event.getGuild().getRoleById(data.get("league role id").getAsLong())).queue();
+			UtilUsers.userQuitLeague(event.getGuild(), event.getUser());
+			//debug
 			event.reply("You have left the gamer league...sad...").setEphemeral(true).queue();
 			break;
 		}
-		LeagueData.saveData();
 	}
 	
 }

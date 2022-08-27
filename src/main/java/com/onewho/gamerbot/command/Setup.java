@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import com.google.gson.JsonObject;
 import com.onewho.gamerbot.data.LeagueData;
@@ -13,13 +14,15 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 public class Setup implements ICommand {
 	
@@ -109,22 +112,61 @@ public class Setup implements ICommand {
 	
 	private void setupOptions(TextChannel channel, JsonObject data) {
 		if (data.get("join league option id") == null) {
-			EmbedBuilder jleb = new EmbedBuilder();
-			jleb.setTitle("Join this Server's Gamer League?");
-			jleb.setColor(Color.GREEN);
-			jleb.setDescription("You will be pinged often and must complete your assigned matches!");
-			Button join = Button.success("join-gamer-league", "Join");
-			Button quit = Button.danger("quit-gamer-league", "Quit");
 			MessageCreateData jlc = new MessageCreateBuilder()
-					.addEmbeds(jleb.build())
-					.addActionRow(Arrays.asList(join, quit))
+					.addEmbeds(getJLEmbed())
+					.addActionRow(getJLButtons())
 					.build();
 			Message jlb = channel.sendMessage(jlc).complete();
 			data.addProperty("join league option id", jlb.getIdLong());
-			jlb.addReaction(Emoji.fromUnicode("U+2714"));
+		} else {
+			MessageEditData jle = new MessageEditBuilder()
+					.setEmbeds(getJLEmbed())
+					.setActionRow(getJLButtons())
+					.build();
+			channel.editMessageById(data.get("join league option id").getAsLong(), jle).complete();
 		}
-		
-		LeagueData.saveData();
+		if (data.get("setsaweek option id") == null) {
+			MessageCreateData swc = new MessageCreateBuilder()
+					.addEmbeds(getSWEmbed())
+					.addActionRow(getSWButtons())
+					.build();
+			Message swb = channel.sendMessage(swc).complete();
+			data.addProperty("setsaweek option id", swb.getIdLong());
+		} else {
+			MessageEditData swe = new MessageEditBuilder()
+					.setEmbeds(getSWEmbed())
+					.setActionRow(getSWButtons())
+					.build();
+			channel.editMessageById(data.get("setsaweek option id").getAsLong(), swe).complete();
+		}
+	}
+	
+	private MessageEmbed getJLEmbed() {
+		EmbedBuilder jleb = new EmbedBuilder();
+		jleb.setTitle("Join this Server's Gamer League?");
+		jleb.setColor(Color.GREEN);
+		jleb.setDescription("You will be pinged often and must complete your assigned matches!");
+		return jleb.build();
+	}
+	
+	private List<Button> getJLButtons() {
+		Button join = Button.success("join-gamer-league", "Join");
+		Button quit = Button.danger("quit-gamer-league", "Quit");
+		return Arrays.asList(join, quit);
+	}
+	
+	private MessageEmbed getSWEmbed() {
+		EmbedBuilder sweb = new EmbedBuilder();
+		sweb.setTitle("Sets Per Week");
+		sweb.setColor(Color.GREEN);
+		sweb.setDescription("Most amount of sets you can do next week?");
+		return sweb.build();
+	}
+	
+	private List<Button> getSWButtons() {
+		List<Button> bs = new ArrayList<Button>();
+		for (int i = 0; i < 4; ++i) bs.add(Button.primary("setsaweek-"+i, i+""));
+		return bs;
 	}
 
 }

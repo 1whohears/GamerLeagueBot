@@ -11,6 +11,7 @@ public class CommandParser {
 	public static List<ICommand> commands;
 	
 	public static boolean parseCommand(MessageReceivedEvent event) {
+		if (event.getAuthor().equals(event.getJDA().getSelfUser())) return true;
 		if (commands == null) loadCommands();
 		String text = event.getMessage().getContentRaw();
 		if (text.length() < 2) return false;
@@ -36,6 +37,7 @@ public class CommandParser {
 		commands = new ArrayList<ICommand>();
 		commands.add(new Help());
 		commands.add(new Setup());
+		commands.add(new Reload());
 	}
 	
 }

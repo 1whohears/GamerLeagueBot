@@ -62,7 +62,27 @@ public class LeagueData {
 	}
 	
 	public static JsonObject getUserDataById(long id, JsonObject guildData) {
-		
+		if (guildData == null) return null;
+		JsonArray users = guildData.get("users").getAsJsonArray();
+		for (int i = 0; i < users.size(); ++i) 
+			if (users.get(i).getAsJsonObject().get("id").getAsLong() == id) 
+				return users.get(i).getAsJsonObject();
+		JsonObject user = new JsonObject();
+		user.addProperty("id", id);
+		user.addProperty("active", false);
+		user.addProperty("sets per week", 0);
+		users.add(user);
+		saveData();
+		return user;
+	}
+	
+	public static JsonObject getSetDataById(int id, JsonObject guildData) {
+		if (guildData == null) return null;
+		JsonArray sets = guildData.get("sets").getAsJsonArray();
+		for (int i = 0; i < sets.size(); ++i)
+			if (sets.get(i).getAsJsonObject().get("id").getAsInt() == id)
+				return sets.get(i).getAsJsonObject();
+		return null;
 	}
 	
 }
