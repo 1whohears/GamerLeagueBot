@@ -56,6 +56,7 @@ public class LeagueData {
 		guild.addProperty("id", id);
 		guild.add("users", new JsonArray());
 		guild.add("sets", new JsonArray());
+		guild.addProperty("max sets a week", 3);
 		guilds.add(guild);
 		saveData();
 		return guild;
@@ -83,6 +84,14 @@ public class LeagueData {
 			if (sets.get(i).getAsJsonObject().get("id").getAsInt() == id)
 				return sets.get(i).getAsJsonObject();
 		return null;
+	}
+	
+	public static int getMaxSetsAWeek(long guildId) {
+		return getGuildDataById(guildId).get("max sets a week").getAsInt();
+	}
+	
+	public static void setMaxSetsAWeek(long guildId, int sets) {
+		getGuildDataById(guildId).addProperty("max sets a week", sets);
 	}
 	
 }

@@ -38,6 +38,8 @@ public class CommandParser {
 		commands.add(new Help());
 		commands.add(new Setup());
 		commands.add(new Reload());
+		commands.add(new Config());
+		commands.add(new GenPairs());
 	}
 	
 }

@@ -125,17 +125,18 @@ public class Setup implements ICommand {
 					.build();
 			channel.editMessageById(data.get("join league option id").getAsLong(), jle).complete();
 		}
+		int max = LeagueData.getMaxSetsAWeek(channel.getGuild().getIdLong());
 		if (data.get("setsaweek option id") == null) {
 			MessageCreateData swc = new MessageCreateBuilder()
 					.addEmbeds(getSWEmbed())
-					.addActionRow(getSWButtons())
+					.addActionRow(getSWButtons(max))
 					.build();
 			Message swb = channel.sendMessage(swc).complete();
 			data.addProperty("setsaweek option id", swb.getIdLong());
 		} else {
 			MessageEditData swe = new MessageEditBuilder()
 					.setEmbeds(getSWEmbed())
-					.setActionRow(getSWButtons())
+					.setActionRow(getSWButtons(max))
 					.build();
 			channel.editMessageById(data.get("setsaweek option id").getAsLong(), swe).complete();
 		}
@@ -158,14 +159,14 @@ public class Setup implements ICommand {
 	private MessageEmbed getSWEmbed() {
 		EmbedBuilder sweb = new EmbedBuilder();
 		sweb.setTitle("Sets Per Week");
-		sweb.setColor(Color.GREEN);
+		sweb.setColor(Color.BLUE);
 		sweb.setDescription("Most amount of sets you can do next week?");
 		return sweb.build();
 	}
 	
-	private List<Button> getSWButtons() {
+	private List<Button> getSWButtons(int max) {
 		List<Button> bs = new ArrayList<Button>();
-		for (int i = 0; i < 4; ++i) bs.add(Button.primary("setsaweek-"+i, i+""));
+		for (int i = 0; i <= max; ++i) bs.add(Button.primary("setsaweek-"+i, i+""));
 		return bs;
 	}
 

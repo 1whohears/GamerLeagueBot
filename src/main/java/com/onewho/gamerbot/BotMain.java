@@ -18,12 +18,6 @@ public class BotMain {
 	
 	public static void main(String [] arg) {
 		try {
-			/*jda = JDABuilder.createLight(TokenReader.getJDAToken(), GatewayIntent.GUILD_MESSAGES, GatewayIntent.DIRECT_MESSAGES, GatewayIntent.GUILD_MEMBERS)
-					.setMemberCachePolicy(MemberCachePolicy.ALL)
-					.setChunkingFilter(ChunkingFilter.ALL)
-					.addEventListeners(new EventListener())
-					.setActivity(Activity.playing("these fools"))
-					.build();*/
 			jda = JDABuilder.createDefault(TokenReader.getJDAToken(), 
 					GatewayIntent.GUILD_MEMBERS, 
 					GatewayIntent.GUILD_MESSAGES,
@@ -36,7 +30,11 @@ public class BotMain {
 		} catch (LoginException e) {
 			e.printStackTrace();
 		}
-		
 	}
+	
+	// TODO make pairings once a week
+	// TODO report scores
+	// TODO show set history
+	// TODO generate rankings
 	
 }
