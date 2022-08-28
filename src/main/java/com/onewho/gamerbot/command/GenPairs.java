@@ -28,9 +28,15 @@ public class GenPairs implements ICommand {
 		System.out.println("running gen pairs command");
 		Guild guild = event.getGuild();
 		JsonObject data = LeagueData.getGuildDataById(guild.getIdLong());
-		int max = data.get("max sets a week").getAsInt();
-		//
-		
+		int maxPairs = data.get("max sets a week").getAsInt();
+		int weeksBeforeAutoInactive = 1;
+		//TODO sort players by score
+		//TODO remove old pairs
+		//TODO get available/active players
+		//TODO while loop
+			//TODO loop through all players
+				//TODO check if they haven't reached their requested limit
+					//TODO use k closest to find the closest player based on score
 		//debug
 		System.out.println("Pairings Generated");
 		event.getChannel().sendMessage("Finished Generating Pairings!").queue();
