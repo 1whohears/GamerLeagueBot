@@ -30,9 +30,8 @@ public class GenPairs implements ICommand {
 		JsonObject data = LeagueData.getGuildDataById(guild.getIdLong());
 		int maxPairs = data.get("max sets a week").getAsInt();
 		int weeksBeforeAutoInactive = 1;
-		//TODO sort players by score
 		//TODO remove old pairs
-		//TODO get available/active players
+		//TODO get available/active players sorted by score
 		//TODO while loop
 			//TODO loop through all players
 				//TODO check if they haven't reached their requested limit
