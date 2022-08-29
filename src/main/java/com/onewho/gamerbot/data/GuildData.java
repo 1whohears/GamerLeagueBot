@@ -21,7 +21,6 @@ public class GuildData {
 	private List<SetData> sets = new ArrayList<SetData>();
 	private List<SetDisplayData> displays = new ArrayList<SetDisplayData>();
 	
-	
 	private long leagueRoleId = -1;
 	private long leagueCategoryId = -1;
 	private long joinLeagueOptionId = -1;
