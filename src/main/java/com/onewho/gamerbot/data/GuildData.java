@@ -97,9 +97,7 @@ public class GuildData {
 	
 	public SetData getSetDataById(int id) {
 		for (int i = 0; i < sets.size(); ++i) if (sets.get(i).getId() == id) return sets.get(i);
-		SetData data = new SetData(id);
-		sets.add(data);
-		return data;
+		return null;
 	}
 	
 	public int getWeeksBeforeAutoInactive() {

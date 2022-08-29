@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import com.google.gson.JsonObject;
 import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.LeagueData;
 

@@ -5,26 +5,97 @@ import com.google.gson.JsonObject;
 public class SetData {
 	
 	private int id;
+	private long p1Id;
+	private long p2Id;
+	private int p1s;
+	private int p2s;
+	private boolean p1c;
+	private boolean p2c;
+	private int state;
+	private String created;
+	private String completed;
 	
 	public SetData(JsonObject data) {
 		id = data.get("id").getAsInt();
+		p1Id = data.get("p1Id").getAsLong();
+		p2Id = data.get("p2Id").getAsLong();
 		
 	}
 	
-	public SetData(int id) {
+	public SetData(int id, long p1Id, long p2Id) {
 		this.id = id;
+		this.p1Id = p1Id;
+		this.p2Id = p2Id;
 		
 	}
 	
 	public JsonObject getJson() {
 		JsonObject data = new JsonObject();
 		data.addProperty("id", id);
+		data.addProperty("p1Id", p1Id);
+		data.addProperty("p2Id", p2Id);
 		
 		return data;
 	}
 	
 	public int getId() {
 		return id;
+	}
+
+	public int getP1s() {
+		return p1s;
+	}
+
+	public void setP1s(int p1s) {
+		this.p1s = p1s;
+	}
+
+	public int getP2s() {
+		return p2s;
+	}
+
+	public void setP2s(int p2s) {
+		this.p2s = p2s;
+	}
+
+	public boolean isP1c() {
+		return p1c;
+	}
+
+	public void setP1c(boolean p1c) {
+		this.p1c = p1c;
+	}
+
+	public boolean isP2c() {
+		return p2c;
+	}
+
+	public void setP2c(boolean p2c) {
+		this.p2c = p2c;
+	}
+
+	public int getState() {
+		return state;
+	}
+
+	public void setState(int state) {
+		this.state = state;
+	}
+
+	public String getCreated() {
+		return created;
+	}
+
+	public void setCreated(String created) {
+		this.created = created;
+	}
+
+	public String getCompleted() {
+		return completed;
+	}
+
+	public void setCompleted(String completed) {
+		this.completed = completed;
 	}
 	
 }
