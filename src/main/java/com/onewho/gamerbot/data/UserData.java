@@ -76,7 +76,6 @@ public class UserData {
 	}
 
 	public void setScore(int score) {
-		// TODO max min score
 		this.score = score;
 	}
 	

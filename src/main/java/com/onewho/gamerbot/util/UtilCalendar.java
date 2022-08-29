@@ -1,11 +1,13 @@
 package com.onewho.gamerbot.util;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.IsoFields;
 import java.time.temporal.WeekFields;
+import java.util.Date;
 import java.util.Locale;
 
 public class UtilCalendar {
@@ -22,6 +24,10 @@ public class UtilCalendar {
 	
 	public static LocalDate getCurrentDate() {
 		return LocalDate.now();
+	}
+	
+	public static String getCurrentDateString() {
+		return new SimpleDateFormat("dd-MM-yyyy").format(new Date());
 	}
 	
 	public static int getWeek(int day, int month, int year) {
@@ -72,6 +78,17 @@ public class UtilCalendar {
                 .with(wf.weekOfYear(), week)
                 .with(wf.dayOfWeek(), 1);
 		return ldt;
+	}
+	
+	public static boolean isNewer(LocalDate d1, LocalDate d2) {
+		return d1.isAfter(d2);
+	}
+	
+	/**
+	 * @param dateString format dd-MM-yyyy
+	 */
+	public static boolean isNewer(String d1, String d2) {
+		return isNewer(getDate(d1), getDate(d2));
 	}
 	
 }

@@ -108,6 +108,10 @@ public class SetData {
 		return p1c && p2c;
 	}
 	
+	public boolean isUnconfirmed() {
+		return (p1c && !p2c) || (!p1c && p2c);
+	}
+	
 	public boolean isP1Win() {
 		return isComplete() && p1s > p2s;
 	}
@@ -169,6 +173,10 @@ public class SetData {
 	@Override
 	public String toString() {
 		return id+"/"+p1Id+":"+p1s+"/"+p2Id+":"+p2s+"/"+created+"/"+completed;
+	}
+	
+	public boolean hasPlayer(long id) {
+		return id == p1Id || id == p2Id; 
 	}
 	
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.onewho.gamerbot.util.UtilCalendar;
+import com.onewho.gamerbot.util.UtilKClosest;
 
 public class GuildData {
 	
@@ -13,6 +14,8 @@ public class GuildData {
 	private int maxSetsPerWeek;
 	private int weeksBeforeAutoInactive;
 	private int weeksBeforeSetExpires;
+	private int weeksBeforeSetRepeat;
+	private int defaultScore;
 	
 	private List<UserData> users = new ArrayList<UserData>();
 	private List<SetData> sets = new ArrayList<SetData>();
@@ -28,6 +31,8 @@ public class GuildData {
 		maxSetsPerWeek = data.get("max sets a week").getAsInt();
 		weeksBeforeAutoInactive = data.get("weeks before auto inactive").getAsInt();
 		weeksBeforeSetExpires = data.get("weeks before set expires").getAsInt();
+		weeksBeforeSetRepeat = data.get("weeks before set repeat").getAsInt();
+		defaultScore = data.get("default score").getAsInt();
 		users.clear();
 		JsonArray us = data.get("users").getAsJsonArray();
 		for (int i = 0; i < us.size(); ++i) users.add(new UserData(us.get(i).getAsJsonObject()));
@@ -46,6 +51,8 @@ public class GuildData {
 		this.maxSetsPerWeek = 3;
 		this.weeksBeforeAutoInactive = -1;
 		this.weeksBeforeSetExpires = -1;
+		this.weeksBeforeSetRepeat = 1;
+		this.defaultScore = 1000;
 		this.leagueRoleId = -1;
 		this.leagueCategoryId = -1;
 		this.joinLeagueOptionId = -1;
@@ -59,6 +66,8 @@ public class GuildData {
 		data.addProperty("max sets a week", maxSetsPerWeek);
 		data.addProperty("weeks before auto inactive", weeksBeforeAutoInactive);
 		data.addProperty("weeks before set expires", weeksBeforeSetExpires);
+		data.addProperty("weeks before set repeat", weeksBeforeSetRepeat);
+		data.addProperty("default score", defaultScore);
 		data.add("users", getUsersJson());
 		data.add("sets", getSetsJson());
 		data.addProperty("league role id", leagueRoleId);
@@ -155,6 +164,22 @@ public class GuildData {
 		channelIds.addProperty(name, id);
 	}
 	
+	public int getDefaultScore() {
+		return defaultScore;
+	}
+
+	public void setDefaultScore(int defaultScore) {
+		this.defaultScore = defaultScore;
+	}
+	
+	public int getWeeksBeforeSetRepeat() {
+		return weeksBeforeSetRepeat;
+	}
+
+	public void setWeeksBeforeSetRepeat(int weeksBeforeSetRepeat) {
+		this.weeksBeforeSetRepeat = weeksBeforeSetRepeat;
+	}
+	
 	public void removeOldSets() {
 		for (int i = 0; i < sets.size(); ++i) {
 			if (sets.get(i).isComplete()) continue;
@@ -182,8 +207,64 @@ public class GuildData {
 			}
 			available.add(users.get(i));
 		}
-		//TODO sort by score
+		sortByScoreDescend(available);
 		return available;
+	}
+	
+	public List<SetData> getIncompleteSetsWithPlayer(long id) {
+		List<SetData> userSets = new ArrayList<SetData>();
+		for (SetData set : sets) 
+			if (!set.isComplete() && !set.isUnconfirmed() && set.hasPlayer(id)) 
+				userSets.add(set);
+		return userSets;
+	}
+	
+	public List<SetData> getSetsBetweenUsers(long id1, long id2) {
+		List<SetData> userSets = new ArrayList<SetData>();
+		for (SetData set : sets) if (set.hasPlayer(id1) && set.hasPlayer(id2)) userSets.add(set);
+		return userSets;
+	}
+	
+	public SetData getNewestSetBetweenUsers(long id1, long id2) {
+		List<SetData> userSets = getSetsBetweenUsers(id1, id2);
+		if (userSets.size() == 0) return null;
+		int newestIndex = 0;
+		for (int i = 1; i < userSets.size(); ++i) {
+			String d1 = userSets.get(i).getCreatedDate();
+			String d2 = userSets.get(newestIndex).getCreatedDate();
+			if (UtilCalendar.isNewer(d1, d2)) newestIndex = i;
+		}
+		return userSets.get(newestIndex);
+	}
+	
+	public SetData createSet(long id1, long id2) {
+		if (id1 == id2) return null;
+		SetData set = new SetData(getNewSetId(), id1, id2, UtilCalendar.getCurrentDateString());
+		sets.add(set);
+		return set;
+	}
+	
+	private int getNewSetId() {
+		int maxId = -1;
+		for (SetData set : sets) if (set.getId() > maxId) maxId = set.getId();
+		return maxId+1;
+	}
+	
+	public static void sortByScoreDescend(List<UserData> ud) {
+		for (int i = 0; i < ud.size(); ++i) {
+			int maxIndex = i;
+			for (int j = i+1; j < ud.size(); ++j) 
+				if (ud.get(j).getScore() > ud.get(maxIndex).getScore()) maxIndex = j;
+			UserData temp = ud.get(maxIndex);
+			ud.set(maxIndex, ud.get(i));
+			ud.set(i, temp);
+		}
+	}
+	
+	public static int[] getClosestUserIndexsByScore(UserData user, List<UserData> sortedUsers) {
+		int[] scores = new int[sortedUsers.size()];
+		for (int i = 0; i < scores.length; ++i) scores[i] = sortedUsers.get(i).getScore();
+		return UtilKClosest.getKclosestIndex(scores, user.getScore(), sortedUsers.size(), sortedUsers.size());
 	}
 	
 }
