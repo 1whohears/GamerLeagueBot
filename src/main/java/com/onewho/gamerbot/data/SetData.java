@@ -11,7 +11,6 @@ public class SetData {
 	private int p2s;
 	private boolean p1c;
 	private boolean p2c;
-	//private int state;
 	private String created;
 	private String completed;
 	
@@ -23,7 +22,6 @@ public class SetData {
 		p2s = data.get("p2s").getAsInt();
 		p1c = data.get("p1c").getAsBoolean();
 		p2c = data.get("p2c").getAsBoolean();
-		//state = data.get("state").getAsInt();
 		created = data.get("created").getAsString();
 		completed = data.get("completed").getAsString();
 	}
@@ -36,7 +34,6 @@ public class SetData {
 		p2s = 0;
 		p1c = false;
 		p2c = false;
-		//state = 0;
 		this.created = created;
 		this.completed = "";
 	}
@@ -50,7 +47,6 @@ public class SetData {
 		data.addProperty("p2s", p2s);
 		data.addProperty("p1c", p1c);
 		data.addProperty("p2c", p2c);
-		//data.addProperty("state", state);
 		data.addProperty("created", created);
 		data.addProperty("completed", completed);
 		return data;
@@ -92,32 +88,82 @@ public class SetData {
 		this.p2c = p2c;
 	}
 
-	/*public int getState() {
-		return state;
-	}
-
-	public void setState(int state) {
-		this.state = state;
-	}*/
-
-	public String getCreated() {
+	public String getCreatedDate() {
 		return created;
 	}
 
-	public void setCreated(String created) {
+	public void setCreatedData(String created) {
 		this.created = created;
 	}
 
-	public String getCompleted() {
+	public String getCompletedDate() {
 		return completed;
 	}
 
-	public void setCompleted(String completed) {
+	public void setCompletedDate(String completed) {
 		this.completed = completed;
 	}
 	
 	public boolean isComplete() {
-		return !completed.isEmpty();
+		return p1c && p2c;
+	}
+	
+	public boolean isP1Win() {
+		return isComplete() && p1s > p2s;
+	}
+	
+	public boolean isP2Win() {
+		return isComplete() && p2s > p1s;
+	}
+	
+	public boolean isDraw() {
+		return isComplete() && p1s == p2s;
+	}
+	
+	public ReportResult report(long reporterId, int reporterScore, int opponentScore, String date) {
+		if (reporterId == p1Id) {
+			if (p2c) {
+				if (p1s == reporterScore && p2s == opponentScore) {
+					p1c = true;
+					completed = date;
+					return ReportResult.SetVerified;
+				} else return ReportResult.ScoreConflict;
+			} else {
+				p1s = reporterScore;
+				p2s = opponentScore;
+				p1c = true;
+				return ReportResult.WaitingForOpponent;
+			}
+		} else if (reporterId == p2Id) {
+			if (p1c) {
+				if (p2s == reporterScore && p1s == opponentScore) {
+					p2c = true;
+					completed = date;
+					return ReportResult.SetVerified;
+				} else return ReportResult.ScoreConflict;
+			} else {
+				p2s = reporterScore;
+				p1s = opponentScore;
+				p2c = true;
+				return ReportResult.WaitingForOpponent;
+			}
+		} else return ReportResult.IDsDontMatch;
+	}
+	
+	public ReportResult reportAdmin(long id1, long id2, int score1, int score2, String date) {
+		if (id1 == p1Id && id2 == p2Id) {
+			p1c = p2c = true;
+			completed = date;
+			p1s = score1;
+			p2s = score2;
+			return ReportResult.SetVerified;
+		} else if (id1 == p2Id && id2 == p1Id) {
+			p1c = p2c = true;
+			completed = date;
+			p1s = score2;
+			p2s = score1;
+			return ReportResult.SetVerified;
+		} else return ReportResult.IDsDontMatch;
 	}
 	
 }
