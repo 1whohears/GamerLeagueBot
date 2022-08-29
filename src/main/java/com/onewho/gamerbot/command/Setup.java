@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.google.gson.JsonObject;
+import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.LeagueData;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -45,23 +46,23 @@ public class Setup implements ICommand {
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		System.out.println("running setup command");
 		Guild guild = event.getGuild();
-		JsonObject guildData = LeagueData.getGuildDataById(guild.getIdLong());
+		GuildData guildData = LeagueData.getGuildDataById(guild.getIdLong());
 		//setup roles
 		Role gamerRole = null;
-		if (guildData.get("league role id") == null) {
+		if (guildData.getLeagueRoleId() == -1) {
 			gamerRole = guild.createRole().complete();
-			guildData.addProperty("league role id", gamerRole.getIdLong());
-		} else gamerRole = guild.getRoleById(guildData.get("league role id").getAsLong());
+			guildData.setLeagueRoleId(gamerRole.getIdLong());
+		} else gamerRole = guild.getRoleById(guildData.getLeagueRoleId());
 		gamerRole.getManager()
 			.setName("GAMERS")
 			.setColor(Color.CYAN)
-			.complete();
+			.queue();
 		//setup category
 		Category gamerCat = null;
-		if (guildData.get("league category id") == null) {
+		if (guildData.getLeagueCategoryId() == -1) {
 			gamerCat = guild.createCategory("Gamer League").complete();
-			guildData.addProperty("league category id", gamerCat.getIdLong());
-		} else gamerCat = guild.getCategoryById(guildData.get("league category id").getAsLong());
+			guildData.setLeagueCategoryId(gamerCat.getIdLong());
+		} else gamerCat = guild.getCategoryById(guildData.getLeagueCategoryId());
 		Collection<Permission> perm1 = new ArrayList<Permission>();
 		Collection<Permission> perm2 = new ArrayList<Permission>();
 		perm1.add(Permission.MESSAGE_HISTORY);
@@ -100,45 +101,45 @@ public class Setup implements ICommand {
 		return true;
 	}
 	
-	private TextChannel setupChannel(String name, Category cat, Guild guild, JsonObject data) {
+	private TextChannel setupChannel(String name, Category cat, Guild guild, GuildData data) {
 		TextChannel channel = null;
-		if (data.get(name+" id") == null) {
+		if (data.getChannelId(name) == -1) {
 			channel = cat.createTextChannel(name).complete();
-			data.addProperty(name+" id", channel.getIdLong());
-		} else channel = guild.getTextChannelById(data.get(name+" id").getAsLong());
+			data.setChannelId(name, channel.getIdLong());
+		} else channel = guild.getTextChannelById(data.getChannelId(name));
 		channel.getManager().sync(cat.getPermissionContainer()).complete();
 		return channel;
 	}
 	
-	private void setupOptions(TextChannel channel, JsonObject data) {
-		if (data.get("join league option id") == null) {
+	private void setupOptions(TextChannel channel, GuildData data) {
+		if (data.getJoinLeagueOptionId() == -1) {
 			MessageCreateData jlc = new MessageCreateBuilder()
 					.addEmbeds(getJLEmbed())
 					.addActionRow(getJLButtons())
 					.build();
 			Message jlb = channel.sendMessage(jlc).complete();
-			data.addProperty("join league option id", jlb.getIdLong());
+			data.setJoinLeagueOptionId(jlb.getIdLong());
 		} else {
 			MessageEditData jle = new MessageEditBuilder()
 					.setEmbeds(getJLEmbed())
 					.setActionRow(getJLButtons())
 					.build();
-			channel.editMessageById(data.get("join league option id").getAsLong(), jle).complete();
+			channel.editMessageById(data.getJoinLeagueOptionId(), jle).complete();
 		}
-		int max = LeagueData.getMaxSetsAWeek(channel.getGuild().getIdLong());
-		if (data.get("setsaweek option id") == null) {
+		int max = data.getMaxSetsPerWeek();
+		if (data.getSetsaweekOptionId() == -1) {
 			MessageCreateData swc = new MessageCreateBuilder()
 					.addEmbeds(getSWEmbed())
 					.addActionRow(getSWButtons(max))
 					.build();
 			Message swb = channel.sendMessage(swc).complete();
-			data.addProperty("setsaweek option id", swb.getIdLong());
+			data.setSetsaweekOptionId(swb.getIdLong());
 		} else {
 			MessageEditData swe = new MessageEditBuilder()
 					.setEmbeds(getSWEmbed())
 					.setActionRow(getSWButtons(max))
 					.build();
-			channel.editMessageById(data.get("setsaweek option id").getAsLong(), swe).complete();
+			channel.editMessageById(data.getSetsaweekOptionId(), swe).complete();
 		}
 	}
 	

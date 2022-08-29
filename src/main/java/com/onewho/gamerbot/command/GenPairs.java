@@ -1,6 +1,6 @@
 package com.onewho.gamerbot.command;
 
-import com.google.gson.JsonObject;
+import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.LeagueData;
 
 import net.dv8tion.jda.api.entities.Guild;
@@ -27,9 +27,7 @@ public class GenPairs implements ICommand {
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		System.out.println("running gen pairs command");
 		Guild guild = event.getGuild();
-		JsonObject data = LeagueData.getGuildDataById(guild.getIdLong());
-		int maxPairs = data.get("max sets a week").getAsInt();
-		int weeksBeforeAutoInactive = 1;
+		GuildData gdata = LeagueData.getGuildDataById(guild.getIdLong());
 		//TODO remove old pairs
 		//TODO get available/active players sorted by score
 		//TODO while loop
