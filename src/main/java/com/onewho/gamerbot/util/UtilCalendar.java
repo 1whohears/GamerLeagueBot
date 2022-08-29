@@ -61,6 +61,10 @@ public class UtilCalendar {
 		return (int)IsoFields.WEEK_OF_WEEK_BASED_YEAR.rangeRefinedBy(date).getMaximum();
 	}
 	
+	public static int getWeekDiff(String start, String end) {
+		return getWeekDiff(getDate(start), getDate(end));
+	}
+	
 	public static int getWeekDiff(LocalDate start, LocalDate end) {
 		return (int)ChronoUnit.WEEKS.between(start, end);
 	}

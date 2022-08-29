@@ -11,20 +11,22 @@ import com.onewho.gamerbot.util.UtilKClosest;
 public class GuildData {
 	
 	private long id;
-	private int maxSetsPerWeek;
-	private int weeksBeforeAutoInactive;
-	private int weeksBeforeSetExpires;
-	private int weeksBeforeSetRepeat;
-	private int defaultScore;
+	private int maxSetsPerWeek = 3;
+	private int weeksBeforeAutoInactive = -1;
+	private int weeksBeforeSetExpires = -1;
+	private int weeksBeforeSetRepeat = -1;
+	private int defaultScore = 1000;
 	
 	private List<UserData> users = new ArrayList<UserData>();
 	private List<SetData> sets = new ArrayList<SetData>();
+	private List<SetDisplayData> displays = new ArrayList<SetDisplayData>();
 	
-	private long leagueRoleId;
-	private long leagueCategoryId;
-	private long joinLeagueOptionId;
-	private long setsaweekOptionId;
-	private JsonObject channelIds;
+	
+	private long leagueRoleId = -1;
+	private long leagueCategoryId = -1;
+	private long joinLeagueOptionId = -1;
+	private long setsaweekOptionId = -1;
+	private JsonObject channelIds = new JsonObject();
 	
 	public GuildData(JsonObject data) {
 		id = data.get("id").getAsLong();
@@ -33,12 +35,17 @@ public class GuildData {
 		weeksBeforeSetExpires = data.get("weeks before set expires").getAsInt();
 		weeksBeforeSetRepeat = data.get("weeks before set repeat").getAsInt();
 		defaultScore = data.get("default score").getAsInt();
+		
 		users.clear();
 		JsonArray us = data.get("users").getAsJsonArray();
 		for (int i = 0; i < us.size(); ++i) users.add(new UserData(us.get(i).getAsJsonObject()));
 		sets.clear();
 		JsonArray ss = data.get("sets").getAsJsonArray();
 		for (int i = 0; i < ss.size(); ++i) sets.add(new SetData(ss.get(i).getAsJsonObject()));
+		displays.clear();
+		JsonArray ds = data.get("displays").getAsJsonArray();
+		for (int i = 0; i < ds.size(); ++i) displays.add(new SetDisplayData(ds.get(i).getAsJsonObject()));
+		
 		this.leagueRoleId = data.get("league role id").getAsLong();
 		this.leagueCategoryId = data.get("league category id").getAsLong();
 		this.joinLeagueOptionId = data.get("join league option id").getAsLong();
@@ -48,16 +55,6 @@ public class GuildData {
 	
 	public GuildData(long id) {
 		this.id = id;
-		this.maxSetsPerWeek = 3;
-		this.weeksBeforeAutoInactive = -1;
-		this.weeksBeforeSetExpires = -1;
-		this.weeksBeforeSetRepeat = 1;
-		this.defaultScore = 1000;
-		this.leagueRoleId = -1;
-		this.leagueCategoryId = -1;
-		this.joinLeagueOptionId = -1;
-		this.setsaweekOptionId = -1;
-		this.channelIds = new JsonObject();
 	}
 	
 	public JsonObject getJson() {
@@ -70,6 +67,7 @@ public class GuildData {
 		data.addProperty("default score", defaultScore);
 		data.add("users", getUsersJson());
 		data.add("sets", getSetsJson());
+		data.add("displays", getDisplaysJson());
 		data.addProperty("league role id", leagueRoleId);
 		data.addProperty("league category id", leagueCategoryId);
 		data.addProperty("join league option id", 0);
@@ -90,6 +88,12 @@ public class GuildData {
 		return ss;
 	}
 	
+	private JsonArray getDisplaysJson() {
+		JsonArray ds = new JsonArray();
+		for (SetDisplayData d : displays) ds.add(d.getJson());
+		return ds;
+	}
+	
 	public long getId() {
 		return id;
 	}
@@ -105,6 +109,7 @@ public class GuildData {
 	public UserData getUserDataById(long id) {
 		for (int i = 0; i < users.size(); ++i) if (users.get(i).getId() == id) return users.get(i);
 		UserData data = new UserData(id);
+		data.setScore(defaultScore);
 		users.add(data);
 		return data;
 	}
@@ -265,6 +270,19 @@ public class GuildData {
 		int[] scores = new int[sortedUsers.size()];
 		for (int i = 0; i < scores.length; ++i) scores[i] = sortedUsers.get(i).getScore();
 		return UtilKClosest.getKclosestIndex(scores, user.getScore(), sortedUsers.size(), sortedUsers.size());
+	}
+	
+	public List<SetData> getSetsAtWeekOfDate(String date) {
+		List<SetData> saw = new ArrayList<SetData>();
+		for (SetData set : sets) if (UtilCalendar.getWeekDiff(date, set.getCreatedDate()) == 0) saw.add(set);
+		return saw;
+	}
+	
+	public SetDisplayData getSetDisplayDataByDate(String date) {
+		for (SetDisplayData d : displays) if (UtilCalendar.getWeekDiff(date, d.getDate()) == 0) return d;
+		SetDisplayData display = new SetDisplayData(this, date);
+		displays.add(display);
+		return display;
 	}
 	
 }

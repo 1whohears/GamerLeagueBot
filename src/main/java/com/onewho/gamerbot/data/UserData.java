@@ -8,10 +8,10 @@ import com.google.gson.JsonObject;
 public class UserData {
 	
 	private long id;
-	private boolean active;
-	private int setsPerWeek;
-	private String lastActive;
-	private int score;
+	private boolean active = false;
+	private int setsPerWeek = 0;
+	private String lastActive = "";
+	private int score = 0;
 	
 	public UserData(JsonObject data) {
 		id = data.get("id").getAsLong();
@@ -23,10 +23,7 @@ public class UserData {
 	
 	public UserData(long id) {
 		this.id = id;
-		this.active = false;
-		this.setsPerWeek = 0;
 		this.setLastActive(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
-		this.setScore(0); // TODO default score
 	}
 	
 	public JsonObject getJson() {

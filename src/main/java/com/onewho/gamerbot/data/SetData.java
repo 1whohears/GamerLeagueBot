@@ -7,12 +7,12 @@ public class SetData {
 	private int id;
 	private long p1Id;
 	private long p2Id;
-	private int p1s;
-	private int p2s;
-	private boolean p1c;
-	private boolean p2c;
-	private String created;
-	private String completed;
+	private int p1s = 0;
+	private int p2s = 0;
+	private boolean p1c = false;
+	private boolean p2c = false;
+	private String created = "";
+	private String completed = "";
 	
 	public SetData(JsonObject data) {
 		id = data.get("id").getAsInt();
@@ -30,12 +30,7 @@ public class SetData {
 		this.id = id;
 		this.p1Id = p1Id;
 		this.p2Id = p2Id;
-		p1s = 0;
-		p2s = 0;
-		p1c = false;
-		p2c = false;
 		this.created = created;
-		this.completed = "";
 	}
 	
 	public JsonObject getJson() {
@@ -54,6 +49,14 @@ public class SetData {
 	
 	public int getId() {
 		return id;
+	}
+	
+	public long getP1Id() {
+		return p1Id;
+	}
+	
+	public long getP2Id() {
+		return p2Id;
 	}
 
 	public int getP1score() {
@@ -177,6 +180,14 @@ public class SetData {
 	
 	public boolean hasPlayer(long id) {
 		return id == p1Id || id == p2Id; 
+	}
+	
+	public String getStatus() {
+		if (this.isP1Win()) return "P1 WIN";
+		if (this.isP2Win()) return "P2 WIN";
+		if (this.isDraw()) return "DRAW";
+		if (this.isUnconfirmed()) return "UNCONFIRMED";
+		return "ASIGNED";
 	}
 	
 }
