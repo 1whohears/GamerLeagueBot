@@ -30,11 +30,13 @@ public class GenPairs implements ICommand {
 		GuildData gdata = LeagueData.getGuildDataById(guild.getIdLong());
 		gdata.removeOldSets();
 		//TODO get available/active players sorted by score
+		
 		//TODO while loop
 			//TODO loop through all players
 				//TODO check if they haven't reached their requested limit
 					//TODO use k closest to find the closest player based on score
 		//debug
+		LeagueData.saveData();
 		System.out.println("Pairings Generated");
 		event.getChannel().sendMessage("Finished Generating Pairings!").queue();
 		return true;

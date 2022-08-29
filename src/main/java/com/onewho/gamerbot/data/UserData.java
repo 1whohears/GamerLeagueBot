@@ -11,12 +11,14 @@ public class UserData {
 	private boolean active;
 	private int setsPerWeek;
 	private String lastActive;
+	private int score;
 	
 	public UserData(JsonObject data) {
 		id = data.get("id").getAsLong();
 		active = data.get("active").getAsBoolean();
 		setsPerWeek = data.get("sets per week").getAsInt();
 		setLastActive(data.get("last active").getAsString());
+		setScore(data.get("score").getAsInt());
 	}
 	
 	public UserData(long id) {
@@ -24,6 +26,7 @@ public class UserData {
 		this.active = false;
 		this.setsPerWeek = 0;
 		this.setLastActive(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
+		this.setScore(0); // TODO default score
 	}
 	
 	public JsonObject getJson() {
@@ -31,6 +34,7 @@ public class UserData {
 		data.addProperty("id", id);
 		data.addProperty("active", active);
 		data.addProperty("sets per week", setsPerWeek);
+		data.addProperty("score", score);
 		return data;
 	}
 	
@@ -65,6 +69,15 @@ public class UserData {
 	@Override
 	public String toString() {
 		return id+"/"+active+"/"+setsPerWeek+"/"+setsPerWeek;
+	}
+
+	public int getScore() {
+		return score;
+	}
+
+	public void setScore(int score) {
+		// TODO max min score
+		this.score = score;
 	}
 	
 }

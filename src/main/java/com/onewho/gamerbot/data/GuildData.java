@@ -168,8 +168,22 @@ public class GuildData {
 		}
 	}
 	
-	public void getAvailableSortedUsers() {
-		
+	public List<UserData> getAvailableSortedUsers() {
+		List<UserData> available = new ArrayList<UserData>();
+		for (int i = 0; i < users.size(); ++i) {
+			if (!users.get(i).getActive()) continue;
+			if (users.get(i).getSetsPerWeek() < 1) continue;
+			int weekDiff = UtilCalendar.getWeekDiff(
+					UtilCalendar.getDate(users.get(i).getLastActive()), 
+					UtilCalendar.getCurrentDate());
+			if (weekDiff > weeksBeforeAutoInactive) {
+				users.get(i).setActive(false);
+				continue;
+			}
+			available.add(users.get(i));
+		}
+		//TODO sort by score
+		return available;
 	}
 	
 }
