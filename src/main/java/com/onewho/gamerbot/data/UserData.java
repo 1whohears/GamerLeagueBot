@@ -62,4 +62,9 @@ public class UserData {
 		this.lastActive = lastActive;
 	}
 	
+	@Override
+	public String toString() {
+		return id+"/"+active+"/"+setsPerWeek+"/"+setsPerWeek;
+	}
+	
 }

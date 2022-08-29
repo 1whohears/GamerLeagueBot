@@ -20,6 +20,10 @@ public class UtilCalendar {
 		return date.getYear();
 	}
 	
+	public static LocalDate getCurrentDate() {
+		return LocalDate.now();
+	}
+	
 	public static int getWeek(int day, int month, int year) {
 		LocalDate date = LocalDate.of(year, month, day);
 		return date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
@@ -29,21 +33,30 @@ public class UtilCalendar {
 	 * @param dateString format dd-MM-yyyy
 	 */
 	public static int getWeek(String dateString) {
-		LocalDate date = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-		return date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
+		return getDate(dateString).get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
 	}
 	
 	/**
 	 * @param dateString format dd-MM-yyyy
 	 */
 	public static int getYear(String dateString) {
-		LocalDate date = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-		return date.getYear();
+		return getDate(dateString).getYear();
+	}
+	
+	/**
+	 * @param dateString format dd-MM-yyyy
+	 */
+	public static LocalDate getDate(String dateString) {
+		return LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 	}
 	
 	public static int getWeeksInYear(int year) {
 		LocalDate date = LocalDate.of(year, 1, 1);
 		return (int)IsoFields.WEEK_OF_WEEK_BASED_YEAR.rangeRefinedBy(date).getMaximum();
+	}
+	
+	public static int getWeekDiff(LocalDate start, LocalDate end) {
+		return (int)ChronoUnit.WEEKS.between(start, end);
 	}
 	
 	public static int getWeekDiff(int w1, int y1, int w2, int y2) {

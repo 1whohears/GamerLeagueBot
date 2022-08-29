@@ -28,7 +28,7 @@ public class GenPairs implements ICommand {
 		System.out.println("running gen pairs command");
 		Guild guild = event.getGuild();
 		GuildData gdata = LeagueData.getGuildDataById(guild.getIdLong());
-		//TODO remove old pairs
+		gdata.removeOldSets();
 		//TODO get available/active players sorted by score
 		//TODO while loop
 			//TODO loop through all players

@@ -5,12 +5,14 @@ import java.util.List;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.onewho.gamerbot.util.UtilCalendar;
 
 public class GuildData {
 	
 	private long id;
 	private int maxSetsPerWeek;
 	private int weeksBeforeAutoInactive;
+	private int weeksBeforeSetExpires;
 	
 	private List<UserData> users = new ArrayList<UserData>();
 	private List<SetData> sets = new ArrayList<SetData>();
@@ -25,6 +27,7 @@ public class GuildData {
 		id = data.get("id").getAsLong();
 		maxSetsPerWeek = data.get("max sets a week").getAsInt();
 		weeksBeforeAutoInactive = data.get("weeks before auto inactive").getAsInt();
+		weeksBeforeSetExpires = data.get("weeks before set expires").getAsInt();
 		users.clear();
 		JsonArray us = data.get("users").getAsJsonArray();
 		for (int i = 0; i < us.size(); ++i) users.add(new UserData(us.get(i).getAsJsonObject()));
@@ -42,6 +45,7 @@ public class GuildData {
 		this.id = id;
 		this.maxSetsPerWeek = 3;
 		this.weeksBeforeAutoInactive = -1;
+		this.weeksBeforeSetExpires = -1;
 		this.leagueRoleId = -1;
 		this.leagueCategoryId = -1;
 		this.joinLeagueOptionId = -1;
@@ -54,6 +58,7 @@ public class GuildData {
 		data.addProperty("id", id);
 		data.addProperty("max sets a week", maxSetsPerWeek);
 		data.addProperty("weeks before auto inactive", weeksBeforeAutoInactive);
+		data.addProperty("weeks before set expires", weeksBeforeSetExpires);
 		data.add("users", getUsersJson());
 		data.add("sets", getSetsJson());
 		data.addProperty("league role id", leagueRoleId);
@@ -148,6 +153,23 @@ public class GuildData {
 	
 	public void setChannelId(String name, long id) {
 		channelIds.addProperty(name, id);
+	}
+	
+	public void removeOldSets() {
+		for (int i = 0; i < sets.size(); ++i) {
+			if (sets.get(i).isComplete()) continue;
+			int weekDiff = UtilCalendar.getWeekDiff(
+					UtilCalendar.getDate(sets.get(i).getCreatedDate()), 
+					UtilCalendar.getCurrentDate()); 
+			System.out.println("SET "+sets.get(i)+" weekDiff = "+weekDiff);
+			if (weekDiff <= weeksBeforeSetExpires) continue;
+			System.out.println("removed");
+			sets.remove(i--);
+		}
+	}
+	
+	public void getAvailableSortedUsers() {
+		
 	}
 	
 }

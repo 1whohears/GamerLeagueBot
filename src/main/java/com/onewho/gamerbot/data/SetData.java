@@ -166,4 +166,9 @@ public class SetData {
 		} else return ReportResult.IDsDontMatch;
 	}
 	
+	@Override
+	public String toString() {
+		return id+"/"+p1Id+":"+p1s+"/"+p2Id+":"+p2s+"/"+created+"/"+completed;
+	}
+	
 }
