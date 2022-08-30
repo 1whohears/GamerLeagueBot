@@ -27,6 +27,12 @@ public class ButtonManager {
 			//debug
 			event.reply("You have left the gamer league...sad...").setEphemeral(true).queue();
 			break;
+		case "report-verify":
+			//TODO report verify button
+			break;
+		case "report-dispute":
+			//TODO report dispute button
+			break;
 		}
 	}
 	

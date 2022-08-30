@@ -1,14 +1,23 @@
 package com.onewho.gamerbot.command;
 
+import java.awt.Color;
+import java.util.Arrays;
+import java.util.List;
+
 import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.ReportResult;
 import com.onewho.gamerbot.data.SetData;
 import com.onewho.gamerbot.util.UtilCalendar;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 public class Report implements ICommand {
 
@@ -81,7 +90,11 @@ public class Report implements ICommand {
 			event.getChannel().sendMessage("Set reported and verified by opponent!").queue();
 			break;
 		case WaitingForOpponent:
-			event.getChannel().sendMessage("Set reported. Waiting for opponent to verify!").queue();
+			MessageCreateData mcd = new MessageCreateBuilder()
+				.addEmbeds(getVerifyEmbed(set, pingId))
+				.addActionRow(getVerifyButtons())
+				.build();
+			event.getChannel().sendMessage(mcd).queue();
 			break;
 		case AlreadyVerified:
 			event.getChannel().sendMessage("This set has already been verified. Admin required to update.").queue();
@@ -96,6 +109,26 @@ public class Report implements ICommand {
 	
 	private boolean checkIfMention(String m) {
 		return m.length() > 10 && m.charAt(0) == '<' && m.charAt(1) == '@' && m.charAt(m.length()-1) == '>';
+	}
+	
+	private MessageEmbed getVerifyEmbed(SetData set, long opponentId) {
+		EmbedBuilder jleb = new EmbedBuilder();
+		jleb.setTitle("Verify report "+getMention(opponentId)+"?");
+		jleb.setDescription("SET ID ["+set.getId()+"]"
+				+ "\n**"+set.getP1score()+"** "+getMention(set.getP1Id())
+				+ "\n**"+set.getP2score()+"** "+getMention(set.getP2Id()));
+		jleb.setColor(Color.GREEN);
+		return jleb.build();
+	}
+	
+	private List<Button> getVerifyButtons() {
+		Button verify = Button.success("report-verify", "Verify");
+		Button disbute = Button.danger("report-dispute", "Dispute");
+		return Arrays.asList(verify, disbute);
+	}
+	
+	private String getMention(long id) {
+		return "<@"+id+">";
 	}
 
 }

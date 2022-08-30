@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 
 public class GuildData {
 	
-	private long id;
+	private long id = -1;
 	private int maxSetsPerWeek = 3;
 	private int weeksBeforeAutoInactive = -1;
 	private int weeksBeforeSetExpires = -1;
@@ -29,25 +29,25 @@ public class GuildData {
 	private JsonObject channelIds = new JsonObject();
 	
 	public GuildData(JsonObject data) {
-		id = data.get("id").getAsLong();
-		maxSetsPerWeek = data.get("max sets a week").getAsInt();
-		weeksBeforeAutoInactive = data.get("weeks before auto inactive").getAsInt();
-		weeksBeforeSetExpires = data.get("weeks before set expires").getAsInt();
-		weeksBeforeSetRepeat = data.get("weeks before set repeat").getAsInt();
-		defaultScore = data.get("default score").getAsInt();
+		id = ParseData.getLong(data, "id", id);
+		maxSetsPerWeek = ParseData.getInt(data, "max sets a week", maxSetsPerWeek);
+		weeksBeforeAutoInactive = ParseData.getInt(data, "weeks before auto inactive", weeksBeforeAutoInactive);
+		weeksBeforeSetExpires = ParseData.getInt(data, "weeks before set expires", weeksBeforeSetExpires);
+		weeksBeforeSetRepeat = ParseData.getInt(data, "weeks before set repeat", weeksBeforeSetRepeat);
+		defaultScore = ParseData.getInt(data, "default score", defaultScore);
 		
 		users.clear();
-		JsonArray us = data.get("users").getAsJsonArray();
+		JsonArray us = ParseData.getJsonArray(data, "users");
 		for (int i = 0; i < us.size(); ++i) users.add(new UserData(us.get(i).getAsJsonObject()));
 		sets.clear();
-		JsonArray ss = data.get("sets").getAsJsonArray();
+		JsonArray ss = ParseData.getJsonArray(data, "sets");
 		for (int i = 0; i < ss.size(); ++i) sets.add(new SetData(ss.get(i).getAsJsonObject()));
 		
-		this.leagueRoleId = data.get("league role id").getAsLong();
-		this.leagueCategoryId = data.get("league category id").getAsLong();
-		this.joinLeagueOptionId = data.get("join league option id").getAsLong();
-		this.setsaweekOptionId = data.get("setsaweek option id").getAsLong();
-		this.channelIds = data.get("channel ids").getAsJsonObject();
+		leagueRoleId = ParseData.getLong(data, "league role id", leagueRoleId);
+		leagueCategoryId = ParseData.getLong(data, "league category id", leagueCategoryId);
+		joinLeagueOptionId = ParseData.getLong(data, "join league option id", joinLeagueOptionId);
+		setsaweekOptionId = ParseData.getLong(data, "setsaweek option id", setsaweekOptionId);
+		channelIds = ParseData.getJsonObject(data, "channel ids");
 	}
 	
 	public GuildData(long id) {

@@ -10,9 +10,9 @@ import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 public class SetData {
 	
-	private int id;
-	private long p1Id;
-	private long p2Id;
+	private int id = -1;
+	private long p1Id = -1;
+	private long p2Id = -1;
 	private int p1s = 0;
 	private int p2s = 0;
 	private boolean p1c = false;
@@ -22,16 +22,16 @@ public class SetData {
 	private long messageId = -1;
 	
 	public SetData(JsonObject data) {
-		id = data.get("id").getAsInt();
-		p1Id = data.get("p1Id").getAsLong();
-		p2Id = data.get("p2Id").getAsLong();
-		p1s = data.get("p1s").getAsInt();
-		p2s = data.get("p2s").getAsInt();
-		p1c = data.get("p1c").getAsBoolean();
-		p2c = data.get("p2c").getAsBoolean();
-		created = data.get("created").getAsString();
-		completed = data.get("completed").getAsString();
-		messageId = data.get("messageId").getAsLong();
+		id = ParseData.getInt(data, "id", id);
+		p1Id = ParseData.getLong(data, "p1Id", p1Id);
+		p2Id = ParseData.getLong(data, "p2Id", p2Id);
+		p1s = ParseData.getInt(data, "p1s", p1s);
+		p2s = ParseData.getInt(data, "p2s", p2s);
+		p1c = ParseData.getBoolean(data, "p1c", p1c);
+		p2c = ParseData.getBoolean(data, "p2c", p2c);
+		created = ParseData.getString(data, "created", created);
+		completed = ParseData.getString(data, "completed", completed);
+		messageId = ParseData.getLong(data, "messageId", messageId);
 	}
 	
 	public SetData(int id, long p1Id, long p2Id, String created) {
@@ -203,13 +203,15 @@ public class SetData {
 	}
 	
 	public void displaySet(TextChannel channel) {
-		String p1Name = "", p2Name = "";
+		String p1Name = "", p2Name = "", date = "";
 		if (this.isComplete()) {
 			p1Name = "*"+channel.getGuild().getMemberById(getP1Id()).getEffectiveName()+"*";
 			p2Name = "*"+channel.getGuild().getMemberById(getP2Id()).getEffectiveName()+"*";
+			date = completed;
 		} else {
 			p1Name = "<@"+getP1Id()+">";
 			p2Name = "<@"+getP2Id()+">";
+			date = created;
 		}
 		MessageCreateData mcd = new MessageCreateBuilder()
 				.addContent("__**ID:"+getId()+"**__ ")
@@ -217,7 +219,8 @@ public class SetData {
 				.addContent(" **"+getP1score()+"** ")
 				.addContent(p2Name)
 				.addContent(" **"+getP2score()+"** ")
-				.addContent("__STATUS: **"+getStatus()+"**__")
+				.addContent("__**"+getStatus()+"**__ ")
+				.addContent("__"+date+"__")
 				.build();
 		if (messageId == -1) messageId = channel.sendMessage(mcd).complete().getIdLong();
 		else {

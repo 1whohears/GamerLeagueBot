@@ -7,18 +7,18 @@ import com.google.gson.JsonObject;
 
 public class UserData {
 	
-	private long id;
+	private long id = -1;
 	private boolean active = false;
 	private int setsPerWeek = 0;
 	private String lastActive = "";
 	private int score = 0;
 	
 	public UserData(JsonObject data) {
-		id = data.get("id").getAsLong();
-		active = data.get("active").getAsBoolean();
-		setsPerWeek = data.get("sets per week").getAsInt();
-		setLastActive(data.get("last active").getAsString());
-		setScore(data.get("score").getAsInt());
+		id = ParseData.getLong(data, "id", id);
+		active = ParseData.getBoolean(data, "active", active);
+		setsPerWeek = ParseData.getInt(data, "sets per week", setsPerWeek);
+		setLastActive(ParseData.getString(data, "last active", lastActive));
+		setScore(ParseData.getInt(data, "score", score));
 	}
 	
 	public UserData(long id) {
