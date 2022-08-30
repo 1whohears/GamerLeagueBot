@@ -5,7 +5,6 @@ import java.util.List;
 import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.SetData;
-import com.onewho.gamerbot.data.SetDisplayData;
 import com.onewho.gamerbot.data.UserData;
 import com.onewho.gamerbot.util.UtilCalendar;
 
@@ -27,7 +26,7 @@ public class GenPairs implements ICommand {
 
 	@Override
 	public String getRequiredChannelName() {
-		return "bot_commands";
+		return "bot-commands";
 	}
 
 	@Override
@@ -40,17 +39,26 @@ public class GenPairs implements ICommand {
 		boolean createdSet = true;
 		while (createdSet) {
 			createdSet = false;
+			System.out.println("BIG LOOP");
 			for (UserData udata : activeUsers) {
-				List<SetData> incompleteSets = gdata.getIncompleteSetsWithPlayer(udata.getId());
+				System.out.println("user "+udata.getId());
+				List<SetData> incompleteSets = gdata.getIncompleteOrCurrentSetsByPlayer(udata.getId());
+				System.out.println("incomplete sets "+incompleteSets.size());
 				if (incompleteSets.size() >= udata.getSetsPerWeek()) continue;
 				int[] ksort = GuildData.getClosestUserIndexsByScore(udata, activeUsers);
 				for (int i = 0; i < ksort.length; ++i) {
-					List<SetData> incompleteSetsK = gdata.getIncompleteSetsWithPlayer(activeUsers.get(ksort[i]).getId());
-					if (incompleteSetsK.size() >= udata.getSetsPerWeek()) continue;
-					SetData recentSet = gdata.getNewestSetBetweenUsers(udata.getId(), activeUsers.get(ksort[i]).getId());
-					int diff = UtilCalendar.getWeekDiff(
-							UtilCalendar.getDate(recentSet.getCreatedDate()), UtilCalendar.getCurrentDate());
-					if (diff <= gdata.getWeeksBeforeSetRepeat()) continue;
+					UserData userk = activeUsers.get(ksort[i]);
+					System.out.println("userk "+userk.getId());
+					List<SetData> incompleteSetsK = gdata.getIncompleteOrCurrentSetsByPlayer(userk.getId());
+					System.out.println("incomplete sets k "+incompleteSetsK.size());
+					if (incompleteSetsK.size() >= userk.getSetsPerWeek()) continue;
+					SetData recentSet = gdata.getNewestSetBetweenUsers(udata.getId(), userk.getId());
+					System.out.println("recent set "+recentSet);
+					if (recentSet != null) {
+						int diff = UtilCalendar.getWeekDiff(
+								UtilCalendar.getDate(recentSet.getCreatedDate()), UtilCalendar.getCurrentDate());
+						if (diff <= gdata.getWeeksBeforeSetRepeat()) continue;
+					}
 					gdata.createSet(udata.getId(), activeUsers.get(ksort[i]).getId());
 					createdSet = true;
 					break;
@@ -59,8 +67,7 @@ public class GenPairs implements ICommand {
 		}
 		//display new sets
 		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("pairings"));
-		SetDisplayData display = gdata.getSetDisplayDataByDate(UtilCalendar.getCurrentDateString());
-		display.updateMessages(pairsChannel);
+		gdata.displaySetsByDate(UtilCalendar.getCurrentDateString(), pairsChannel);
 		//debug
 		LeagueData.saveData();
 		System.out.println("Pairings Generated");

@@ -2,6 +2,12 @@ package com.onewho.gamerbot.data;
 
 import com.google.gson.JsonObject;
 
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
+
 public class SetData {
 	
 	private int id;
@@ -13,6 +19,7 @@ public class SetData {
 	private boolean p2c = false;
 	private String created = "";
 	private String completed = "";
+	private long messageId = -1;
 	
 	public SetData(JsonObject data) {
 		id = data.get("id").getAsInt();
@@ -24,6 +31,7 @@ public class SetData {
 		p2c = data.get("p2c").getAsBoolean();
 		created = data.get("created").getAsString();
 		completed = data.get("completed").getAsString();
+		messageId = data.get("messageId").getAsLong();
 	}
 	
 	public SetData(int id, long p1Id, long p2Id, String created) {
@@ -44,6 +52,7 @@ public class SetData {
 		data.addProperty("p2c", p2c);
 		data.addProperty("created", created);
 		data.addProperty("completed", completed);
+		data.addProperty("messageId", messageId);
 		return data;
 	}
 	
@@ -127,8 +136,11 @@ public class SetData {
 		return isComplete() && p1s == p2s;
 	}
 	
-	public ReportResult report(long reporterId, int reporterScore, int opponentScore, String date) {
-		if (reporterId == p1Id) {
+	public ReportResult report(long reporterId, long opponentId, int reporterScore, int opponentScore, String date) {
+		if (isComplete()) return ReportResult.AlreadyVerified;
+		System.out.println("reporter id = "+reporterId);
+		System.out.println("opponent id = "+opponentId);
+		if (reporterId == p1Id && opponentId == p2Id) {
 			if (p2c) {
 				if (p1s == reporterScore && p2s == opponentScore) {
 					p1c = true;
@@ -141,7 +153,7 @@ public class SetData {
 				p1c = true;
 				return ReportResult.WaitingForOpponent;
 			}
-		} else if (reporterId == p2Id) {
+		} else if (reporterId == p2Id && opponentId == p1Id) {
 			if (p1c) {
 				if (p2s == reporterScore && p1s == opponentScore) {
 					p2c = true;
@@ -187,7 +199,21 @@ public class SetData {
 		if (this.isP2Win()) return "P2 WIN";
 		if (this.isDraw()) return "DRAW";
 		if (this.isUnconfirmed()) return "UNCONFIRMED";
-		return "ASIGNED";
+		return "ASSIGNED";
 	}
 	
+	public void displaySet(TextChannel channel) {
+		MessageCreateData mcd = new MessageCreateBuilder()
+				.addContent("id:"+getId()+" ")
+				.addContent("<@"+getP1Id()+">")
+				.addContent(" "+getP1score()+" ")
+				.addContent("<@"+getP2Id()+">")
+				.addContent(" "+getP2score()+" status: "+getStatus())
+				.build();
+		if (messageId == -1) messageId = channel.sendMessage(mcd).complete().getIdLong();
+		else {
+			MessageEditData med = new MessageEditBuilder().applyCreateData(mcd).build();
+			channel.editMessageById(messageId, med).queue();
+		}
+	}
 }

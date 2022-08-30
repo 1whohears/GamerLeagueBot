@@ -5,6 +5,7 @@ public enum ReportResult {
 	IDsDontMatch,
 	ScoreConflict,
 	WaitingForOpponent,
-	SetVerified
+	SetVerified,
+	AlreadyVerified
 	
 }

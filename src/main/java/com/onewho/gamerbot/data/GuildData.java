@@ -8,6 +8,8 @@ import com.google.gson.JsonObject;
 import com.onewho.gamerbot.util.UtilCalendar;
 import com.onewho.gamerbot.util.UtilKClosest;
 
+import net.dv8tion.jda.api.entities.TextChannel;
+
 public class GuildData {
 	
 	private long id;
@@ -19,7 +21,6 @@ public class GuildData {
 	
 	private List<UserData> users = new ArrayList<UserData>();
 	private List<SetData> sets = new ArrayList<SetData>();
-	private List<SetDisplayData> displays = new ArrayList<SetDisplayData>();
 	
 	private long leagueRoleId = -1;
 	private long leagueCategoryId = -1;
@@ -41,9 +42,6 @@ public class GuildData {
 		sets.clear();
 		JsonArray ss = data.get("sets").getAsJsonArray();
 		for (int i = 0; i < ss.size(); ++i) sets.add(new SetData(ss.get(i).getAsJsonObject()));
-		displays.clear();
-		JsonArray ds = data.get("displays").getAsJsonArray();
-		for (int i = 0; i < ds.size(); ++i) displays.add(new SetDisplayData(ds.get(i).getAsJsonObject()));
 		
 		this.leagueRoleId = data.get("league role id").getAsLong();
 		this.leagueCategoryId = data.get("league category id").getAsLong();
@@ -66,12 +64,11 @@ public class GuildData {
 		data.addProperty("default score", defaultScore);
 		data.add("users", getUsersJson());
 		data.add("sets", getSetsJson());
-		data.add("displays", getDisplaysJson());
 		data.addProperty("league role id", leagueRoleId);
 		data.addProperty("league category id", leagueCategoryId);
-		data.addProperty("join league option id", 0);
-		data.addProperty("setsaweek option id", 0);
-		data.add("channel ids", new JsonObject());
+		data.addProperty("join league option id", joinLeagueOptionId);
+		data.addProperty("setsaweek option id", setsaweekOptionId);
+		data.add("channel ids", channelIds);
 		return data;
 	}
 	
@@ -85,12 +82,6 @@ public class GuildData {
 		JsonArray ss = new JsonArray();
 		for (SetData s : sets) ss.add(s.getJson());
 		return ss;
-	}
-	
-	private JsonArray getDisplaysJson() {
-		JsonArray ds = new JsonArray();
-		for (SetDisplayData d : displays) ds.add(d.getJson());
-		return ds;
 	}
 	
 	public long getId() {
@@ -190,8 +181,8 @@ public class GuildData {
 			int weekDiff = UtilCalendar.getWeekDiff(
 					UtilCalendar.getDate(sets.get(i).getCreatedDate()), 
 					UtilCalendar.getCurrentDate()); 
-			System.out.println("SET "+sets.get(i)+" weekDiff = "+weekDiff);
-			if (weekDiff <= weeksBeforeSetExpires) continue;
+			System.out.println("SET "+sets.get(i)+" weekDiff = "+weekDiff+" "+weeksBeforeSetExpires);
+			if (weeksBeforeSetExpires == -1 || weekDiff <= weeksBeforeSetExpires) continue;
 			System.out.println("removed");
 			sets.remove(i--);
 		}
@@ -199,26 +190,33 @@ public class GuildData {
 	
 	public List<UserData> getAvailableSortedUsers() {
 		List<UserData> available = new ArrayList<UserData>();
+		System.out.println("getting available users");
 		for (int i = 0; i < users.size(); ++i) {
+			System.out.println(users.get(i));
 			if (!users.get(i).getActive()) continue;
 			if (users.get(i).getSetsPerWeek() < 1) continue;
 			int weekDiff = UtilCalendar.getWeekDiff(
 					UtilCalendar.getDate(users.get(i).getLastActive()), 
 					UtilCalendar.getCurrentDate());
-			if (weekDiff > weeksBeforeAutoInactive) {
+			System.out.println("week diff = "+weekDiff);
+			if (weeksBeforeAutoInactive != -1 && weekDiff > weeksBeforeAutoInactive) {
 				users.get(i).setActive(false);
 				continue;
 			}
+			System.out.println("added");
 			available.add(users.get(i));
 		}
 		sortByScoreDescend(available);
 		return available;
 	}
 	
-	public List<SetData> getIncompleteSetsWithPlayer(long id) {
+	public List<SetData> getIncompleteOrCurrentSetsByPlayer(long id) {
 		List<SetData> userSets = new ArrayList<SetData>();
-		for (SetData set : sets) 
-			if (!set.isComplete() && !set.isUnconfirmed() && set.hasPlayer(id)) 
+		for (SetData set : sets) if (set.hasPlayer(id) 
+					&& (UtilCalendar.getWeekDiff(
+						UtilCalendar.getDate(set.getCreatedDate()), 
+						UtilCalendar.getCurrentDate()) == 0
+					|| (!set.isComplete() && !set.isUnconfirmed()))) 
 				userSets.add(set);
 		return userSets;
 	}
@@ -277,11 +275,8 @@ public class GuildData {
 		return saw;
 	}
 	
-	public SetDisplayData getSetDisplayDataByDate(String date) {
-		for (SetDisplayData d : displays) if (UtilCalendar.getWeekDiff(date, d.getDate()) == 0) return d;
-		SetDisplayData display = new SetDisplayData(this, date);
-		displays.add(display);
-		return display;
+	public void displaySetsByDate(String date, TextChannel channel) {
+		for (SetData set : sets) if (UtilCalendar.getWeekDiff(date, set.getCreatedDate()) == 0) set.displaySet(channel);
 	}
 	
 }

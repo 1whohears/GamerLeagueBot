@@ -14,7 +14,7 @@ public class CommandParser {
 		if (event.getAuthor().equals(event.getJDA().getSelfUser())) return true;
 		if (commands == null) loadCommands();
 		String text = event.getMessage().getContentRaw();
-		if (text.length() < 2) return false;
+		if (text.length() < 2) return true;
 		String[] command = text.substring(1, text.length()).split(" ");
 		//System.out.println("command received: "+command[0]+" in channel "+event.getChannel().getName());
 		//System.out.println("the user "+event.getMember().getNickname()+" has admin? "+event.getMember().hasPermission(Permission.ADMINISTRATOR));
@@ -40,6 +40,7 @@ public class CommandParser {
 		commands.add(new Reload());
 		commands.add(new Config());
 		commands.add(new GenPairs());
+		commands.add(new Report());
 	}
 	
 }

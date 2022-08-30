@@ -31,6 +31,7 @@ public class UserData {
 		data.addProperty("id", id);
 		data.addProperty("active", active);
 		data.addProperty("sets per week", setsPerWeek);
+		data.addProperty("last active", lastActive);
 		data.addProperty("score", score);
 		return data;
 	}
