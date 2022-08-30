@@ -203,12 +203,21 @@ public class SetData {
 	}
 	
 	public void displaySet(TextChannel channel) {
+		String p1Name = "", p2Name = "";
+		if (this.isComplete()) {
+			p1Name = "*"+channel.getGuild().getMemberById(getP1Id()).getEffectiveName()+"*";
+			p2Name = "*"+channel.getGuild().getMemberById(getP2Id()).getEffectiveName()+"*";
+		} else {
+			p1Name = "<@"+getP1Id()+">";
+			p2Name = "<@"+getP2Id()+">";
+		}
 		MessageCreateData mcd = new MessageCreateBuilder()
-				.addContent("id:"+getId()+" ")
-				.addContent("<@"+getP1Id()+">")
-				.addContent(" "+getP1score()+" ")
-				.addContent("<@"+getP2Id()+">")
-				.addContent(" "+getP2score()+" status: "+getStatus())
+				.addContent("__**ID:"+getId()+"**__ ")
+				.addContent(p1Name)
+				.addContent(" **"+getP1score()+"** ")
+				.addContent(p2Name)
+				.addContent(" **"+getP2score()+"** ")
+				.addContent("__STATUS: **"+getStatus()+"**__")
 				.build();
 		if (messageId == -1) messageId = channel.sendMessage(mcd).complete().getIdLong();
 		else {
