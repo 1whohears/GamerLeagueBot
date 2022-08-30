@@ -30,6 +30,7 @@ public class Report implements ICommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		if (params.length != 5) {
+			// TODO make insults random
 			event.getChannel().sendMessage("WRONG! do: ~report [id] [your score] [opponent score] [opponent ping]").queue();
 			return true;
 		}
