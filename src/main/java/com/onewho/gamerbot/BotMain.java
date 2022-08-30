@@ -1,5 +1,7 @@
 package com.onewho.gamerbot;
 
+import java.io.IOException;
+
 import javax.security.auth.login.LoginException;
 
 import com.onewho.gamerbot.event.EventListener;
@@ -27,13 +29,11 @@ public class BotMain {
 					.setChunkingFilter(ChunkingFilter.ALL)
 					.build();
 			jda.addEventListener(new EventListener());
-		} catch (LoginException e) {
+		} catch (LoginException | IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	// TODO make pairings once a week
-	// TODO report scores
 	// TODO show set history
 	// TODO generate rankings
 	
