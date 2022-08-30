@@ -20,6 +20,7 @@ public class SetData {
 	private String created = "";
 	private String completed = "";
 	private long messageId = -1;
+	private boolean processed = false;
 	
 	public SetData(JsonObject data) {
 		id = ParseData.getInt(data, "id", id);
@@ -32,6 +33,7 @@ public class SetData {
 		created = ParseData.getString(data, "created", created);
 		completed = ParseData.getString(data, "completed", completed);
 		messageId = ParseData.getLong(data, "messageId", messageId);
+		processed = ParseData.getBoolean(data, "processed", processed);
 	}
 	
 	public SetData(int id, long p1Id, long p2Id, String created) {
@@ -53,6 +55,7 @@ public class SetData {
 		data.addProperty("created", created);
 		data.addProperty("completed", completed);
 		data.addProperty("messageId", messageId);
+		data.addProperty("processed", processed);
 		return data;
 	}
 	
@@ -124,6 +127,10 @@ public class SetData {
 		return (p1c && !p2c) || (!p1c && p2c);
 	}
 	
+	public boolean isProcessed() {
+		return processed;
+	}
+	
 	public boolean isP1Win() {
 		return isComplete() && p1s > p2s;
 	}
@@ -170,6 +177,7 @@ public class SetData {
 	}
 	
 	public ReportResult reportAdmin(long id1, long id2, int score1, int score2, String date) {
+		if (isProcessed()) return ReportResult.AlreadyVerified;
 		if (id1 == p1Id && id2 == p2Id) {
 			p1c = p2c = true;
 			completed = date;
@@ -228,4 +236,33 @@ public class SetData {
 			channel.editMessageById(messageId, med).queue();
 		}
 	}
+	
+	public void processSet(GuildData guild) {
+		if (!isComplete() || processed) return;
+		UserData p1 = guild.getUserDataById(p1Id);
+		UserData p2 = guild.getUserDataById(p2Id);
+		int change = (int)getChangeInScore(p1s, p2s, p1.getScore(), p2.getScore(), guild.getK());
+		p1.setScore(p1.getScore() + change);
+		p2.setScore(p2.getScore() - change);
+		processed = true;
+	}
+	
+	private static double getChangeInScore(int points1, int points2, int score1, int score2, double k) {
+		return k * (getActualScore(points1, points2) - getExpectedScore(score1, score2));
+	}
+	
+	private static double getActualScore(int points1, int points2) {
+		if (points1 > points2) return 1.0;
+		else if (points1 < points2) return 0.0;
+		return 0.5;
+	}
+	
+	private static double getExpectedScore(int score1, int score2) {
+		return getQ(score1) / (getQ(score1) + getQ(score2));
+	}
+	
+	private static double getQ(int score) {
+		return Math.pow(10.0, score / 400.0);
+	}
+	
 }

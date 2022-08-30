@@ -82,10 +82,15 @@ public class ReportAdmin implements ICommand {
 			return true;
 		} else if (result == ReportResult.SetVerified) {
 			event.getChannel().sendMessage("Admin Override Successful!").queue();
+		} else if (result == ReportResult.AlreadyVerified) {
+			event.getChannel().sendMessage("This set has already been processed"
+					+ " and the scores have been updated. You must use a backup of this"
+					+ " server's league data to go back before these sets were processed!").queue();
+			return true;
 		}
 		//display new sets
 		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("pairings"));
-		gdata.displaySetsByDate(set.getCreatedDate(), pairsChannel);
+		set.displaySet(pairsChannel);
 		LeagueData.saveData();
 		return true;
 	}

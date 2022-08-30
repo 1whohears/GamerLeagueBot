@@ -102,7 +102,7 @@ public class Report implements ICommand {
 		}
 		//display new sets
 		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("pairings"));
-		gdata.displaySetsByDate(set.getCreatedDate(), pairsChannel);
+		set.displaySet(pairsChannel);
 		LeagueData.saveData();
 		return true;
 	}

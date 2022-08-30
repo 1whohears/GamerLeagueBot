@@ -5,9 +5,9 @@ import com.google.gson.JsonObject;
 
 public class ParseData {
 	
-	public static long getLong(JsonObject data, String key, long defaultValue) {
+	public static boolean getBoolean(JsonObject data, String key, boolean defaultValue) {
 		if (data.get(key) == null) return defaultValue;
-		return data.get(key).getAsLong();
+		return data.get(key).getAsBoolean();
 	}
 	
 	public static int getInt(JsonObject data, String key, int defaultValue) {
@@ -15,9 +15,14 @@ public class ParseData {
 		return data.get(key).getAsInt();
 	}
 	
-	public static boolean getBoolean(JsonObject data, String key, boolean defaultValue) {
+	public static long getLong(JsonObject data, String key, long defaultValue) {
 		if (data.get(key) == null) return defaultValue;
-		return data.get(key).getAsBoolean();
+		return data.get(key).getAsLong();
+	}
+	
+	public static double getDouble(JsonObject data, String key, double defaultValue) {
+		if (data.get(key) == null) return defaultValue;
+		return data.get(key).getAsDouble();
 	}
 	
 	public static String getString(JsonObject data, String key, String defaultValue) {

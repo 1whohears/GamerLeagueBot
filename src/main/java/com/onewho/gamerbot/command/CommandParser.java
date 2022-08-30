@@ -41,6 +41,8 @@ public class CommandParser {
 		commands.add(new Config());
 		commands.add(new GenPairs());
 		commands.add(new Report());
+		commands.add(new ReportAdmin());
+		commands.add(new UpdateRanks());
 	}
 	
 }

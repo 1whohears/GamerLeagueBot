@@ -18,6 +18,7 @@ public class GuildData {
 	private int weeksBeforeSetExpires = -1;
 	private int weeksBeforeSetRepeat = -1;
 	private int defaultScore = 1000;
+	private double K = 20d;
 	
 	private List<UserData> users = new ArrayList<UserData>();
 	private List<SetData> sets = new ArrayList<SetData>();
@@ -35,6 +36,7 @@ public class GuildData {
 		weeksBeforeSetExpires = ParseData.getInt(data, "weeks before set expires", weeksBeforeSetExpires);
 		weeksBeforeSetRepeat = ParseData.getInt(data, "weeks before set repeat", weeksBeforeSetRepeat);
 		defaultScore = ParseData.getInt(data, "default score", defaultScore);
+		K = ParseData.getDouble(data, "K", K);
 		
 		users.clear();
 		JsonArray us = ParseData.getJsonArray(data, "users");
@@ -62,6 +64,7 @@ public class GuildData {
 		data.addProperty("weeks before set expires", weeksBeforeSetExpires);
 		data.addProperty("weeks before set repeat", weeksBeforeSetRepeat);
 		data.addProperty("default score", defaultScore);
+		data.addProperty("K", K);
 		data.add("users", getUsersJson());
 		data.add("sets", getSetsJson());
 		data.addProperty("league role id", leagueRoleId);
@@ -175,6 +178,14 @@ public class GuildData {
 		this.weeksBeforeSetRepeat = weeksBeforeSetRepeat;
 	}
 	
+	public double getK() {
+		return K;
+	}
+
+	public void setK(double k) {
+		K = k;
+	}
+	
 	public void removeOldSets() {
 		for (int i = 0; i < sets.size(); ++i) {
 			if (sets.get(i).isComplete()) continue;
@@ -277,6 +288,15 @@ public class GuildData {
 	
 	public void displaySetsByDate(String date, TextChannel channel) {
 		for (SetData set : sets) if (UtilCalendar.getWeekDiff(date, set.getCreatedDate()) == 0) set.displaySet(channel);
+	}
+	
+	public int processSets() {
+		int num = 0;
+		for (SetData set : sets) if (set.isComplete() && !set.isProcessed()) {
+			set.processSet(this);
+			++num;
+		}
+		return num;
 	}
 	
 }
