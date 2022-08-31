@@ -1,11 +1,7 @@
 package com.onewho.gamerbot.command;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import com.google.gson.JsonObject;
 import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.UserData;
@@ -14,7 +10,6 @@ import com.onewho.gamerbot.util.UtilCalendar;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
@@ -39,10 +34,7 @@ public class UpdateRanks implements ICommand {
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		Guild guild = event.getGuild();
 		GuildData gdata = LeagueData.getGuildDataById(guild.getIdLong());
-		JsonObject gdataJson = gdata.getJson();
-		JsonObject backup = new JsonObject();
-		backup.add("users", gdataJson.get("users").getAsJsonArray());
-		backup.add("sets", gdataJson.get("sets").getAsJsonArray());
+		Backup.createBackup(guild);
 		int num = gdata.processSets();
 		//display
 		if (num == 0) {
@@ -64,14 +56,6 @@ public class UpdateRanks implements ICommand {
 		}
 		MessageCreateData mcd = mcb.build();
 		ranksChannel.sendMessage(mcd).queue();
-		// send backup
-		TextChannel historyChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("set-history"));
-		String data = LeagueData.getGson().toJson(backup);
-		FileUpload fu = FileUpload.fromData(new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)), 
-				guild.getName()+"_backup_"+UtilCalendar.getCurrentDateTimeString()+".json");
-		historyChannel.sendFiles(fu).queue();
-		try { fu.close(); } 
-		catch (IOException e) { e.printStackTrace(); }
 		LeagueData.saveData();
 		return true;
 	}

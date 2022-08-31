@@ -43,6 +43,7 @@ public class CommandParser {
 		commands.add(new Report());
 		commands.add(new ReportAdmin());
 		commands.add(new UpdateRanks());
+		commands.add(new Backup());
 	}
 	
 }
