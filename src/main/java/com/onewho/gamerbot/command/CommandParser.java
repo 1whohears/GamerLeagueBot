@@ -46,6 +46,7 @@ public class CommandParser {
 		commands.add(new Backup());
 		commands.add(new ReadBackup());
 		commands.add(new RefreshSet());
+		commands.add(new CreateSet());
 	}
 	
 }

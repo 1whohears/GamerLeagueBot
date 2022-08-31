@@ -34,8 +34,4 @@ public class BotMain {
 		}
 	}
 	
-	// TODO read backup file
-	// TODO admin add pair through command
-	// TODO config command
-	
 }
