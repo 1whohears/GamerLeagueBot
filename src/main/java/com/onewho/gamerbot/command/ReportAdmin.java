@@ -76,11 +76,14 @@ public class ReportAdmin implements ICommand {
 			event.getChannel().sendMessage("INCORRECT! The set with id "+id+" does not exist!").queue();
 			return true;
 		}
-		ReportResult result = set.reportAdmin(pingId1, pingId2, s1, s2, UtilCalendar.getCurrentDateString());
+		String currentData = UtilCalendar.getCurrentDateString();
+		ReportResult result = set.reportAdmin(pingId1, pingId2, s1, s2, currentData);
 		if (result == ReportResult.IDsDontMatch) {
 			event.getChannel().sendMessage("LOL! This set id does not have those players!").queue();
 			return true;
 		} else if (result == ReportResult.SetVerified) {
+			gdata.getUserDataById(set.getP1Id()).setLastActive(currentData);
+			gdata.getUserDataById(set.getP2Id()).setLastActive(currentData);
 			event.getChannel().sendMessage("Admin Override Successful!").queue();
 		} else if (result == ReportResult.AlreadyVerified) {
 			event.getChannel().sendMessage("This set has already been processed"

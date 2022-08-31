@@ -3,6 +3,7 @@ package com.onewho.gamerbot.command;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.LeagueData;
@@ -77,7 +78,8 @@ public class Report implements ICommand {
 			event.getChannel().sendMessage("INCORRECT! The set with id "+id+" does not exist!").queue();
 			return true;
 		}
-		ReportResult result = set.report(event.getAuthor().getIdLong(), pingId, s1, s2, UtilCalendar.getCurrentDateString());
+		String currentData = UtilCalendar.getCurrentDateString();
+		ReportResult result = set.report(event.getAuthor().getIdLong(), pingId, s1, s2, currentData);
 		switch (result) {
 		case IDsDontMatch:
 			event.getChannel().sendMessage("WOW! This set id does not have those players!").queue();
@@ -87,6 +89,7 @@ public class Report implements ICommand {
 					+ "If you are correct have your opponent report again, or get a hold of an admin.").queue();
 			break;
 		case SetVerified:
+			gdata.getUserDataById(event.getAuthor().getIdLong()).setLastActive(currentData);
 			event.getChannel().sendMessage("Set reported and verified by opponent!").queue();
 			break;
 		case WaitingForOpponent:
@@ -94,6 +97,7 @@ public class Report implements ICommand {
 				.addEmbeds(getVerifyEmbed(set, pingId))
 				.addActionRow(getVerifyButtons())
 				.build();
+			gdata.getUserDataById(event.getAuthor().getIdLong()).setLastActive(currentData);
 			event.getChannel().sendMessage(mcd).queue();
 			break;
 		case AlreadyVerified:
@@ -113,12 +117,23 @@ public class Report implements ICommand {
 	
 	private MessageEmbed getVerifyEmbed(SetData set, long opponentId) {
 		EmbedBuilder jleb = new EmbedBuilder();
-		jleb.setTitle(getMention(opponentId)+" Verify Report?");
-		jleb.setDescription("SET ID ["+set.getId()+"]"
+		jleb.setDescription(getMention(opponentId)+" Verify Report?"
+				+ "\n**SET ID ["+set.getId()+"]**"
 				+ "\n**"+set.getP1score()+"** "+getMention(set.getP1Id())
 				+ "\n**"+set.getP2score()+"** "+getMention(set.getP2Id()));
-		jleb.setColor(Color.GREEN);
+		jleb.setColor(getRandomColor());
 		return jleb.build();
+	}
+	
+	/**
+	 * https://stackoverflow.com/questions/4246351/creating-random-colour-in-java
+	 */
+	private Color getRandomColor() {
+		Random random = new Random();
+		final float hue = random.nextFloat();
+		final float saturation = 0.9f;
+		final float luminance = 1.0f;
+		return Color.getHSBColor(hue, saturation, luminance);
 	}
 	
 	private List<Button> getVerifyButtons() {
