@@ -34,7 +34,7 @@ public class UpdateRanks implements ICommand {
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		Guild guild = event.getGuild();
 		GuildData gdata = LeagueData.getGuildDataById(guild.getIdLong());
-		Backup.createBackup(guild);
+		Backup.createBackup(guild, "pre_updateranks_backup");
 		int num = gdata.processSets();
 		//display
 		if (num == 0) {

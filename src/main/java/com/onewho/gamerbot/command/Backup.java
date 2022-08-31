@@ -33,11 +33,11 @@ public class Backup implements ICommand {
 
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
-		createBackup(event.getGuild());
+		createBackup(event.getGuild(), "backup");
 		return true;
 	}
 	
-	public static void createBackup(Guild guild) {
+	public static void createBackup(Guild guild, String name) {
 		GuildData gdata = LeagueData.getGuildDataById(guild.getIdLong());
 		JsonObject gdataJson = gdata.getJson();
 		JsonObject backup = new JsonObject();
@@ -46,7 +46,7 @@ public class Backup implements ICommand {
 		TextChannel historyChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("set-history"));
 		String data = LeagueData.getGson().toJson(backup);
 		FileUpload fu = FileUpload.fromData(new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)), 
-				guild.getName()+"_backup_"+UtilCalendar.getCurrentDateTimeString()+".json");
+				guild.getName()+"_"+name+"_"+UtilCalendar.getCurrentDateTimeString()+".json");
 		historyChannel.sendFiles(fu).queue();
 		try { fu.close(); } 
 		catch (IOException e) { e.printStackTrace(); }
