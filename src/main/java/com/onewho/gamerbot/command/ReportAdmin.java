@@ -31,7 +31,7 @@ public class ReportAdmin implements ICommand {
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		if (params.length != 6) {
 			event.getChannel().sendMessage(Report.getInsult()
-					+" do: `~report [id] [p1 ping] [p1 score] [p2 ping] [p2 score]`").queue();
+					+" do: `~reportadmin [set id] [p1 ping] [p1 score] [p2 ping] [p2 score]`").queue();
 			return true;
 		}
 		int id = -1, s1 = -1, s2 = -1;

@@ -39,10 +39,7 @@ public class Backup implements ICommand {
 	
 	public static void createBackup(Guild guild, String name) {
 		GuildData gdata = LeagueData.getGuildDataById(guild.getIdLong());
-		JsonObject gdataJson = gdata.getJson();
-		JsonObject backup = new JsonObject();
-		backup.add("users", gdataJson.get("users").getAsJsonArray());
-		backup.add("sets", gdataJson.get("sets").getAsJsonArray());
+		JsonObject backup = gdata.getBackupJson();
 		TextChannel historyChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("set-history"));
 		String data = LeagueData.getGson().toJson(backup);
 		FileUpload fu = FileUpload.fromData(new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)), 

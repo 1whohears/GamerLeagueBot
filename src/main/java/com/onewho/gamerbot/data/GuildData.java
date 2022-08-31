@@ -75,10 +75,13 @@ public class GuildData {
 		return data;
 	}
 	
-	public void readBackup(JsonObject backup) {
-		users.clear();
+	public void readBackup(JsonObject backup) throws IllegalStateException, ClassCastException {
 		JsonArray us = ParseData.getJsonArray(backup, "users");
-		for (int i = 0; i < us.size(); ++i) users.add(new UserData(us.get(i).getAsJsonObject()));
+		for (int i = 0; i < us.size(); ++i) {
+			UserData user = getUserDataById(us.get(i).getAsJsonObject().get("id").getAsLong());
+			if (user == null) continue;
+			user.readBackup(us.get(i).getAsJsonObject());
+		}
 		sets.clear();
 		JsonArray ss = ParseData.getJsonArray(backup, "sets");
 		for (int i = 0; i < ss.size(); ++i) sets.add(new SetData(ss.get(i).getAsJsonObject()));
@@ -94,6 +97,19 @@ public class GuildData {
 		JsonArray ss = new JsonArray();
 		for (SetData s : sets) ss.add(s.getJson());
 		return ss;
+	}
+	
+	public JsonObject getBackupJson() {
+		JsonObject backup = new JsonObject();
+		backup.add("users", getUsersBackupJson());
+		backup.add("sets", getSetsJson());
+		return backup;
+	}
+	
+	private JsonArray getUsersBackupJson() {
+		JsonArray us = new JsonArray();
+		for (UserData u : users) us.add(u.getBackupJson());
+		return us;
 	}
 	
 	public long getId() {

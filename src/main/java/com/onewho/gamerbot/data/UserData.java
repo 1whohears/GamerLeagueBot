@@ -36,6 +36,18 @@ public class UserData {
 		return data;
 	}
 	
+	public JsonObject getBackupJson() {
+		JsonObject data = new JsonObject();
+		data.addProperty("id", id);
+		data.addProperty("score", score);
+		return data;
+	}
+	
+	public void readBackup(JsonObject data) {
+		if (data.get("id") == null || data.get("id").getAsLong() != id) return;
+		setScore(ParseData.getInt(data, "score", score));
+	}
+	
 	public long getId() {
 		return id;
 	}
