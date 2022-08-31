@@ -30,6 +30,10 @@ public class UtilCalendar {
 		return new SimpleDateFormat("dd-MM-yyyy").format(new Date());
 	}
 	
+	public static String getCurrentDateTimeString() {
+		return new SimpleDateFormat("hh-mm dd-MM-yyyy").format(new Date());
+	}
+	
 	public static int getWeek(int day, int month, int year) {
 		LocalDate date = LocalDate.of(year, month, day);
 		return date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);

@@ -68,7 +68,7 @@ public class UpdateRanks implements ICommand {
 		TextChannel historyChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("set-history"));
 		String data = LeagueData.getGson().toJson(backup);
 		FileUpload fu = FileUpload.fromData(new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)), 
-				guild.getName()+"_backup_"+UtilCalendar.getCurrentDateString()+".json");
+				guild.getName()+"_backup_"+UtilCalendar.getCurrentDateTimeString()+".json");
 		historyChannel.sendFiles(fu).queue();
 		try { fu.close(); } 
 		catch (IOException e) { e.printStackTrace(); }
