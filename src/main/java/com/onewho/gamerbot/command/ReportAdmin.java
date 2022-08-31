@@ -35,11 +35,11 @@ public class ReportAdmin implements ICommand {
 		}
 		int id = -1, s1 = -1, s2 = -1;
 		long pingId1 = -1, pingId2 = -1;
-		if (checkIfMention(params[2])) {
+		if (!checkIfMention(params[2])) {
 			event.getChannel().sendMessage("BRUH! "+params[2]+" is not a mention!").queue();
 			return true;
 		}
-		if (checkIfMention(params[4])) {
+		if (!checkIfMention(params[4])) {
 			event.getChannel().sendMessage("BRUH! "+params[4]+" is not a mention!").queue();
 			return true;
 		}

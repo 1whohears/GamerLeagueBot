@@ -45,7 +45,7 @@ public class Report implements ICommand {
 		}
 		int id = -1, s1 = -1, s2 = -1;
 		long pingId = -1;
-		if (checkIfMention(params[4])) {
+		if (!checkIfMention(params[4])) {
 			event.getChannel().sendMessage("BRUH! "+params[4]+" is not a mention!").queue();
 			return true;
 		}
