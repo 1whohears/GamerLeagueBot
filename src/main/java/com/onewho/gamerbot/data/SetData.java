@@ -243,7 +243,8 @@ public class SetData {
 	}
 	
 	public void removeSetDisplay(TextChannel channel) {
-		// TODO remove set display
+		channel.deleteMessageById(messageId).queue();
+		messageId = -1;
 	}
 	
 	public void processSet(GuildData guild) {

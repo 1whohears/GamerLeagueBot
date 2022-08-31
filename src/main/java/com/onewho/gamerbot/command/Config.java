@@ -43,6 +43,7 @@ public class Config implements ICommand {
 			}
 			gdata.setMaxSetsPerWeek(value);
 			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`");
+			LeagueData.saveData();
 			return true;
 		case "weeks-before-auto-inactive":
 			value = parseInt(params[2]);
@@ -52,6 +53,7 @@ public class Config implements ICommand {
 			}
 			gdata.setWeeksBeforeAutoInactive(value);
 			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`");
+			LeagueData.saveData();
 			return true;
 		case "weeks-before-set-expires":
 			value = parseInt(params[2]);
@@ -61,6 +63,7 @@ public class Config implements ICommand {
 			}
 			gdata.setWeeksBeforeSetExpires(value);
 			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`");
+			LeagueData.saveData();
 			return true;
 		case "weeks-before-set-repeat":
 			value = parseInt(params[2]);
@@ -70,6 +73,7 @@ public class Config implements ICommand {
 			}
 			gdata.setWeeksBeforeSetRepeat(value);
 			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`");
+			LeagueData.saveData();
 			return true;
 		case "default-score":
 			value = parseInt(params[2]);
@@ -79,6 +83,7 @@ public class Config implements ICommand {
 			}
 			gdata.setDefaultScore(value);
 			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`");
+			LeagueData.saveData();
 			return true;
 		case "K":
 			valueD = parseDouble(params[2]);
@@ -88,6 +93,7 @@ public class Config implements ICommand {
 			}
 			gdata.setK(valueD);
 			event.getChannel().sendMessage("`"+params[1]+"` set to `"+valueD+"`");
+			LeagueData.saveData();
 			return true;
 		}
 		event.getChannel().sendMessage(Report.getInsult()

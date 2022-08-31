@@ -1,5 +1,11 @@
 package com.onewho.gamerbot.command;
 
+import com.onewho.gamerbot.data.GuildData;
+import com.onewho.gamerbot.data.LeagueData;
+import com.onewho.gamerbot.data.SetData;
+
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class CreateSet implements ICommand {
@@ -28,7 +34,38 @@ public class CreateSet implements ICommand {
 		}
 		long id1 = getIdFromMention(params[1]);
 		long id2 = getIdFromMention(params[2]);
-		// TODO check if id are -1 and create set
+		if (id1 == -1) {
+			event.getChannel().sendMessage(Report.getInsult()+" "+params[1]
+					+" is not a mention!").queue();
+			return true;
+		}
+		if (id2 == -1) {
+			event.getChannel().sendMessage(Report.getInsult()+" "+params[2]
+					+" is not a mention!").queue();
+			return true;
+		}
+		Guild guild = event.getGuild();
+		GuildData gdata = LeagueData.getGuildDataById(guild.getIdLong());
+		if (gdata.getUserDataById(id1) == null) {
+			event.getChannel().sendMessage(Report.getInsult()
+					+" The first user/mention is not in this server!").queue();
+			return true;
+		}
+		if (gdata.getUserDataById(id2) == null) {
+			event.getChannel().sendMessage(Report.getInsult()
+					+" The second user/mention is not in this server!").queue();
+			return true;
+		}
+		SetData set = gdata.createSet(id1, id2);
+		if (set == null) {
+			event.getChannel().sendMessage(Report.getInsult()
+					+" You can't make someone fight themself!").queue();
+			return true;
+		}
+		event.getChannel().sendMessage("Successfully created set "+set.getId()).queue();
+		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("pairings"));
+		set.displaySet(pairsChannel);
+		LeagueData.saveData();
 		return true;
 	}
 	

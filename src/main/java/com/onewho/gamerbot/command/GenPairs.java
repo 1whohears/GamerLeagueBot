@@ -34,7 +34,8 @@ public class GenPairs implements ICommand {
 		System.out.println("running gen pairs command");
 		Guild guild = event.getGuild();
 		GuildData gdata = LeagueData.getGuildDataById(guild.getIdLong());
-		gdata.removeOldSets();
+		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("pairings"));
+		gdata.removeOldSets(pairsChannel);
 		List<UserData> activeUsers = gdata.getAvailableSortedUsers();
 		boolean createdSet = true;
 		while (createdSet) {
@@ -68,7 +69,6 @@ public class GenPairs implements ICommand {
 			}
 		}
 		//display new sets
-		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("pairings"));
 		gdata.displaySetsByDate(UtilCalendar.getCurrentDateString(), pairsChannel);
 		//debug
 		LeagueData.saveData();

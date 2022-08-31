@@ -207,7 +207,7 @@ public class GuildData {
 		return users;
 	}
 	
-	public void removeOldSets() {
+	public void removeOldSets(TextChannel pairsChannel) {
 		for (int i = 0; i < sets.size(); ++i) {
 			if (sets.get(i).isComplete()) continue;
 			int weekDiff = UtilCalendar.getWeekDiff(
@@ -215,15 +215,15 @@ public class GuildData {
 					UtilCalendar.getCurrentDate()); 
 			System.out.println("SET "+sets.get(i)+" weekDiff = "+weekDiff+" "+weeksBeforeSetExpires);
 			if (weeksBeforeSetExpires == -1 || weekDiff <= weeksBeforeSetExpires) continue;
+			removeSet(sets.get(i).getId(), pairsChannel);
 			System.out.println("removed");
-			// TODO get pairing channel
-			sets.get(i).removeSetDisplay(null);
-			sets.remove(i--);
 		}
 	}
 	
-	public void removeSet(int id) {
-		// TODO create remove set util function
+	public void removeSet(int id, TextChannel pairsChannel) {
+		SetData set = this.getSetDataById(id);
+		set.removeSetDisplay(pairsChannel);
+		sets.remove(set);
 	}
 	
 	public List<UserData> getAvailableSortedUsers() {
