@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.command.CommandParser;
-import com.onewho.gamerbot.data.LeagueData;
+import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.interact.ButtonManager;
 
 import net.dv8tion.jda.api.events.ReadyEvent;
@@ -18,7 +18,7 @@ public class EventListener extends ListenerAdapter {
 	@Override
     public void onReady(ReadyEvent event) {
         try {
-			LeagueData.readJsonData();
+			GlobalData.readJsonData();
 			System.out.println("Gaming Time in "+event.getGuildTotalCount()+" guilds!");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -28,7 +28,7 @@ public class EventListener extends ListenerAdapter {
 	@Override
 	public void onReconnected(ReconnectedEvent event) {
 		try {
-			LeagueData.readJsonData();
+			GlobalData.readJsonData();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

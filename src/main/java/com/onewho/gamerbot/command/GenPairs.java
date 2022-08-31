@@ -3,7 +3,7 @@ package com.onewho.gamerbot.command;
 import java.util.List;
 
 import com.onewho.gamerbot.data.GuildData;
-import com.onewho.gamerbot.data.LeagueData;
+import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.SetData;
 import com.onewho.gamerbot.data.UserData;
 import com.onewho.gamerbot.util.UtilCalendar;
@@ -33,7 +33,7 @@ public class GenPairs implements ICommand {
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		System.out.println("running gen pairs command");
 		Guild guild = event.getGuild();
-		GuildData gdata = LeagueData.getGuildDataById(guild.getIdLong());
+		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
 		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("pairings"));
 		gdata.removeOldSets(pairsChannel);
 		List<UserData> activeUsers = gdata.getAvailableSortedUsers();
@@ -71,7 +71,7 @@ public class GenPairs implements ICommand {
 		//display new sets
 		gdata.displaySetsByDate(UtilCalendar.getCurrentDateString(), pairsChannel);
 		//debug
-		LeagueData.saveData();
+		GlobalData.saveData();
 		System.out.println("Pairings Generated");
 		event.getChannel().sendMessage("Finished Generating Pairings!").queue();
 		return true;

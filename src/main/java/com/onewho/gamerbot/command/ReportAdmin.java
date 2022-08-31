@@ -1,7 +1,7 @@
 package com.onewho.gamerbot.command;
 
 import com.onewho.gamerbot.data.GuildData;
-import com.onewho.gamerbot.data.LeagueData;
+import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.ReportResult;
 import com.onewho.gamerbot.data.SetData;
 import com.onewho.gamerbot.util.UtilCalendar;
@@ -71,7 +71,7 @@ public class ReportAdmin implements ICommand {
 			return true;
 		}
 		Guild guild = event.getGuild();
-		GuildData gdata = LeagueData.getGuildDataById(guild.getIdLong());
+		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
 		SetData set = gdata.getSetDataById(id);
 		if (set == null) {
 			event.getChannel().sendMessage(Report.getInsult()+" The set with id "+id+" does not exist!").queue();
@@ -95,7 +95,7 @@ public class ReportAdmin implements ICommand {
 		//display new sets
 		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("pairings"));
 		set.displaySet(pairsChannel);
-		LeagueData.saveData();
+		GlobalData.saveData();
 		return true;
 	}
 	

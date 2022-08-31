@@ -3,7 +3,7 @@ package com.onewho.gamerbot.command;
 import java.util.List;
 
 import com.onewho.gamerbot.data.GuildData;
-import com.onewho.gamerbot.data.LeagueData;
+import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.UserData;
 import com.onewho.gamerbot.util.UtilCalendar;
 
@@ -33,7 +33,7 @@ public class UpdateRanks implements ICommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		Guild guild = event.getGuild();
-		GuildData gdata = LeagueData.getGuildDataById(guild.getIdLong());
+		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
 		Backup.createBackup(guild, "pre_updateranks_backup");
 		int num = gdata.processSets();
 		//display
@@ -56,7 +56,7 @@ public class UpdateRanks implements ICommand {
 		}
 		MessageCreateData mcd = mcb.build();
 		ranksChannel.sendMessage(mcd).queue();
-		LeagueData.saveData();
+		GlobalData.saveData();
 		return true;
 	}
 	

@@ -1,6 +1,6 @@
 package com.onewho.gamerbot.interact;
 
-import com.onewho.gamerbot.data.LeagueData;
+import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.ReportResult;
 import com.onewho.gamerbot.data.SetData;
 import com.onewho.gamerbot.util.UtilCalendar;
@@ -44,7 +44,7 @@ public class ButtonManager {
 	
 	private static void handleReportVerifyButton(ButtonInteractionEvent event) {
 		int setId = getSetId(event);
-		SetData set = LeagueData.getGuildDataById(event.getGuild().getIdLong()).getSetDataById(setId);
+		SetData set = GlobalData.getGuildDataById(event.getGuild().getIdLong()).getSetDataById(setId);
 		long id1 = -1, id2 = -1;
 		int s1 = -1, s2 = -1;
 		if (set.isP1confirm()) {
@@ -70,14 +70,14 @@ public class ButtonManager {
 		event.reply("The set has been verified!").queue();
 		Guild guild = event.getGuild();
 		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, 
-				LeagueData.getGuildDataById(guild.getIdLong()).getChannelId("pairings"));
+				GlobalData.getGuildDataById(guild.getIdLong()).getChannelId("pairings"));
 		set.displaySet(pairsChannel);
-		LeagueData.saveData();
+		GlobalData.saveData();
 	}
 	
 	private static void handleReportDisputeButton(ButtonInteractionEvent event) {
 		int setId = getSetId(event);
-		SetData set = LeagueData.getGuildDataById(event.getGuild().getIdLong()).getSetDataById(setId);
+		SetData set = GlobalData.getGuildDataById(event.getGuild().getIdLong()).getSetDataById(setId);
 		if (set.isComplete()) {
 			event.reply("This set has already been verified!"
 					+ " If you still dispute the results then contact an admin!").setEphemeral(true).queue();

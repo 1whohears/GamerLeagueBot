@@ -6,7 +6,7 @@ package com.onewho.gamerbot.command;
 
 import java.io.IOException;
 
-import com.onewho.gamerbot.data.LeagueData;
+import com.onewho.gamerbot.data.GlobalData;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
@@ -30,7 +30,7 @@ public class Reload implements ICommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		try {
-			LeagueData.readJsonData();
+			GlobalData.readJsonData();
 			event.getChannel().sendMessage("Realoaded Data File!").queue();
 			System.out.println("Reloading JsonData");
 		} catch (IOException e) {

@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 
 import com.google.gson.JsonObject;
 import com.onewho.gamerbot.data.GuildData;
-import com.onewho.gamerbot.data.LeagueData;
+import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.util.UtilCalendar;
 
 import net.dv8tion.jda.api.entities.Guild;
@@ -38,10 +38,10 @@ public class Backup implements ICommand {
 	}
 	
 	public static void createBackup(Guild guild, String name) {
-		GuildData gdata = LeagueData.getGuildDataById(guild.getIdLong());
+		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
 		JsonObject backup = gdata.getBackupJson();
 		TextChannel historyChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("set-history"));
-		String data = LeagueData.getGson().toJson(backup);
+		String data = GlobalData.getGson().toJson(backup);
 		FileUpload fu = FileUpload.fromData(new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)), 
 				guild.getName()+"_"+name+"_"+UtilCalendar.getCurrentDateTimeString()+".json");
 		historyChannel.sendFiles(fu).queue();

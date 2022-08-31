@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.onewho.gamerbot.data.GuildData;
-import com.onewho.gamerbot.data.LeagueData;
+import com.onewho.gamerbot.data.GlobalData;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -45,7 +45,7 @@ public class Setup implements ICommand {
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		System.out.println("running setup command");
 		Guild guild = event.getGuild();
-		GuildData guildData = LeagueData.getGuildDataById(guild.getIdLong());
+		GuildData guildData = GlobalData.getGuildDataById(guild.getIdLong());
 		//setup roles
 		Role gamerRole = null;
 		if (guildData.getLeagueRoleId() == -1) {
@@ -106,7 +106,7 @@ public class Setup implements ICommand {
 		//setup options channel
 		setupOptions(optionsChannel, guildData);
 		//finish
-		LeagueData.saveData();
+		GlobalData.saveData();
 		System.out.println("setup command complete");
 		event.getChannel().sendMessage("Bot Channel Setup Complete!").queue();
 		return true;
