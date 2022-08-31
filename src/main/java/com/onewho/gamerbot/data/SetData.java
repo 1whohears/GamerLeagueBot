@@ -242,6 +242,10 @@ public class SetData {
 		}
 	}
 	
+	public void removeSetDisplay(TextChannel channel) {
+		// TODO remove set display
+	}
+	
 	public void processSet(GuildData guild) {
 		if (!isComplete() || processed) return;
 		UserData p1 = guild.getUserDataById(p1Id);

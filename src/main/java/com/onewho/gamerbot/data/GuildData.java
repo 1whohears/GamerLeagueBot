@@ -216,8 +216,14 @@ public class GuildData {
 			System.out.println("SET "+sets.get(i)+" weekDiff = "+weekDiff+" "+weeksBeforeSetExpires);
 			if (weeksBeforeSetExpires == -1 || weekDiff <= weeksBeforeSetExpires) continue;
 			System.out.println("removed");
+			// TODO get pairing channel
+			sets.get(i).removeSetDisplay(null);
 			sets.remove(i--);
 		}
+	}
+	
+	public void removeSet(int id) {
+		// TODO create remove set util function
 	}
 	
 	public List<UserData> getAvailableSortedUsers() {
