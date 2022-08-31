@@ -38,7 +38,7 @@ public class EventListener extends ListenerAdapter {
 	public void onMessageReceived(MessageReceivedEvent event) {
 		String text = event.getMessage().getContentRaw();
 		if (text.length() > 0 && text.charAt(0) != BotMain.PREFIX) return;
-		if (!CommandParser.parseCommand(event)) event.getChannel().sendMessage("That command doesn't exist! Try "+BotMain.PREFIX+"help!").queue();
+		if (!CommandParser.parseCommand(event)) event.getChannel().sendMessage("That command doesn't exist! Try `"+BotMain.PREFIX+"help`!").queue();
 	}
 	
 	@Override
