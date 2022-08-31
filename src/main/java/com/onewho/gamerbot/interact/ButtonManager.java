@@ -16,20 +16,20 @@ public class ButtonManager {
 		String id = event.getButton().getId();
 		if (id.startsWith("setsaweek-")) {
 			int sets = Integer.parseInt(id.substring("setsaweek-".length(), id.length()));
-			if (UtilUsers.userSetsAWeek(event.getGuild(), event.getUser(), sets)) 
+			if (UtilUsers.userSetsAWeek(event.getGuild(), event.getUser(), sets, event.getChannel())) 
 				event.reply("I will try to give you "+sets+" pairings next week!").setEphemeral(true).queue();
 			else event.reply("You must join the Gamer League first!").setEphemeral(true).queue();
 			return;
 		}
 		switch (id) {
 		case "join-gamer-league":
-			UtilUsers.userJoinLeague(event.getGuild(), event.getUser());
+			UtilUsers.userJoinLeague(event.getGuild(), event.getUser(), event.getChannel());
 			//debug
 			event.reply("You have joined the Gamer League! Please select how many sets you want to do per week!"
 					+ " Use ~help in #bot-commands for more info!").setEphemeral(true).queue();
 			break;
 		case "quit-gamer-league":
-			UtilUsers.userQuitLeague(event.getGuild(), event.getUser());
+			UtilUsers.userQuitLeague(event.getGuild(), event.getUser(), event.getChannel());
 			//debug
 			event.reply("You have left the gamer league...sad...").setEphemeral(true).queue();
 			break;
@@ -44,7 +44,8 @@ public class ButtonManager {
 	
 	private static void handleReportVerifyButton(ButtonInteractionEvent event) {
 		int setId = getSetId(event);
-		SetData set = GlobalData.getGuildDataById(event.getGuild().getIdLong()).getSetDataById(setId);
+		SetData set = GlobalData.getGuildDataById(event.getGuild().getIdLong())
+				.getLeagueByChannel(event.getChannel()).getSetDataById(setId);
 		long id1 = -1, id2 = -1;
 		int s1 = -1, s2 = -1;
 		if (set.isP1confirm()) {
@@ -70,14 +71,16 @@ public class ButtonManager {
 		event.reply("The set has been verified!").queue();
 		Guild guild = event.getGuild();
 		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, 
-				GlobalData.getGuildDataById(guild.getIdLong()).getChannelId("pairings"));
+				GlobalData.getGuildDataById(guild.getIdLong())
+					.getLeagueByChannel(event.getChannel()).getChannelId("pairings"));
 		set.displaySet(pairsChannel);
 		GlobalData.saveData();
 	}
 	
 	private static void handleReportDisputeButton(ButtonInteractionEvent event) {
 		int setId = getSetId(event);
-		SetData set = GlobalData.getGuildDataById(event.getGuild().getIdLong()).getSetDataById(setId);
+		SetData set = GlobalData.getGuildDataById(event.getGuild().getIdLong())
+				.getLeagueByChannel(event.getChannel()).getSetDataById(setId);
 		if (set.isComplete()) {
 			event.reply("This set has already been verified!"
 					+ " If you still dispute the results then contact an admin!").setEphemeral(true).queue();

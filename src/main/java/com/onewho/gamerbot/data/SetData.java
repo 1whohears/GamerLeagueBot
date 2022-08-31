@@ -256,7 +256,7 @@ public class SetData {
 		messageId = -1;
 	}
 	
-	public void processSet(GuildData guild) {
+	public void processSet(LeagueData guild) {
 		if (!isComplete() || processed) return;
 		UserData p1 = guild.getUserDataById(p1Id);
 		UserData p2 = guild.getUserDataById(p2Id);

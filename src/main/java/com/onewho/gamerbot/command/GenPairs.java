@@ -2,7 +2,7 @@ package com.onewho.gamerbot.command;
 
 import java.util.List;
 
-import com.onewho.gamerbot.data.GuildData;
+import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.SetData;
 import com.onewho.gamerbot.data.UserData;
@@ -33,7 +33,8 @@ public class GenPairs implements ICommand {
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		System.out.println("running gen pairs command");
 		Guild guild = event.getGuild();
-		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
+		LeagueData gdata = GlobalData.getGuildDataById(guild.getIdLong())
+				.getLeagueByChannel(event.getChannel());
 		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("pairings"));
 		gdata.removeOldSets(pairsChannel);
 		List<UserData> activeUsers = gdata.getAvailableSortedUsers();
@@ -46,7 +47,7 @@ public class GenPairs implements ICommand {
 				List<SetData> incompleteSets = gdata.getIncompleteOrCurrentSetsByPlayer(udata.getId());
 				System.out.println("incomplete sets "+incompleteSets.size());
 				if (incompleteSets.size() >= udata.getSetsPerWeek()) continue;
-				int[] ksort = GuildData.getClosestUserIndexsByScore(udata, activeUsers);
+				int[] ksort = LeagueData.getClosestUserIndexsByScore(udata, activeUsers);
 				for (int i = 0; i < ksort.length; ++i) {
 					UserData userk = activeUsers.get(ksort[i]);
 					System.out.println("userk "+userk.getId());

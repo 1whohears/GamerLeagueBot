@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import com.onewho.gamerbot.data.GuildData;
+import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.ReportResult;
 import com.onewho.gamerbot.data.SetData;
@@ -72,7 +72,8 @@ public class Report implements ICommand {
 			return true;
 		}
 		Guild guild = event.getGuild();
-		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
+		LeagueData gdata = GlobalData.getGuildDataById(guild.getIdLong())
+				.getLeagueByChannel(event.getChannel());
 		SetData set = gdata.getSetDataById(id);
 		if (set == null) {
 			event.getChannel().sendMessage(getInsult()+" The set with id "+id+" does not exist!").queue();

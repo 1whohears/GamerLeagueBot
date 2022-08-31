@@ -1,6 +1,6 @@
 package com.onewho.gamerbot.command;
 
-import com.onewho.gamerbot.data.GuildData;
+import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.SetData;
 
@@ -39,7 +39,8 @@ public class RefreshSet implements ICommand {
 			return false;
 		}
 		Guild guild = event.getGuild();
-		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
+		LeagueData gdata = GlobalData.getGuildDataById(guild.getIdLong())
+				.getLeagueByChannel(event.getChannel());
 		SetData set = gdata.getSetDataById(setId);
 		if (set == null) {
 			event.getChannel().sendMessage("this set doesn't exist").queue();

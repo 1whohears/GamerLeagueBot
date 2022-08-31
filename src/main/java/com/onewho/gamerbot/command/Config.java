@@ -1,6 +1,6 @@
 package com.onewho.gamerbot.command;
 
-import com.onewho.gamerbot.data.GuildData;
+import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.GlobalData;
 
 import net.dv8tion.jda.api.entities.Guild;
@@ -31,7 +31,8 @@ public class Config implements ICommand {
 			return true;
 		}
 		Guild guild = event.getGuild();
-		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
+		LeagueData gdata = GlobalData.getGuildDataById(guild.getIdLong())
+				.getLeagueByChannel(event.getChannel());
 		int value;
 		double valueD;
 		switch (params[1]) {

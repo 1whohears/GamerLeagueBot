@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutionException;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import com.onewho.gamerbot.data.GuildData;
+import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.GlobalData;
 
 import net.dv8tion.jda.api.entities.Guild;
@@ -71,8 +71,9 @@ public class ReadBackup implements ICommand {
 			return true;
 		}
 		Guild guild = event.getGuild();
-		Backup.createBackup(guild, "pre-readbackup");
-		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
+		Backup.createBackup(guild, "pre-readbackup", event.getChannel());
+		LeagueData gdata = GlobalData.getGuildDataById(guild.getIdLong())
+				.getLeagueByChannel(event.getChannel());
 		try {
 			gdata.readBackup(backup);
 		} catch (IllegalStateException e) {

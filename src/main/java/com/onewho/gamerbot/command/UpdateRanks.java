@@ -2,7 +2,7 @@ package com.onewho.gamerbot.command;
 
 import java.util.List;
 
-import com.onewho.gamerbot.data.GuildData;
+import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.UserData;
 import com.onewho.gamerbot.util.UtilCalendar;
@@ -33,8 +33,9 @@ public class UpdateRanks implements ICommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		Guild guild = event.getGuild();
-		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
-		Backup.createBackup(guild, "pre_updateranks_backup");
+		LeagueData gdata = GlobalData.getGuildDataById(guild.getIdLong())
+				.getLeagueByChannel(event.getChannel());
+		Backup.createBackup(guild, "pre_updateranks_backup", event.getChannel());
 		int num = gdata.processSets();
 		//display
 		if (num == 0) {
@@ -44,7 +45,7 @@ public class UpdateRanks implements ICommand {
 		event.getChannel().sendMessage("Processed "+num+" sets! Ranks and backups are being updated!").queue();
 		TextChannel ranksChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("ranks"));
 		List<UserData> users = gdata.getAllUsers();
-		GuildData.sortByScoreDescend(users);
+		LeagueData.sortByScoreDescend(users);
 		MessageCreateBuilder mcb = new MessageCreateBuilder();
 		mcb.addContent("__**"+UtilCalendar.getCurrentDateString()+" RANKS**__");
 		int r = 0, r2 = 0, prevScore = Integer.MAX_VALUE;

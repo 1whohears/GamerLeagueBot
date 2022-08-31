@@ -5,10 +5,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import com.google.gson.JsonObject;
-import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.GlobalData;
+import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.util.UtilCalendar;
 
+import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -33,12 +34,12 @@ public class Backup implements ICommand {
 
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
-		createBackup(event.getGuild(), "backup");
+		createBackup(event.getGuild(), "backup", event.getChannel());
 		return true;
 	}
 	
-	public static void createBackup(Guild guild, String name) {
-		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
+	public static void createBackup(Guild guild, String name, Channel leagueChannel) {
+		LeagueData gdata = GlobalData.getGuildDataById(guild.getIdLong()).getLeagueByChannel(leagueChannel);
 		JsonObject backup = gdata.getBackupJson();
 		TextChannel historyChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("set-history"));
 		String data = GlobalData.getGson().toJson(backup);
