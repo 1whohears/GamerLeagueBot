@@ -34,7 +34,8 @@ public class BotMain {
 		}
 	}
 	
-	// TODO show set history
-	// TODO generate rankings
+	// TODO read backup file
+	// TODO admin add pair through command
+	// TODO config command
 	
 }
