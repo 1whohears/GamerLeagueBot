@@ -113,7 +113,7 @@ public class Report implements ICommand {
 	
 	private MessageEmbed getVerifyEmbed(SetData set, long opponentId) {
 		EmbedBuilder jleb = new EmbedBuilder();
-		jleb.setTitle("Verify report "+getMention(opponentId)+"?");
+		jleb.setTitle(getMention(opponentId)+" Verify Report?");
 		jleb.setDescription("SET ID ["+set.getId()+"]"
 				+ "\n**"+set.getP1score()+"** "+getMention(set.getP1Id())
 				+ "\n**"+set.getP2score()+"** "+getMention(set.getP2Id()));

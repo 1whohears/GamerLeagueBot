@@ -21,12 +21,17 @@ public class LeagueData {
 	
 	private static List<GuildData> guilds = new ArrayList<GuildData>();
 	
-	public static JsonObject readJsonData() throws IOException {
+	public static Gson getGson() {
 		if (gson == null) {
 			GsonBuilder builder = new GsonBuilder();
 			builder.setPrettyPrinting();
 			gson = builder.create();
 		}
+		return gson;
+	}
+	
+	public static JsonObject readJsonData() throws IOException {
+		getGson();
 		JsonObject json = new JsonObject();
 		if (!Files.exists(Paths.get(dataFileName))) {
 			json.add("guilds", new JsonArray());

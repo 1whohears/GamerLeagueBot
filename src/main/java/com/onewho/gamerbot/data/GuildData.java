@@ -186,6 +186,10 @@ public class GuildData {
 		K = k;
 	}
 	
+	public List<UserData> getAllUsers() {
+		return users;
+	}
+	
 	public void removeOldSets() {
 		for (int i = 0; i < sets.size(); ++i) {
 			if (sets.get(i).isComplete()) continue;

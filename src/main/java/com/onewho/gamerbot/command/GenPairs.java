@@ -59,7 +59,9 @@ public class GenPairs implements ICommand {
 								UtilCalendar.getDate(recentSet.getCreatedDate()), UtilCalendar.getCurrentDate());
 						if (diff <= gdata.getWeeksBeforeSetRepeat()) continue;
 					}
-					gdata.createSet(udata.getId(), activeUsers.get(ksort[i]).getId());
+					long id1 = udata.getId(), id2 = activeUsers.get(ksort[i]).getId();
+					if (id1 == id2) continue;
+					gdata.createSet(id1, id2);
 					createdSet = true;
 					break;
 				}
