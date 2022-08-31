@@ -40,14 +40,13 @@ public class Report implements ICommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		if (params.length != 5) {
-			// TODO make insults random
-			event.getChannel().sendMessage("WRONG! do: ~report [id] [your score] [opponent score] [opponent ping]").queue();
+			event.getChannel().sendMessage(getInsult()+" do: ~report [id] [your score] [opponent score] [opponent ping]").queue();
 			return true;
 		}
 		int id = -1, s1 = -1, s2 = -1;
 		long pingId = -1;
 		if (!checkIfMention(params[4])) {
-			event.getChannel().sendMessage("BRUH! "+params[4]+" is not a mention!").queue();
+			event.getChannel().sendMessage(getInsult()+" "+params[4]+" is not a mention!").queue();
 			return true;
 		}
 		String pingString = params[4].substring(2, params[4].length()-1);
@@ -59,30 +58,30 @@ public class Report implements ICommand {
 		} catch (NumberFormatException e) {
 		}
 		if (id == -1) {
-			event.getChannel().sendMessage("IDIOT! "+params[1]+" is not a number!").queue();
+			event.getChannel().sendMessage(getInsult()+" "+params[1]+" is not a number!").queue();
 			return true;
 		} else if (s1 == -1) {
-			event.getChannel().sendMessage("UHHGGG! "+params[2]+" is not a number!").queue();
+			event.getChannel().sendMessage(getInsult()+" "+params[2]+" is not a number!").queue();
 			return true;
 		} else if (s2 == -1) {
-			event.getChannel().sendMessage("WHY!? "+params[3]+" is not a number!").queue();
+			event.getChannel().sendMessage(getInsult()+" "+params[3]+" is not a number!").queue();
 			return true;
 		} else if (pingId == -1) {
-			event.getChannel().sendMessage("DONKEYKONG? you didn't mention/ping your opponent correctly!").queue();
+			event.getChannel().sendMessage(getInsult()+" you didn't mention/ping your opponent correctly!").queue();
 			return true;
 		}
 		Guild guild = event.getGuild();
 		GuildData gdata = LeagueData.getGuildDataById(guild.getIdLong());
 		SetData set = gdata.getSetDataById(id);
 		if (set == null) {
-			event.getChannel().sendMessage("INCORRECT! The set with id "+id+" does not exist!").queue();
+			event.getChannel().sendMessage(getInsult()+" The set with id "+id+" does not exist!").queue();
 			return true;
 		}
 		String currentData = UtilCalendar.getCurrentDateString();
 		ReportResult result = set.report(event.getAuthor().getIdLong(), pingId, s1, s2, currentData);
 		switch (result) {
 		case IDsDontMatch:
-			event.getChannel().sendMessage("WOW! This set id does not have those players!").queue();
+			event.getChannel().sendMessage(getInsult()+" This set id does not have those players!").queue();
 			break;
 		case ScoreConflict:
 			event.getChannel().sendMessage("This conflicts with the score that your opponent reported! "
@@ -144,6 +143,16 @@ public class Report implements ICommand {
 	
 	private String getMention(long id) {
 		return "<@"+id+">";
+	}
+	
+	private static String[] insults = {"STUPID!", "IDIOT!", "BRUH!", "WRONG!", "UHHGGG!", "INCORRECT!", "WOW!", 
+			"WHY!?", "DONKEYKONG?", "This is why I didn't go to your birthday party.", "ROFL!", 
+			"Your faliures would be so funny if they weren't so sad.", "sign...",
+			"You have less brain cells than a yoshi player.", "wrong wrong wrong...",
+			"Dr Doofenshmirtz is no longer the dumbest person in the tristate area!"};
+	
+	private String getInsult() {
+		return insults[(int)(Math.random()*insults.length)];
 	}
 
 }
