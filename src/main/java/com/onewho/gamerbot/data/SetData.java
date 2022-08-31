@@ -233,7 +233,12 @@ public class SetData {
 		if (messageId == -1) messageId = channel.sendMessage(mcd).complete().getIdLong();
 		else {
 			MessageEditData med = new MessageEditBuilder().applyCreateData(mcd).build();
-			channel.editMessageById(messageId, med).queue();
+			// TODO catch error if message no longer exists
+			//try {
+				channel.editMessageById(messageId, med).queue();
+			/*} catch () {
+				
+			}*/
 		}
 	}
 	

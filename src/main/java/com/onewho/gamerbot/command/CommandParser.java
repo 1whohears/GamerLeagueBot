@@ -44,6 +44,8 @@ public class CommandParser {
 		commands.add(new ReportAdmin());
 		commands.add(new UpdateRanks());
 		commands.add(new Backup());
+		commands.add(new ReadBackup());
+		commands.add(new RefreshSet());
 	}
 	
 }

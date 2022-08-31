@@ -145,12 +145,19 @@ public class Report implements ICommand {
 		return "<@"+id+">";
 	}
 	
-	private static String[] insults = {"STUPID!", "IDIOT!", "BRUH!", "WRONG!", "UHHGGG!", "INCORRECT!", "WOW!", 
-			"WHY!?", "DONKEYKONG?", "This is why I didn't go to your birthday party.", "ROFL!", 
-			"Your faliures would be so funny if they weren't so sad.", "sigh...",
+	private static String[] insults = {"STUPID!", "IDIOT!", "BRUH!", "WRONG!", "UHHGGG!",  
+			"WOW!", "WHY!?", "DONKEYKONG?", "This is why I didn't go to your birthday party.",
+			"Your faliures would be so funny if they weren't so sad.", "sigh...", "SAD!",
 			"You have less brain cells than a yoshi player.", "wrong wrong wrong...",
 			"Dr Doofenshmirtz is no longer the dumbest person in the tristate area!",
-			"CRINGE!", "BAD!", "L", "RATIO", "LOL!", "yikes..."};
+			"CRINGE!", "BAD!", "L", "RATIO", "LOL!", "yikes...", "man", "ROFL!", 
+			"It's nice to know that no one read the docs.", "oof", "INCORRECT!",
+			"I'm going to start a twitter account just to make fun of you.",
+			"no", "Wrong again.", "Are you even trying?", "yeeeaahhh....no",
+			"You would think after billions of years of evolution all Earthlings"
+			+ " would be competent by now. I'll tell my buddies from Proxima Centauri"
+			+ " to delay the invasion at least a thousand earth years so y'all have a chance.",
+			"This is just sad.", "You won't like the side of the IQ bell curve that your on."};
 	
 	public static String getInsult() {
 		return insults[(int)(Math.random()*insults.length)];

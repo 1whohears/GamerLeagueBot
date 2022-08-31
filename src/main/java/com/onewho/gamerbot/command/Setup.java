@@ -105,7 +105,10 @@ public class Setup implements ICommand {
 		if (data.getChannelId(name) == -1) {
 			channel = cat.createTextChannel(name).complete();
 			data.setChannelId(name, channel.getIdLong());
-		} else channel = guild.getTextChannelById(data.getChannelId(name));
+		} else {
+			// TODO catch error if channel no longer exists
+			channel = guild.getTextChannelById(data.getChannelId(name));
+		}
 		channel.getManager().sync(cat.getPermissionContainer()).complete();
 		return channel;
 	}

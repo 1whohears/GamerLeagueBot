@@ -75,6 +75,15 @@ public class GuildData {
 		return data;
 	}
 	
+	public void readBackup(JsonObject backup) {
+		users.clear();
+		JsonArray us = ParseData.getJsonArray(backup, "users");
+		for (int i = 0; i < us.size(); ++i) users.add(new UserData(us.get(i).getAsJsonObject()));
+		sets.clear();
+		JsonArray ss = ParseData.getJsonArray(backup, "sets");
+		for (int i = 0; i < ss.size(); ++i) sets.add(new SetData(ss.get(i).getAsJsonObject()));
+	}
+	
 	private JsonArray getUsersJson() {
 		JsonArray us = new JsonArray();
 		for (UserData u : users) us.add(u.getJson());
@@ -176,6 +185,14 @@ public class GuildData {
 
 	public void setWeeksBeforeSetRepeat(int weeksBeforeSetRepeat) {
 		this.weeksBeforeSetRepeat = weeksBeforeSetRepeat;
+	}
+	
+	public int getWeeksBeforeSetExpires() {
+		return weeksBeforeSetExpires;
+	}
+	
+	public void setWeeksBeforeSetExpires(int weeks) {
+		this.weeksBeforeSetExpires = weeks;
 	}
 	
 	public double getK() {
