@@ -3,6 +3,7 @@ package com.onewho.gamerbot.data;
 import com.google.gson.JsonObject;
 
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
@@ -233,17 +234,25 @@ public class SetData {
 		if (messageId == -1) messageId = channel.sendMessage(mcd).complete().getIdLong();
 		else {
 			MessageEditData med = new MessageEditBuilder().applyCreateData(mcd).build();
-			// TODO catch error if message no longer exists
-			//try {
+			try {
 				channel.editMessageById(messageId, med).queue();
-			/*} catch () {
-				
-			}*/
+			} catch (ErrorResponseException e) {
+				switch (e.getErrorResponse()) {
+				case UNKNOWN_MESSAGE:
+					messageId = channel.sendMessage(mcd).complete().getIdLong();
+					return;
+				default:
+					return;
+				}
+			}
 		}
 	}
 	
 	public void removeSetDisplay(TextChannel channel) {
-		channel.deleteMessageById(messageId).queue();
+		try {
+			channel.deleteMessageById(messageId).queue();
+		} catch (ErrorResponseException e) {
+		}
 		messageId = -1;
 	}
 	

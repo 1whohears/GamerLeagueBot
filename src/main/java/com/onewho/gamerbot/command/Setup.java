@@ -51,7 +51,13 @@ public class Setup implements ICommand {
 		if (guildData.getLeagueRoleId() == -1) {
 			gamerRole = guild.createRole().complete();
 			guildData.setLeagueRoleId(gamerRole.getIdLong());
-		} else gamerRole = guild.getRoleById(guildData.getLeagueRoleId());
+		} else {
+			gamerRole = guild.getRoleById(guildData.getLeagueRoleId());
+			if (gamerRole == null) {
+				gamerRole = guild.createRole().complete();
+				guildData.setLeagueRoleId(gamerRole.getIdLong());
+			}
+		}
 		gamerRole.getManager()
 			.setName("GAMERS")
 			.setColor(Color.CYAN)
@@ -61,7 +67,13 @@ public class Setup implements ICommand {
 		if (guildData.getLeagueCategoryId() == -1) {
 			gamerCat = guild.createCategory("Gamer League").complete();
 			guildData.setLeagueCategoryId(gamerCat.getIdLong());
-		} else gamerCat = guild.getCategoryById(guildData.getLeagueCategoryId());
+		} else {
+			gamerCat = guild.getCategoryById(guildData.getLeagueCategoryId());
+			if (gamerCat == null) {
+				gamerCat = guild.createCategory("Gamer League").complete();
+				guildData.setLeagueCategoryId(gamerCat.getIdLong());
+			}
+		}
 		Collection<Permission> perm1 = new ArrayList<Permission>();
 		Collection<Permission> perm2 = new ArrayList<Permission>();
 		perm1.add(Permission.MESSAGE_HISTORY);
@@ -106,8 +118,11 @@ public class Setup implements ICommand {
 			channel = cat.createTextChannel(name).complete();
 			data.setChannelId(name, channel.getIdLong());
 		} else {
-			// TODO catch error if channel no longer exists
 			channel = guild.getTextChannelById(data.getChannelId(name));
+			if (channel == null) {
+				channel = cat.createTextChannel(name).complete();
+				data.setChannelId(name, channel.getIdLong());
+			}
 		}
 		channel.getManager().sync(cat.getPermissionContainer()).complete();
 		return channel;
