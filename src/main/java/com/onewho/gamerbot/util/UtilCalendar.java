@@ -31,7 +31,7 @@ public class UtilCalendar {
 	}
 	
 	public static String getCurrentDateTimeString() {
-		return new SimpleDateFormat("hh-mm dd-MM-yyyy").format(new Date());
+		return new SimpleDateFormat("yyyy-MM-dd HH-mm-ssZ").format(new Date());
 	}
 	
 	public static int getWeek(int day, int month, int year) {
