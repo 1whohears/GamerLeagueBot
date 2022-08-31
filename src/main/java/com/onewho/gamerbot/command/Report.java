@@ -147,9 +147,10 @@ public class Report implements ICommand {
 	
 	private static String[] insults = {"STUPID!", "IDIOT!", "BRUH!", "WRONG!", "UHHGGG!", "INCORRECT!", "WOW!", 
 			"WHY!?", "DONKEYKONG?", "This is why I didn't go to your birthday party.", "ROFL!", 
-			"Your faliures would be so funny if they weren't so sad.", "sign...",
+			"Your faliures would be so funny if they weren't so sad.", "sigh...",
 			"You have less brain cells than a yoshi player.", "wrong wrong wrong...",
-			"Dr Doofenshmirtz is no longer the dumbest person in the tristate area!"};
+			"Dr Doofenshmirtz is no longer the dumbest person in the tristate area!",
+			"CRINGE!", "BAD!", "L", "RATIO"};
 	
 	private String getInsult() {
 		return insults[(int)(Math.random()*insults.length)];
