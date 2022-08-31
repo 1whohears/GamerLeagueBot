@@ -150,9 +150,9 @@ public class Report implements ICommand {
 			"Your faliures would be so funny if they weren't so sad.", "sigh...",
 			"You have less brain cells than a yoshi player.", "wrong wrong wrong...",
 			"Dr Doofenshmirtz is no longer the dumbest person in the tristate area!",
-			"CRINGE!", "BAD!", "L", "RATIO"};
+			"CRINGE!", "BAD!", "L", "RATIO", "LOL!", "yikes..."};
 	
-	private String getInsult() {
+	public static String getInsult() {
 		return insults[(int)(Math.random()*insults.length)];
 	}
 
