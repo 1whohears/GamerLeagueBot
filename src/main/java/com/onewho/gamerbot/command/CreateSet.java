@@ -50,12 +50,12 @@ public class CreateSet implements ICommand {
 				.getLeagueByChannel(event.getChannel());
 		if (gdata.getUserDataById(id1) == null) {
 			event.getChannel().sendMessage(Report.getInsult()
-					+" The first user/mention is not in this server!").queue();
+					+" The first user/mention is not in this league!").queue();
 			return true;
 		}
 		if (gdata.getUserDataById(id2) == null) {
 			event.getChannel().sendMessage(Report.getInsult()
-					+" The second user/mention is not in this server!").queue();
+					+" The second user/mention is not in this league!").queue();
 			return true;
 		}
 		SetData set = gdata.createSet(id1, id2);
