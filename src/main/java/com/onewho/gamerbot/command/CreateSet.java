@@ -1,7 +1,8 @@
 package com.onewho.gamerbot.command;
 
-import com.onewho.gamerbot.data.LeagueData;
+import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
+import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.SetData;
 
 import net.dv8tion.jda.api.entities.Guild;
@@ -27,9 +28,9 @@ public class CreateSet implements ICommand {
 
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
-		if (params.length != 5) {
+		if (params.length != 3) {
 			event.getChannel().sendMessage(Report.getInsult()
-					+" do: `~createset [p1 ping] [p2 ping]`").queue();
+					+" do: `"+BotMain.PREFIX+"createset [p1 ping] [p2 ping]`").queue();
 			return true;
 		}
 		long id1 = getIdFromMention(params[1]);

@@ -16,7 +16,7 @@ public class BotMain {
 	
 	public static JDA jda;
 	
-	public static char PREFIX = '~';
+	public static char PREFIX = '$';
 	
 	public static void main(String [] arg) {
 		try {

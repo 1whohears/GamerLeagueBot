@@ -5,8 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import com.onewho.gamerbot.data.LeagueData;
+import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
+import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.ReportResult;
 import com.onewho.gamerbot.data.SetData;
 import com.onewho.gamerbot.util.UtilCalendar;
@@ -41,7 +42,7 @@ public class Report implements ICommand {
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		if (params.length != 5) {
 			event.getChannel().sendMessage(getInsult()
-					+" do: `~report [set id] [your score] [opponent score] [opponent ping]`").queue();
+					+" do: `"+BotMain.PREFIX+"report [set id] [your score] [opponent score] [opponent ping]`").queue();
 			return true;
 		}
 		int id = -1, s1 = -1, s2 = -1;
@@ -151,12 +152,16 @@ public class Report implements ICommand {
 			"Dr Doofenshmirtz is no longer the dumbest person in the tristate area!",
 			"CRINGE!", "BAD!", "L", "RATIO", "LOL!", "yikes...", "man", "ROFL!", 
 			"It's nice to know that no one read the docs.", "oof", "INCORRECT!",
-			"I'm going to start a twitter account just to make fun of you.",
-			"no", "Wrong again.", "Are you even trying?", "yeeeaahhh....no",
+			"I'm going to start a twitter account just to make fun of you.", "get good",
+			"no", "Wrong again.", "Are you even trying?", "yeeeaahhh....no", "ur bad!",
 			"You would think after billions of years of evolution all Earthlings"
 			+ " would be competent by now. I'll tell my buddies from Proxima Centauri"
 			+ " to delay the invasion at least a thousand earth years so y'all have a chance.",
-			"This is just sad.", "You won't like the side of the IQ bell curve that your on."};
+			"This is just sad.", "You won't like the side of the IQ bell curve that your on.",
+			"When the gurus tell you to clear your mind they don't mean remove your brain"
+			+ " from your skull you idiot.", "I would feel bad for you..but I can't because"
+			+ " I am hundreds of lines of code.", "Why are people so afraid of AI taking over?"
+			+ " Y'all are going to destroy yourselves from incompetence.", "Go see a doctor."};
 	
 	public static String getInsult() {
 		return insults[(int)(Math.random()*insults.length)];

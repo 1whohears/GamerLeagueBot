@@ -1,7 +1,8 @@
 package com.onewho.gamerbot.command;
 
-import com.onewho.gamerbot.data.LeagueData;
+import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
+import com.onewho.gamerbot.data.LeagueData;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -27,7 +28,7 @@ public class Config implements ICommand {
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		if (params.length != 3) {
 			event.getChannel().sendMessage(Report.getInsult()
-					+" do: `~config [setting] [value]`").queue();
+					+" do: `"+BotMain.PREFIX+"config [setting] [value]`").queue();
 			return true;
 		}
 		Guild guild = event.getGuild();
@@ -98,7 +99,7 @@ public class Config implements ICommand {
 			return true;
 		}
 		event.getChannel().sendMessage(Report.getInsult()
-				+" setting "+params[1]+" doesn't exist. Try `~help`!").queue();
+				+" setting "+params[1]+" doesn't exist. Try `"+BotMain.PREFIX+"help`!").queue();
 		return true;
 	}
 	

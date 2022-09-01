@@ -216,7 +216,7 @@ public class LeagueData {
 	
 	public boolean hasChannel(Channel channel) {
 		if (channelIds.get(channel.getName()) == null) return false;
-		return channelIds.get(name).getAsLong() == channel.getIdLong();
+		return channelIds.get(channel.getName()).getAsLong() == channel.getIdLong();
 	}
 	
 	public int getDefaultScore() {

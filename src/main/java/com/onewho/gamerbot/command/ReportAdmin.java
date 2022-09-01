@@ -1,7 +1,8 @@
 package com.onewho.gamerbot.command;
 
-import com.onewho.gamerbot.data.LeagueData;
+import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
+import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.ReportResult;
 import com.onewho.gamerbot.data.SetData;
 import com.onewho.gamerbot.util.UtilCalendar;
@@ -31,7 +32,7 @@ public class ReportAdmin implements ICommand {
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		if (params.length != 6) {
 			event.getChannel().sendMessage(Report.getInsult()
-					+" do: `~reportadmin [set id] [p1 ping] [p1 score] [p2 ping] [p2 score]`").queue();
+					+" do: `"+BotMain.PREFIX+"reportadmin [set id] [p1 ping] [p1 score] [p2 ping] [p2 score]`").queue();
 			return true;
 		}
 		int id = -1, s1 = -1, s2 = -1;

@@ -42,13 +42,14 @@ public class ReadBackup implements ICommand {
 			event.getChannel().sendMessage("There were no files attached to your command.").queue();
 			return true;
 		}
-		String url = att.get(0).getProxyUrl();
+		String url = att.get(0).getUrl();
+		System.out.println(url);
 		FileProxy fp = new FileProxy(url);
 		InputStream stream = null;
 		try {
 			stream = fp.download().get();
 		} catch (InterruptedException e) {
-			event.getChannel().sendMessage("There was an error while downloading this file."
+			event.getChannel().sendMessage("There was an interrupt error while downloading this file."
 					+ "\n"+e.getMessage()).queue();
 		} catch (ExecutionException e) {
 			event.getChannel().sendMessage("There was an error while downloading this file."

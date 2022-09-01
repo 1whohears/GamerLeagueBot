@@ -1,5 +1,6 @@
 package com.onewho.gamerbot.command;
 
+import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.GuildData;
 
@@ -27,7 +28,7 @@ public class CreateLeague implements ICommand {
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		if (params.length != 2) {
 			event.getChannel().sendMessage(Report.getInsult()
-					+" do: `~createleague [league name]`").queue();
+					+" do: `"+BotMain.PREFIX+"createleague [league name]`").queue();
 			return true;
 		}
 		Guild guild = event.getGuild();

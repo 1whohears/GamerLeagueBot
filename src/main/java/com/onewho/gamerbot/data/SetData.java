@@ -3,6 +3,7 @@ package com.onewho.gamerbot.data;
 import com.google.gson.JsonObject;
 
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.exceptions.ContextException;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
@@ -235,7 +236,7 @@ public class SetData {
 		else {
 			MessageEditData med = new MessageEditBuilder().applyCreateData(mcd).build();
 			try {
-				channel.editMessageById(messageId, med).queue();
+				channel.editMessageById(messageId, med).complete();
 			} catch (ErrorResponseException e) {
 				switch (e.getErrorResponse()) {
 				case UNKNOWN_MESSAGE:
@@ -244,7 +245,7 @@ public class SetData {
 				default:
 					return;
 				}
-			}
+			} 
 		}
 	}
 	
