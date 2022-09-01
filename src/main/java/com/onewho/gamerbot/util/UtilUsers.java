@@ -18,6 +18,7 @@ public class UtilUsers {
 		LeagueData data = GlobalData.getGuildDataById(guild.getIdLong()).getLeagueByChannel(channel);
 		if (data == null) return false;
 		UserData userData = data.getUserDataById(user.getIdLong());
+		if (userData == null) userData = data.createUser(user.getIdLong());
 		//join role
 		guild.addRoleToMember(user, guild.getRoleById(data.getLeagueRoleId())).queue();
 		//update league data
@@ -32,6 +33,7 @@ public class UtilUsers {
 		LeagueData data = GlobalData.getGuildDataById(guild.getIdLong()).getLeagueByChannel(channel);
 		if (data == null) return false;
 		UserData userData = data.getUserDataById(user.getIdLong());
+		if (userData == null) return false;
 		//leave role
 		guild.removeRoleFromMember(user, guild.getRoleById(data.getLeagueRoleId())).queue();
 		//update league data
@@ -45,6 +47,7 @@ public class UtilUsers {
 		LeagueData data = GlobalData.getGuildDataById(guild.getIdLong()).getLeagueByChannel(channel);
 		if (data == null) return false;
 		UserData userData = data.getUserDataById(user.getIdLong());
+		if (userData == null) userData = data.createUser(user.getIdLong());
 		//update league data
 		if (!userData.getActive()) return false;
 		userData.setSetsPerWeek(sets);

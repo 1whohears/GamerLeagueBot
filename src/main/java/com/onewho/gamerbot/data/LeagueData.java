@@ -99,10 +99,7 @@ public class LeagueData {
 		for (int i = 0; i < us.size(); ++i) {
 			long id = us.get(i).getAsJsonObject().get("id").getAsLong();
 			UserData user = getUserDataById(id);
-			if (user == null) {
-				user = new UserData(id);
-				users.add(user);
-			}
+			if (user == null) createUser(id);
 			user.readBackup(us.get(i).getAsJsonObject());
 		}
 		sets.clear();
@@ -153,6 +150,10 @@ public class LeagueData {
 	
 	public UserData getUserDataById(long id) {
 		for (int i = 0; i < users.size(); ++i) if (users.get(i).getId() == id) return users.get(i);
+		return null;
+	}
+	
+	public UserData createUser(long id) {
 		UserData data = new UserData(id);
 		data.setScore(defaultScore);
 		users.add(data);
@@ -327,6 +328,8 @@ public class LeagueData {
 	
 	public SetData createSet(long id1, long id2) {
 		if (id1 == id2) return null;
+		if (getUserDataById(id1) == null) return null;
+		if (getUserDataById(id2) == null) return null;
 		SetData set = new SetData(getNewSetId(), id1, id2, UtilCalendar.getCurrentDateString());
 		sets.add(set);
 		return set;

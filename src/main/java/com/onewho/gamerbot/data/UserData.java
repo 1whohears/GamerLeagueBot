@@ -74,6 +74,7 @@ public class UserData {
 
 	public void setLastActive(String lastActive) {
 		this.lastActive = lastActive;
+		this.active = true;
 	}
 	
 	@Override
