@@ -47,6 +47,7 @@ public class CommandParser {
 		commands.add(new ReadBackup());
 		commands.add(new RefreshSet());
 		commands.add(new CreateSet());
+		commands.add(new CreateLeague());
 	}
 	
 }

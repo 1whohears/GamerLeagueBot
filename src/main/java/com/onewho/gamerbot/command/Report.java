@@ -126,14 +126,11 @@ public class Report implements ICommand {
 		return jleb.build();
 	}
 	
-	/**
-	 * https://stackoverflow.com/questions/4246351/creating-random-colour-in-java
-	 */
 	private Color getRandomColor() {
 		Random random = new Random();
-		final float hue = random.nextFloat();
-		final float saturation = 0.9f;
-		final float luminance = 1.0f;
+		float hue = random.nextFloat();
+		float saturation = 0.9f;
+		float luminance = 1.0f;
 		return Color.getHSBColor(hue, saturation, luminance);
 	}
 	

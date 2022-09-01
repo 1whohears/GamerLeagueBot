@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -20,6 +21,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
@@ -95,8 +97,12 @@ public class LeagueData {
 	public void readBackup(JsonObject backup) throws IllegalStateException, ClassCastException {
 		JsonArray us = ParseData.getJsonArray(backup, "users");
 		for (int i = 0; i < us.size(); ++i) {
-			UserData user = getUserDataById(us.get(i).getAsJsonObject().get("id").getAsLong());
-			if (user == null) continue;
+			long id = us.get(i).getAsJsonObject().get("id").getAsLong();
+			UserData user = getUserDataById(id);
+			if (user == null) {
+				user = new UserData(id);
+				users.add(user);
+			}
 			user.readBackup(us.get(i).getAsJsonObject());
 		}
 		sets.clear();
@@ -368,7 +374,7 @@ public class LeagueData {
 		return num;
 	}
 	
-	public void setupDiscordStuff(Guild guild, TextChannel debugChannel) {
+	public void setupDiscordStuff(Guild guild, MessageChannelUnion debugChannel) {
 		//setup roles
 		Role gamerRole = null;
 		if (getLeagueRoleId() == -1) {
@@ -383,17 +389,17 @@ public class LeagueData {
 		}
 		gamerRole.getManager()
 			.setName("GAMERS")
-			.setColor(Color.CYAN)
+			.setColor(getRandomColor())
 			.queue();
 		//setup category
 		Category gamerCat = null;
 		if (getLeagueCategoryId() == -1) {
-			gamerCat = guild.createCategory("Gamer League").complete();
+			gamerCat = guild.createCategory(name).complete();
 			setLeagueCategoryId(gamerCat.getIdLong());
 		} else {
 			gamerCat = guild.getCategoryById(getLeagueCategoryId());
 			if (gamerCat == null) {
-				gamerCat = guild.createCategory("Gamer League").complete();
+				gamerCat = guild.createCategory(name).complete();
 				setLeagueCategoryId(gamerCat.getIdLong());
 			}
 		}
@@ -432,6 +438,14 @@ public class LeagueData {
 		GlobalData.saveData();
 		System.out.println("setup command complete");
 		debugChannel.sendMessage("Bot Channel Setup Complete!").queue();		
+	}
+	
+	private Color getRandomColor() {
+		Random random = new Random();
+		float hue = random.nextFloat();
+		float saturation = 0.9f;
+		float luminance = 1.0f;
+		return Color.getHSBColor(hue, saturation, luminance);
 	}
 	
 	private TextChannel setupChannel(String name, Category cat, Guild guild) {

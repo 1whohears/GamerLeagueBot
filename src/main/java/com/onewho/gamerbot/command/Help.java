@@ -35,7 +35,8 @@ public class Help implements ICommand {
 			).queue();
 		if (!isAdmin) return true;
 		event.getChannel().sendMessage("__**Admin Users Commands**__"
-				+ "\n`~setup` Sets up channels/roles for this server's league. "
+				+ "\n`~createleague [league name]` "
+				+ "\n`~setup` Sets up channels/roles for this server's leagues. "
 					+ " Run this command if you accidentally delete a channel."
 				+ "\n`~config [setting] [value]`"
 					+ " Settings: max-sets-per-week, weeks-before-auto-inactive, weeks-before-set-expires,"

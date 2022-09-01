@@ -8,7 +8,7 @@ import com.google.gson.JsonObject;
 
 import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 public class GuildData {
 	
@@ -52,7 +52,7 @@ public class GuildData {
 		return null;
 	}
 	
-	public LeagueData createLeague(Guild guild, TextChannel debugChannel, String name) {
+	public LeagueData createLeague(Guild guild, MessageChannelUnion debugChannel, String name) {
 		LeagueData league = new LeagueData(name);
 		leagues.add(league);
 		league.setupDiscordStuff(guild, debugChannel);
@@ -60,7 +60,11 @@ public class GuildData {
 	}
 	
 	public void archiveLeague() {
-		
+		// TODO archive league command
+	}
+	
+	public void setupLeagues(Guild guild, MessageChannelUnion debugChannel) {
+		for (LeagueData l : leagues) l.setupDiscordStuff(guild, debugChannel);
 	}
 	
 }
