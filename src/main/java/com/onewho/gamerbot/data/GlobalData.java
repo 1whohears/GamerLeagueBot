@@ -30,6 +30,11 @@ public class GlobalData {
 		return gson;
 	}
 	
+	/**
+	 * Read all data saved on disk
+	 * @return JsonObject with the data for all servers/guilds using this bot
+	 * @throws IOException
+	 */
 	public static JsonObject readJsonData() throws IOException {
 		getGson();
 		JsonObject json = new JsonObject();
@@ -47,6 +52,9 @@ public class GlobalData {
 		return json;
 	}
 	
+	/**
+	 * writes data for all servers/guilds to disk
+	 */
 	public static void saveData() {
 		JsonObject json = new JsonObject();
 		JsonArray gs = new JsonArray();
@@ -63,6 +71,10 @@ public class GlobalData {
 		}
 	}
 	
+	/**
+	 * @param id guild id
+	 * @return the league data for this guild
+	 */
 	public static GuildData getGuildDataById(long id) {
 		for (int i = 0; i < guilds.size(); ++i) if (guilds.get(i).getId() == id) return guilds.get(i);
 		GuildData data = new GuildData(id);

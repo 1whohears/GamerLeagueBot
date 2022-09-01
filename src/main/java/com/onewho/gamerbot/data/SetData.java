@@ -23,7 +23,7 @@ public class SetData {
 	private long messageId = -1;
 	private boolean processed = false;
 	
-	public SetData(JsonObject data) {
+	protected SetData(JsonObject data) {
 		id = ParseData.getInt(data, "id", id);
 		p1Id = ParseData.getLong(data, "p1Id", p1Id);
 		p2Id = ParseData.getLong(data, "p2Id", p2Id);
@@ -37,7 +37,7 @@ public class SetData {
 		processed = ParseData.getBoolean(data, "processed", processed);
 	}
 	
-	public SetData(int id, long p1Id, long p2Id, String created) {
+	protected SetData(int id, long p1Id, long p2Id, String created) {
 		this.id = id;
 		this.p1Id = p1Id;
 		this.p2Id = p2Id;
@@ -60,22 +60,31 @@ public class SetData {
 		return data;
 	}
 	
+	/**
+	 * @return this set's id
+	 */
 	public int getId() {
 		return id;
 	}
 	
+	/**
+	 * @return player 1 user id
+	 */
 	public long getP1Id() {
 		return p1Id;
 	}
 	
+	/**
+	 * @return player 2 user id
+	 */
 	public long getP2Id() {
 		return p2Id;
 	}
-
+	
 	public int getP1score() {
 		return p1s;
 	}
-
+	
 	public void setP1score(int p1s) {
 		this.p1s = p1s;
 	}
@@ -87,47 +96,54 @@ public class SetData {
 	public void setP2score(int p2s) {
 		this.p2s = p2s;
 	}
-
+	
+	/**
+	 * @return did player 1 confirm these results
+	 */
 	public boolean isP1confirm() {
 		return p1c;
 	}
-
-	public void setP1confirm(boolean p1c) {
-		this.p1c = p1c;
-	}
-
+	
+	/**
+	 * @return did player 2 confirm these results
+	 */
 	public boolean isP2confirm() {
 		return p2c;
 	}
-
-	public void setP2confirm(boolean p2c) {
-		this.p2c = p2c;
-	}
-
+	
+	/**
+	 * the date this set was created
+	 * @return dd-mm-yyyy format
+	 */
 	public String getCreatedDate() {
 		return created;
 	}
-
-	public void setCreatedData(String created) {
-		this.created = created;
-	}
-
+	
+	/**
+	 * the date this set was completed
+	 * @return dd-mm-yyyy format
+	 */
 	public String getCompletedDate() {
 		return completed;
 	}
-
-	public void setCompletedDate(String completed) {
-		this.completed = completed;
-	}
 	
+	/**
+	 * @return did both players confirm these results
+	 */
 	public boolean isComplete() {
 		return p1c && p2c;
 	}
 	
+	/**
+	 * @return did only one player confirm these results
+	 */
 	public boolean isUnconfirmed() {
 		return (p1c && !p2c) || (!p1c && p2c);
 	}
 	
+	/**
+	 * @return was this set processed and players scores updated
+	 */
 	public boolean isProcessed() {
 		return processed;
 	}
@@ -144,6 +160,15 @@ public class SetData {
 		return isComplete() && p1s == p2s;
 	}
 	
+	/**
+	 * report the results of this set
+	 * @param reporterId user id
+	 * @param opponentId user id
+	 * @param reporterScore
+	 * @param opponentScore
+	 * @param date dd-mm-yyyy format
+	 * @return result enum
+	 */
 	public ReportResult report(long reporterId, long opponentId, int reporterScore, int opponentScore, String date) {
 		if (isComplete()) return ReportResult.AlreadyVerified;
 		System.out.println("reporter id = "+reporterId);
@@ -177,6 +202,15 @@ public class SetData {
 		} else return ReportResult.IDsDontMatch;
 	}
 	
+	/**
+	 * override a normal players report
+	 * @param id1
+	 * @param id2
+	 * @param score1
+	 * @param score2
+	 * @param date dd-mm-yyyy format
+	 * @return result enum
+	 */
 	public ReportResult reportAdmin(long id1, long id2, int score1, int score2, String date) {
 		if (isProcessed()) return ReportResult.AlreadyVerified;
 		if (id1 == p1Id && id2 == p2Id) {
@@ -199,10 +233,18 @@ public class SetData {
 		return id+"/"+p1Id+":"+p1s+"/"+p2Id+":"+p2s+"/"+created+"/"+completed;
 	}
 	
+	/**
+	 * @param id
+	 * @return is this user id the same as p1Id or p2Id
+	 */
 	public boolean hasPlayer(long id) {
 		return id == p1Id || id == p2Id; 
 	}
 	
+	/**
+	 * a string representation of the status of this set
+	 * @return "P1 WIN", "P2 WIN", "DRAW", "UNCONFIRMED", or "ASSIGNED"
+	 */
 	public String getStatus() {
 		if (this.isP1Win()) return "P1 WIN";
 		if (this.isP2Win()) return "P2 WIN";
@@ -211,6 +253,10 @@ public class SetData {
 		return "ASSIGNED";
 	}
 	
+	/**
+	 * display this set in discord
+	 * @param channel the channel this set should be displayed in
+	 */
 	public void displaySet(TextChannel channel) {
 		String p1Name = "", p2Name = "", date = "";
 		if (this.isComplete()) {
@@ -248,6 +294,10 @@ public class SetData {
 		}
 	}
 	
+	/**
+	 * remove this set from being displayed in discord
+	 * @param channel the channel this set should be removed from
+	 */
 	public void removeSetDisplay(TextChannel channel) {
 		try {
 			channel.deleteMessageById(messageId).queue();
@@ -256,11 +306,15 @@ public class SetData {
 		messageId = -1;
 	}
 	
-	public void processSet(LeagueData guild) {
+	/**
+	 * if this set is complete and not processed yet, update the scores of the users in this set
+	 * @param league the league data this set was played in
+	 */
+	public void processSet(LeagueData league) {
 		if (!isComplete() || processed) return;
-		UserData p1 = guild.getUserDataById(p1Id);
-		UserData p2 = guild.getUserDataById(p2Id);
-		int change = (int)getChangeInScore(p1s, p2s, p1.getScore(), p2.getScore(), guild.getK());
+		UserData p1 = league.getUserDataById(p1Id);
+		UserData p2 = league.getUserDataById(p2Id);
+		int change = (int)getChangeInScore(p1s, p2s, p1.getScore(), p2.getScore(), league.getK());
 		p1.setScore(p1.getScore() + change);
 		p2.setScore(p2.getScore() - change);
 		processed = true;

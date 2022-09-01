@@ -16,17 +16,28 @@ public class GuildData {
 	
 	List<LeagueData> leagues = new ArrayList<LeagueData>();
 	
-	public GuildData(JsonObject data) {
+	/**
+	 * construct this GuildData instance using data from disk
+	 * @param data
+	 */
+	protected GuildData(JsonObject data) {
 		id = ParseData.getLong(data, "id", id);
 		leagues.clear();
 		JsonArray ls = ParseData.getJsonArray(data, "leagues");
 		for (int i = 0; i < ls.size(); ++i) leagues.add(new LeagueData(ls.get(i).getAsJsonObject()));
 	}
 	
-	public GuildData(long id) {
+	/**
+	 * construct data for a new guild
+	 * @param id guild id
+	 */
+	protected GuildData(long id) {
 		this.id = id;
 	}
 	
+	/**
+	 * @return this guild's league data to be written to disk
+	 */
 	public JsonObject getJson() {
 		JsonObject data = new JsonObject();
 		data.addProperty("id", id);
@@ -40,6 +51,9 @@ public class GuildData {
 		return json;
 	}
 	
+	/**
+	 * @return this guild's id
+	 */
 	public long getId() {
 		return id;
 	}
@@ -52,6 +66,13 @@ public class GuildData {
 		return null;
 	}
 	
+	/**
+	 * create a new league for this guild
+	 * @param guild
+	 * @param debugChannel channel debug messages to be sent to
+	 * @param name name of the new league
+	 * @return new league data object
+	 */
 	public LeagueData createLeague(Guild guild, MessageChannelUnion debugChannel, String name) {
 		LeagueData league = new LeagueData(name);
 		leagues.add(league);
@@ -59,10 +80,18 @@ public class GuildData {
 		return league;
 	}
 	
+	/**
+	 * not working yet
+	 */
 	public void archiveLeague() {
 		// TODO archive league command
 	}
 	
+	/**
+	 * setup the channels for all the leagues in this guild
+	 * @param guild
+	 * @param debugChannel
+	 */
 	public void setupLeagues(Guild guild, MessageChannelUnion debugChannel) {
 		for (LeagueData l : leagues) l.setupDiscordStuff(guild, debugChannel);
 	}

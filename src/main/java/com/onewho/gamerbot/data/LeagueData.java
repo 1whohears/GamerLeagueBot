@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
+import javax.annotation.Nullable;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.onewho.gamerbot.util.UtilCalendar;
@@ -48,7 +50,10 @@ public class LeagueData {
 	private long setsaweekOptionId = -1;
 	private JsonObject channelIds = new JsonObject();
 	
-	public LeagueData(JsonObject data) {
+	/**
+	 * @param data league data written from disk
+	 */
+	protected LeagueData(JsonObject data) {
 		name = ParseData.getString(data, name, name);
 		
 		maxSetsPerWeek = ParseData.getInt(data, "max sets a week", maxSetsPerWeek);
@@ -72,10 +77,17 @@ public class LeagueData {
 		channelIds = ParseData.getJsonObject(data, "channel ids");
 	}
 	
-	public LeagueData(String name) {
+	/**
+	 * construct a new league data object
+	 * @param name name of this new league
+	 */
+	protected LeagueData(String name) {
 		this.name = name;
 	}
 	
+	/**
+	 * @return league data to be written to disk
+	 */
 	public JsonObject getJson() {
 		JsonObject data = new JsonObject();
 		data.addProperty("max sets a week", maxSetsPerWeek);
@@ -94,6 +106,12 @@ public class LeagueData {
 		return data;
 	}
 	
+	/**
+	 * change user and set data to the contents of this backup data
+	 * @param backup
+	 * @throws IllegalStateException
+	 * @throws ClassCastException
+	 */
 	public void readBackup(JsonObject backup) throws IllegalStateException, ClassCastException {
 		JsonArray us = ParseData.getJsonArray(backup, "users");
 		for (int i = 0; i < us.size(); ++i) {
@@ -119,6 +137,9 @@ public class LeagueData {
 		return ss;
 	}
 	
+	/**
+	 * @return data needed to recover the current set and user data
+	 */
 	public JsonObject getBackupJson() {
 		JsonObject backup = new JsonObject();
 		backup.add("users", getUsersBackupJson());
@@ -132,27 +153,49 @@ public class LeagueData {
 		return us;
 	}
 	
+	/**
+	 * @return the name of this league
+	 */
 	public String getName() {
 		return name;
 	}
 	
+	/**
+	 * @param name change the name of this league
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 	
+	/**
+	 * @return the max number of sets a user will be automatically assigned every week
+	 */
 	public int getMaxSetsPerWeek() {
 		return maxSetsPerWeek;
 	}
 	
+	/**
+	 * @param max change the max number of sets a user can be assigned every week
+	 */
 	public void setMaxSetsPerWeek(int max) {
+		if (max < 0) max = 0;
 		maxSetsPerWeek = max;
 	}
 	
+	/**
+	 * @param id User Id
+	 * @return a user's league data or null if that user isn't in this league
+	 */
 	public UserData getUserDataById(long id) {
 		for (int i = 0; i < users.size(); ++i) if (users.get(i).getId() == id) return users.get(i);
 		return null;
 	}
 	
+	/**
+	 * add a user to this league by their id
+	 * @param id
+	 * @return the new user data
+	 */
 	public UserData createUser(long id) {
 		UserData data = new UserData(id);
 		data.setScore(defaultScore);
@@ -160,102 +203,185 @@ public class LeagueData {
 		return data;
 	}
 	
+	/**
+	 * @param id
+	 * @return get set data by id or null if that set doesn't exist
+	 */
+	@Nullable
 	public SetData getSetDataById(int id) {
 		for (int i = 0; i < sets.size(); ++i) if (sets.get(i).getId() == id) return sets.get(i);
 		return null;
 	}
 	
+	/**
+	 * @return weeks of not completing sets before a user is automatically set to inactive
+	 */
 	public int getWeeksBeforeAutoInactive() {
 		return weeksBeforeAutoInactive;
 	}
 	
+	/**
+	 * weeks of not completing sets before a user is automatically set to inactive
+	 * @param weeks set to -1 to disable this feature
+	 */
 	public void setWeeksBeforeAutoInactive(int weeks) {
 		if (weeks < -1) weeks = -1;
 		weeksBeforeAutoInactive = weeks;
 	}
-
+	
+	/**
+	 * @return the id of the role given to players in this league
+	 */
 	public long getLeagueRoleId() {
 		return leagueRoleId;
 	}
-
+	
+	/**
+	 * @param leagueRoleId the id of the role given to players in this league
+	 */
 	public void setLeagueRoleId(long leagueRoleId) {
 		this.leagueRoleId = leagueRoleId;
 	}
-
+	
+	/**
+	 * @return the id of the category this leagues channels are under
+	 */
 	public long getLeagueCategoryId() {
 		return leagueCategoryId;
 	}
-
+	
+	/**
+	 * @param leagueCategoryId the id of the category this leagues channels are under
+	 */
 	public void setLeagueCategoryId(long leagueCategoryId) {
 		this.leagueCategoryId = leagueCategoryId;
 	}
-
+	
+	/**
+	 * @return the id of the message with the join/quit league buttons
+	 */
 	public long getJoinLeagueOptionId() {
 		return joinLeagueOptionId;
 	}
-
+	
+	/**
+	 * @param joinLeagueOptionId the id of the message with the join/quit league buttons
+	 */
 	public void setJoinLeagueOptionId(long joinLeagueOptionId) {
 		this.joinLeagueOptionId = joinLeagueOptionId;
 	}
-
+	
+	/**
+	 * @return the id of the message with the sets a week option buttons 
+	 */
 	public long getSetsaweekOptionId() {
 		return setsaweekOptionId;
 	}
-
+	
+	/**
+	 * @param setsaweekOptionId the id of the message with the sets a week option buttons 
+	 */
 	public void setSetsaweekOptionId(long setsaweekOptionId) {
 		this.setsaweekOptionId = setsaweekOptionId;
 	}
 	
+	/**
+	 * @param name
+	 * @return the saved id of a league channel by name. -1 if a channel with that name isn't saved
+	 */
 	public long getChannelId(String name) {
 		if (channelIds.get(name) == null) return -1;
 		return channelIds.get(name).getAsLong();
 	}
 	
+	/**
+	 * @param name the name of the league channel
+	 * @param id the new id of a channel you want to be used by the league
+	 */
 	public void setChannelId(String name, long id) {
 		channelIds.addProperty(name, id);
 	}
 	
+	/**
+	 * @param channel
+	 * @return if this league uses this channel
+	 */
 	public boolean hasChannel(Channel channel) {
 		if (channelIds.get(channel.getName()) == null) return false;
 		return channelIds.get(channel.getName()).getAsLong() == channel.getIdLong();
 	}
 	
+	/**
+	 * @return the score new users are given
+	 */
 	public int getDefaultScore() {
 		return defaultScore;
 	}
-
+	
+	/**
+	 * @param defaultScore the score new users are given
+	 */
 	public void setDefaultScore(int defaultScore) {
 		this.defaultScore = defaultScore;
 	}
 	
+	/**
+	 * @return weeks before 2 players are allowed to be automatically paired together
+	 */
 	public int getWeeksBeforeSetRepeat() {
 		return weeksBeforeSetRepeat;
 	}
-
+	
+	/**
+	 * set weeks before 2 players are allowed to be automatically paired together
+	 * @param weeksBeforeSetRepeat -1 to disable this feature
+	 */
 	public void setWeeksBeforeSetRepeat(int weeksBeforeSetRepeat) {
+		if (weeksBeforeSetRepeat < -1) weeksBeforeSetRepeat = -1;
 		this.weeksBeforeSetRepeat = weeksBeforeSetRepeat;
 	}
 	
+	/**
+	 * @return weeks before an incomplete set is removed
+	 */
 	public int getWeeksBeforeSetExpires() {
 		return weeksBeforeSetExpires;
 	}
 	
+	/**
+	 * set weeks before an incomplete set is removed
+	 * @param weeks -1 to disable this feature
+	 */
 	public void setWeeksBeforeSetExpires(int weeks) {
+		if (weeks < -1) weeks = -1;
 		this.weeksBeforeSetExpires = weeks;
 	}
 	
+	/**
+	 * @return the elo K constant
+	 */
 	public double getK() {
 		return K;
 	}
-
+	
+	/**
+	 * @param k new elo k constant
+	 */
 	public void setK(double k) {
 		K = k;
 	}
 	
+	/**
+	 * @return list of all users league data 
+	 */
 	public List<UserData> getAllUsers() {
 		return users;
 	}
 	
+	/**
+	 * remove incomplete sets based on weeks before auto expire
+	 * @param pairsChannel the pairs channel of this league
+	 */
 	public void removeOldSets(TextChannel pairsChannel) {
 		for (int i = 0; i < sets.size(); ++i) {
 			if (sets.get(i).isComplete()) continue;
@@ -269,12 +395,21 @@ public class LeagueData {
 		}
 	}
 	
+	/**
+	 * remove this set
+	 * @param id the set id
+	 * @param pairsChannel the pairs channel of this league
+	 */
 	public void removeSet(int id, TextChannel pairsChannel) {
 		SetData set = this.getSetDataById(id);
+		if (set == null) return;
 		set.removeSetDisplay(pairsChannel);
 		sets.remove(set);
 	}
 	
+	/**
+	 * @return a list of active/available user data
+	 */
 	public List<UserData> getAvailableSortedUsers() {
 		List<UserData> available = new ArrayList<UserData>();
 		System.out.println("getting available users");
@@ -297,6 +432,10 @@ public class LeagueData {
 		return available;
 	}
 	
+	/**
+	 * @param id league user id
+	 * @return list of this users sets that were assigned this week or hasn't completed yet 
+	 */
 	public List<SetData> getIncompleteOrCurrentSetsByPlayer(long id) {
 		List<SetData> userSets = new ArrayList<SetData>();
 		for (SetData set : sets) if (set.hasPlayer(id) 
@@ -308,12 +447,23 @@ public class LeagueData {
 		return userSets;
 	}
 	
+	/**
+	 * @param id1 user 1 id
+	 * @param id2 user 2 id
+	 * @return list of sets that these users played each other
+	 */
 	public List<SetData> getSetsBetweenUsers(long id1, long id2) {
 		List<SetData> userSets = new ArrayList<SetData>();
 		for (SetData set : sets) if (set.hasPlayer(id1) && set.hasPlayer(id2)) userSets.add(set);
 		return userSets;
 	}
 	
+	/**
+	 * @param id1 user 1 id
+	 * @param id2 user 2 id
+	 * @return the most recent set these users have played
+	 */
+	@Nullable
 	public SetData getNewestSetBetweenUsers(long id1, long id2) {
 		List<SetData> userSets = getSetsBetweenUsers(id1, id2);
 		if (userSets.size() == 0) return null;
@@ -326,6 +476,12 @@ public class LeagueData {
 		return userSets.get(newestIndex);
 	}
 	
+	/**
+	 * @param id1 user 1 that is in this league's id
+	 * @param id2 user 2 that is in this league's id
+	 * @return a new set between these 2 users
+	 */
+	@Nullable
 	public SetData createSet(long id1, long id2) {
 		if (id1 == id2) return null;
 		if (getUserDataById(id1) == null) return null;
@@ -341,6 +497,9 @@ public class LeagueData {
 		return maxId+1;
 	}
 	
+	/**
+	 * @param ud sort this list of users by their score descending
+	 */
 	public static void sortByScoreDescend(List<UserData> ud) {
 		for (int i = 0; i < ud.size(); ++i) {
 			int maxIndex = i;
@@ -358,16 +517,30 @@ public class LeagueData {
 		return UtilKClosest.getKclosestIndex(scores, user.getScore(), sortedUsers.size(), sortedUsers.size());
 	}
 	
+	/**
+	 * @param date dd-mm-yyyy format
+	 * @return list of sets that happened the week of date
+	 */
 	public List<SetData> getSetsAtWeekOfDate(String date) {
 		List<SetData> saw = new ArrayList<SetData>();
 		for (SetData set : sets) if (UtilCalendar.getWeekDiff(date, set.getCreatedDate()) == 0) saw.add(set);
 		return saw;
 	}
 	
+	/**
+	 * display this league's sets that happened the week of this date
+	 * @param date dd-mm-yyyy format
+	 * @param channel the pairs channel to display this leagues sets in
+	 */
 	public void displaySetsByDate(String date, TextChannel channel) {
 		for (SetData set : sets) if (UtilCalendar.getWeekDiff(date, set.getCreatedDate()) == 0) set.displaySet(channel);
 	}
 	
+	/**
+	 * update the scores of players based on completed sets.
+	 * once a set is process it's score's can't be changed 
+	 * @return the number of sets processed
+	 */
 	public int processSets() {
 		int num = 0;
 		for (SetData set : sets) if (set.isComplete() && !set.isProcessed()) {
@@ -377,34 +550,27 @@ public class LeagueData {
 		return num;
 	}
 	
+	/**
+	 * setup this league's role/channels so info can be displayed to the user
+	 * @param guild this league's guild
+	 * @param debugChannel channel debug info should be sent to
+	 */
 	public void setupDiscordStuff(Guild guild, MessageChannelUnion debugChannel) {
 		//setup roles
-		Role gamerRole = null;
-		if (getLeagueRoleId() == -1) {
+		Role gamerRole = guild.getRoleById(getLeagueRoleId());
+		if (gamerRole == null) {
 			gamerRole = guild.createRole().complete();
 			setLeagueRoleId(gamerRole.getIdLong());
-		} else {
-			gamerRole = guild.getRoleById(getLeagueRoleId());
-			if (gamerRole == null) {
-				gamerRole = guild.createRole().complete();
-				setLeagueRoleId(gamerRole.getIdLong());
-			}
+			gamerRole.getManager()
+				.setName("GAMERS")
+				.setColor(getRandomColor())
+				.queue();
 		}
-		gamerRole.getManager()
-			.setName("GAMERS")
-			.setColor(getRandomColor())
-			.queue();
 		//setup category
-		Category gamerCat = null;
-		if (getLeagueCategoryId() == -1) {
+		Category gamerCat = guild.getCategoryById(getLeagueCategoryId());
+		if (gamerCat == null) {
 			gamerCat = guild.createCategory(name).complete();
 			setLeagueCategoryId(gamerCat.getIdLong());
-		} else {
-			gamerCat = guild.getCategoryById(getLeagueCategoryId());
-			if (gamerCat == null) {
-				gamerCat = guild.createCategory(name).complete();
-				setLeagueCategoryId(gamerCat.getIdLong());
-			}
 		}
 		Collection<Permission> perm1 = new ArrayList<Permission>();
 		Collection<Permission> perm2 = new ArrayList<Permission>();
