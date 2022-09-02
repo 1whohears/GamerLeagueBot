@@ -1,17 +1,11 @@
 package com.onewho.gamerbot.command;
 
-import java.util.List;
-
-import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.GlobalData;
-import com.onewho.gamerbot.data.UserData;
-import com.onewho.gamerbot.util.UtilCalendar;
+import com.onewho.gamerbot.data.GuildData;
+import com.onewho.gamerbot.data.LeagueData;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
-import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 public class UpdateRanks implements ICommand {
 
@@ -33,36 +27,19 @@ public class UpdateRanks implements ICommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		Guild guild = event.getGuild();
-		LeagueData gdata = GlobalData.getGuildDataById(guild.getIdLong())
-				.getLeagueByChannel(event.getChannel());
-		Backup.createBackup(guild, "pre_updateranks_backup", event.getChannel());
-		int num = gdata.processSets();
-		//display
-		if (num == 0) {
-			event.getChannel().sendMessage("There were no sets ready to be processed!").queue();
+		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
+		if (gdata == null) {
+			event.getChannel().sendMessage("This guild doesn't have any leagues.").queue();
 			return true;
 		}
-		event.getChannel().sendMessage("Processed "+num+" sets! Ranks and backups are being updated!").queue();
-		TextChannel ranksChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("ranks"));
-		List<UserData> users = gdata.getAllUsers();
-		LeagueData.sortByScoreDescend(users);
-		MessageCreateBuilder mcb = new MessageCreateBuilder();
-		mcb.addContent("__**"+UtilCalendar.getCurrentDateString()+" RANKS**__");
-		int r = 0, r2 = 0, prevScore = Integer.MAX_VALUE;
-		for (UserData user : users) {
-			++r2;
-			if (user.getScore() < prevScore) r = r2;
-			mcb.addContent("\n**"+r+")** "+getMention(user.getId())+" **"+user.getScore()+"**");
-			prevScore = user.getScore();
+		LeagueData ldata = gdata.getLeagueByChannel(event.getChannel());
+		if (ldata == null) {
+			event.getChannel().sendMessage("This is not a valid league.").queue();
+			return true;
 		}
-		MessageCreateData mcd = mcb.build();
-		ranksChannel.sendMessage(mcd).queue();
+		ldata.updateRanks(guild, event.getChannel());
 		GlobalData.saveData();
 		return true;
-	}
-	
-	private String getMention(long id) {
-		return "<@"+id+">";
 	}
 
 }

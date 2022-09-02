@@ -2,6 +2,7 @@ package com.onewho.gamerbot.command;
 
 import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
+import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.SetData;
 
@@ -46,26 +47,34 @@ public class CreateSet implements ICommand {
 			return true;
 		}
 		Guild guild = event.getGuild();
-		LeagueData gdata = GlobalData.getGuildDataById(guild.getIdLong())
-				.getLeagueByChannel(event.getChannel());
-		if (gdata.getUserDataById(id1) == null) {
+		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
+		if (gdata == null) {
+			event.getChannel().sendMessage("This guild doesn't have any leagues.").queue();
+			return true;
+		}
+		LeagueData ldata = gdata.getLeagueByChannel(event.getChannel());
+		if (ldata == null) {
+			event.getChannel().sendMessage("This is not a valid league.").queue();
+			return true;
+		}
+		if (ldata.getUserDataById(id1) == null) {
 			event.getChannel().sendMessage(Report.getInsult()
 					+" The first user/mention is not in this league!").queue();
 			return true;
 		}
-		if (gdata.getUserDataById(id2) == null) {
+		if (ldata.getUserDataById(id2) == null) {
 			event.getChannel().sendMessage(Report.getInsult()
 					+" The second user/mention is not in this league!").queue();
 			return true;
 		}
-		SetData set = gdata.createSet(id1, id2);
+		SetData set = ldata.createSet(id1, id2);
 		if (set == null) {
 			event.getChannel().sendMessage(Report.getInsult()
 					+" You can't make someone fight themself!").queue();
 			return true;
 		}
 		event.getChannel().sendMessage("Successfully created set "+set.getId()).queue();
-		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("pairings"));
+		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, ldata.getChannelId("pairings"));
 		set.displaySet(pairsChannel);
 		GlobalData.saveData();
 		return true;

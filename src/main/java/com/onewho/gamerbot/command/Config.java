@@ -2,6 +2,7 @@ package com.onewho.gamerbot.command;
 
 import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
+import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.LeagueData;
 
 import net.dv8tion.jda.api.entities.Guild;
@@ -32,8 +33,16 @@ public class Config implements ICommand {
 			return true;
 		}
 		Guild guild = event.getGuild();
-		LeagueData gdata = GlobalData.getGuildDataById(guild.getIdLong())
-				.getLeagueByChannel(event.getChannel());
+		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
+		if (gdata == null) {
+			event.getChannel().sendMessage("This guild doesn't have any leagues.").queue();
+			return true;
+		}
+		LeagueData ldata = gdata.getLeagueByChannel(event.getChannel());
+		if (ldata == null) {
+			event.getChannel().sendMessage("This is not a valid league.").queue();
+			return true;
+		}
 		int value;
 		double valueD;
 		switch (params[1]) {
@@ -43,7 +52,7 @@ public class Config implements ICommand {
 				notNumber(event);
 				return true;
 			}
-			gdata.setMaxSetsPerWeek(value);
+			ldata.setMaxSetsPerWeek(value);
 			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`");
 			GlobalData.saveData();
 			return true;
@@ -53,7 +62,7 @@ public class Config implements ICommand {
 				notNumber(event);
 				return true;
 			}
-			gdata.setWeeksBeforeAutoInactive(value);
+			ldata.setWeeksBeforeAutoInactive(value);
 			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`");
 			GlobalData.saveData();
 			return true;
@@ -63,7 +72,7 @@ public class Config implements ICommand {
 				notNumber(event);
 				return true;
 			}
-			gdata.setWeeksBeforeSetExpires(value);
+			ldata.setWeeksBeforeSetExpires(value);
 			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`");
 			GlobalData.saveData();
 			return true;
@@ -73,7 +82,7 @@ public class Config implements ICommand {
 				notNumber(event);
 				return true;
 			}
-			gdata.setWeeksBeforeSetRepeat(value);
+			ldata.setWeeksBeforeSetRepeat(value);
 			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`");
 			GlobalData.saveData();
 			return true;
@@ -83,7 +92,7 @@ public class Config implements ICommand {
 				notNumber(event);
 				return true;
 			}
-			gdata.setDefaultScore(value);
+			ldata.setDefaultScore(value);
 			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`");
 			GlobalData.saveData();
 			return true;
@@ -93,7 +102,7 @@ public class Config implements ICommand {
 				notNumber(event);
 				return true;
 			}
-			gdata.setK(valueD);
+			ldata.setK(valueD);
 			event.getChannel().sendMessage("`"+params[1]+"` set to `"+valueD+"`");
 			GlobalData.saveData();
 			return true;

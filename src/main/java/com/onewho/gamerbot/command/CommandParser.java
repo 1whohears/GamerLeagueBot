@@ -25,7 +25,7 @@ public class CommandParser {
 				if (c.getNeedsAdmin() && !event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
 					event.getChannel().sendMessage("That command requires admin permission to use!").queue();
 					return true;
-				} 
+				}
 				c.runCommand(event, command);
 				return true;
 			}

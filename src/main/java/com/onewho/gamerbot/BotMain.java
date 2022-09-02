@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.security.auth.login.LoginException;
 
 import com.onewho.gamerbot.event.EventListener;
+import com.onewho.gamerbot.schedule.Scheduler;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -32,6 +33,7 @@ public class BotMain {
 		} catch (LoginException | IOException e) {
 			e.printStackTrace();
 		}
+		Scheduler.init();
 	}
 	
 }

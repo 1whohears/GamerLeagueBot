@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.onewho.gamerbot.command.Backup;
 import com.onewho.gamerbot.util.UtilCalendar;
 import com.onewho.gamerbot.util.UtilKClosest;
 
@@ -41,6 +42,9 @@ public class LeagueData {
 	private int defaultScore = 1000;
 	private double K = 20d;
 	
+	public boolean autoGenPairs = false;
+	public boolean autoUpdateRanks = false;
+	
 	private List<UserData> users = new ArrayList<UserData>();
 	private List<SetData> sets = new ArrayList<SetData>();
 	
@@ -62,6 +66,9 @@ public class LeagueData {
 		weeksBeforeSetRepeat = ParseData.getInt(data, "weeks before set repeat", weeksBeforeSetRepeat);
 		defaultScore = ParseData.getInt(data, "default score", defaultScore);
 		K = ParseData.getDouble(data, "K", K);
+		
+		autoGenPairs = ParseData.getBoolean(data, "auto gen pairs", autoGenPairs);
+		autoUpdateRanks = ParseData.getBoolean(data, "auto update ranks", autoUpdateRanks);
 		
 		users.clear();
 		JsonArray us = ParseData.getJsonArray(data, "users");
@@ -96,6 +103,8 @@ public class LeagueData {
 		data.addProperty("weeks before set repeat", weeksBeforeSetRepeat);
 		data.addProperty("default score", defaultScore);
 		data.addProperty("K", K);
+		data.addProperty("auto gen pairs", autoGenPairs);
+		data.addProperty("auto update ranks", autoUpdateRanks);
 		data.add("users", getUsersJson());
 		data.add("sets", getSetsJson());
 		data.addProperty("league role id", leagueRoleId);
@@ -691,6 +700,93 @@ public class LeagueData {
 		List<Button> bs = new ArrayList<Button>();
 		for (int i = 0; i <= max; ++i) bs.add(Button.primary("setsaweek-"+i, i+""));
 		return bs;
+	}
+	
+	/**
+	 * automatically generate pairings for this week
+	 * @param guild this league's guild
+	 * @param debugChannel channel for debug messages
+	 */
+	public void genWeeklyPairs(Guild guild, MessageChannelUnion debugChannel) {
+		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, this.getChannelId("pairings"));
+		this.removeOldSets(pairsChannel);
+		List<UserData> activeUsers = this.getAvailableSortedUsers();
+		boolean createdSet = true;
+		while (createdSet) {
+			createdSet = false;
+			System.out.println("BIG LOOP");
+			for (UserData udata : activeUsers) {
+				System.out.println("user "+udata.getId());
+				List<SetData> incompleteSets = this.getIncompleteOrCurrentSetsByPlayer(udata.getId());
+				System.out.println("incomplete sets "+incompleteSets.size());
+				if (incompleteSets.size() >= udata.getSetsPerWeek()) continue;
+				int[] ksort = LeagueData.getClosestUserIndexsByScore(udata, activeUsers);
+				for (int i = 0; i < ksort.length; ++i) {
+					UserData userk = activeUsers.get(ksort[i]);
+					System.out.println("userk "+userk.getId());
+					List<SetData> incompleteSetsK = this.getIncompleteOrCurrentSetsByPlayer(userk.getId());
+					System.out.println("incomplete sets k "+incompleteSetsK.size());
+					if (incompleteSetsK.size() >= userk.getSetsPerWeek()) continue;
+					SetData recentSet = this.getNewestSetBetweenUsers(udata.getId(), userk.getId());
+					System.out.println("recent set "+recentSet);
+					if (recentSet != null) {
+						int diff = UtilCalendar.getWeekDiff(
+								UtilCalendar.getDate(recentSet.getCreatedDate()), UtilCalendar.getCurrentDate());
+						if (diff <= this.getWeeksBeforeSetRepeat()) continue;
+					}
+					long id1 = udata.getId(), id2 = activeUsers.get(ksort[i]).getId();
+					if (id1 == id2) continue;
+					this.createSet(id1, id2);
+					createdSet = true;
+					break;
+				}
+			}
+		}
+		this.displaySetsByDate(UtilCalendar.getCurrentDateString(), pairsChannel);
+		debugChannel.sendMessage("Finished Generating Pairings!").queue();
+	}
+	
+	public void updateRanks(Guild guild, MessageChannelUnion debugChannel) {
+		Backup.createBackup(guild, "pre_updateranks_backup", debugChannel);
+		int num = processSets();
+		//display
+		if (num == 0) {
+			debugChannel.sendMessage("There were no sets ready to be processed!").queue();
+			return;
+		}
+		debugChannel.sendMessage("Processed "+num+" sets! Ranks and backups are being updated!").queue();
+		TextChannel ranksChannel = guild.getChannelById(TextChannel.class, getChannelId("ranks"));
+		List<UserData> users = getAllUsers();
+		LeagueData.sortByScoreDescend(users);
+		MessageCreateBuilder mcb = new MessageCreateBuilder();
+		mcb.addContent("__**"+UtilCalendar.getCurrentDateString()+" RANKS**__");
+		int r = 0, r2 = 0, prevScore = Integer.MAX_VALUE;
+		for (UserData user : users) {
+			++r2;
+			if (user.getScore() < prevScore) r = r2;
+			mcb.addContent("\n**"+r+")** "+getMention(user.getId())+" **"+user.getScore()+"**");
+			prevScore = user.getScore();
+		}
+		MessageCreateData mcd = mcb.build();
+		ranksChannel.sendMessage(mcd).queue();
+	}
+	
+	private String getMention(long id) {
+		return "<@"+id+">";
+	}
+	
+	protected void genScheduledPairs(Guild guild) {
+		if (autoGenPairs) {
+			MessageChannelUnion channel = guild.getChannelById(MessageChannelUnion.class, this.getChannelId("bot-commands"));
+			genWeeklyPairs(guild, channel);
+		}
+	}
+	
+	protected void updateRanks(Guild guild) {
+		if (autoGenPairs) {
+			MessageChannelUnion channel = guild.getChannelById(MessageChannelUnion.class, this.getChannelId("bot-commands"));
+			updateRanks(guild, channel);
+		}
 	}
 	
 }

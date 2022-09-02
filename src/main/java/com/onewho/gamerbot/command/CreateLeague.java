@@ -32,7 +32,7 @@ public class CreateLeague implements ICommand {
 			return true;
 		}
 		Guild guild = event.getGuild();
-		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
+		GuildData gdata = GlobalData.createGuildData(guild.getIdLong());
 		String name = "";
 		for (int i = 1; i < params.length; ++i) name += params[i];
 		gdata.createLeague(guild, event.getChannel(), name);

@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.onewho.gamerbot.BotMain;
 
 import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Guild;
@@ -94,6 +95,14 @@ public class GuildData {
 	 */
 	public void setupLeagues(Guild guild, MessageChannelUnion debugChannel) {
 		for (LeagueData l : leagues) l.setupDiscordStuff(guild, debugChannel);
+	}
+	
+	protected void genScheduledPairsForAllLeagues() {
+		for (LeagueData l : leagues) l.genScheduledPairs(BotMain.jda.getGuildById(id));
+	}
+	
+	protected void updateRanksForAllLeagues() {
+		for (LeagueData l : leagues) l.updateRanks(BotMain.jda.getGuildById(id));
 	}
 	
 }

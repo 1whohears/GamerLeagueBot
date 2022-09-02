@@ -9,6 +9,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -75,11 +77,30 @@ public class GlobalData {
 	 * @param id guild id
 	 * @return the league data for this guild
 	 */
+	@Nullable
 	public static GuildData getGuildDataById(long id) {
 		for (int i = 0; i < guilds.size(); ++i) if (guilds.get(i).getId() == id) return guilds.get(i);
-		GuildData data = new GuildData(id);
+		return null;
+	}
+	
+	/**
+	 * @param id guild id
+	 * @return the league data for this guild
+	 */
+	public static GuildData createGuildData(long id) {
+		GuildData data = getGuildDataById(id);
+		if (data != null) return data;
+		data = new GuildData(id);
 		guilds.add(data);
 		return data;
+	}
+	
+	public static void genScheduledPairsForAllLeagues() {
+		for (GuildData g : guilds) g.genScheduledPairsForAllLeagues();
+	}
+	
+	public static void updateRanksForAllLeagues() {
+		for (GuildData g : guilds) g.updateRanksForAllLeagues();
 	}
 	
 }

@@ -12,6 +12,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.GlobalData;
+import com.onewho.gamerbot.data.GuildData;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message.Attachment;
@@ -73,10 +74,18 @@ public class ReadBackup implements ICommand {
 		}
 		Guild guild = event.getGuild();
 		Backup.createBackup(guild, "pre-readbackup", event.getChannel());
-		LeagueData gdata = GlobalData.getGuildDataById(guild.getIdLong())
-				.getLeagueByChannel(event.getChannel());
+		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
+		if (gdata == null) {
+			event.getChannel().sendMessage("This guild doesn't have any leagues.").queue();
+			return true;
+		}
+		LeagueData ldata = gdata.getLeagueByChannel(event.getChannel());
+		if (ldata == null) {
+			event.getChannel().sendMessage("This is not a valid league.").queue();
+			return true;
+		}
 		try {
-			gdata.readBackup(backup);
+			ldata.readBackup(backup);
 		} catch (IllegalStateException e) {
 			event.getChannel().sendMessage("The uploaded file is not a backup file").queue();
 			return true;

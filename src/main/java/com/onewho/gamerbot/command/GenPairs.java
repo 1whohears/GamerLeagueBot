@@ -1,15 +1,10 @@
 package com.onewho.gamerbot.command;
 
-import java.util.List;
-
-import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.GlobalData;
-import com.onewho.gamerbot.data.SetData;
-import com.onewho.gamerbot.data.UserData;
-import com.onewho.gamerbot.util.UtilCalendar;
+import com.onewho.gamerbot.data.GuildData;
+import com.onewho.gamerbot.data.LeagueData;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class GenPairs implements ICommand {
@@ -31,50 +26,19 @@ public class GenPairs implements ICommand {
 
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
-		System.out.println("running gen pairs command");
 		Guild guild = event.getGuild();
-		LeagueData gdata = GlobalData.getGuildDataById(guild.getIdLong())
-				.getLeagueByChannel(event.getChannel());
-		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("pairings"));
-		gdata.removeOldSets(pairsChannel);
-		List<UserData> activeUsers = gdata.getAvailableSortedUsers();
-		boolean createdSet = true;
-		while (createdSet) {
-			createdSet = false;
-			System.out.println("BIG LOOP");
-			for (UserData udata : activeUsers) {
-				System.out.println("user "+udata.getId());
-				List<SetData> incompleteSets = gdata.getIncompleteOrCurrentSetsByPlayer(udata.getId());
-				System.out.println("incomplete sets "+incompleteSets.size());
-				if (incompleteSets.size() >= udata.getSetsPerWeek()) continue;
-				int[] ksort = LeagueData.getClosestUserIndexsByScore(udata, activeUsers);
-				for (int i = 0; i < ksort.length; ++i) {
-					UserData userk = activeUsers.get(ksort[i]);
-					System.out.println("userk "+userk.getId());
-					List<SetData> incompleteSetsK = gdata.getIncompleteOrCurrentSetsByPlayer(userk.getId());
-					System.out.println("incomplete sets k "+incompleteSetsK.size());
-					if (incompleteSetsK.size() >= userk.getSetsPerWeek()) continue;
-					SetData recentSet = gdata.getNewestSetBetweenUsers(udata.getId(), userk.getId());
-					System.out.println("recent set "+recentSet);
-					if (recentSet != null) {
-						int diff = UtilCalendar.getWeekDiff(
-								UtilCalendar.getDate(recentSet.getCreatedDate()), UtilCalendar.getCurrentDate());
-						if (diff <= gdata.getWeeksBeforeSetRepeat()) continue;
-					}
-					long id1 = udata.getId(), id2 = activeUsers.get(ksort[i]).getId();
-					if (id1 == id2) continue;
-					gdata.createSet(id1, id2);
-					createdSet = true;
-					break;
-				}
-			}
+		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
+		if (gdata == null) {
+			event.getChannel().sendMessage("This guild doesn't have any leagues.").queue();
+			return true;
 		}
-		//display new sets
-		gdata.displaySetsByDate(UtilCalendar.getCurrentDateString(), pairsChannel);
-		//debug
+		LeagueData ldata = gdata.getLeagueByChannel(event.getChannel());
+		if (ldata == null) {
+			event.getChannel().sendMessage("This is not a valid league.").queue();
+			return true;
+		}
+		ldata.genWeeklyPairs(guild, event.getChannel());
 		GlobalData.saveData();
-		System.out.println("Pairings Generated");
-		event.getChannel().sendMessage("Finished Generating Pairings!").queue();
 		return true;
 	}
 

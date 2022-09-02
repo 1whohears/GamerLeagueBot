@@ -73,8 +73,7 @@ public class Report implements ICommand {
 			return true;
 		}
 		Guild guild = event.getGuild();
-		LeagueData gdata = GlobalData.getGuildDataById(guild.getIdLong())
-				.getLeagueByChannel(event.getChannel());
+		LeagueData gdata = GlobalData.getGuildDataById(guild.getIdLong()).getLeagueByChannel(event.getChannel());
 		SetData set = gdata.getSetDataById(id);
 		if (set == null) {
 			event.getChannel().sendMessage(getInsult()+" The set with id "+id+" does not exist!").queue();

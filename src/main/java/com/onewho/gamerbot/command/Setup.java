@@ -28,6 +28,10 @@ public class Setup implements ICommand {
 		System.out.println("running setup command");
 		Guild guild = event.getGuild();
 		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
+		if (gdata == null) {
+			event.getChannel().sendMessage("This guild doesn't have any leagues.").queue();
+			return true;
+		}
 		gdata.setupLeagues(guild, event.getChannel());
 		return true;
 	}
