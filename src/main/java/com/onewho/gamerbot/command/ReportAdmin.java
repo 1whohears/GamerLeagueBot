@@ -2,6 +2,7 @@ package com.onewho.gamerbot.command;
 
 import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
+import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.ReportResult;
 import com.onewho.gamerbot.data.SetData;
@@ -72,8 +73,17 @@ public class ReportAdmin implements ICommand {
 			return true;
 		}
 		Guild guild = event.getGuild();
-		LeagueData gdata = GlobalData.getGuildDataById(guild.getIdLong()).getLeagueByChannel(event.getChannel());
-		SetData set = gdata.getSetDataById(id);
+		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
+		if (gdata == null) {
+			event.getChannel().sendMessage("This guild doesn't have any leagues.").queue();
+			return true;
+		}
+		LeagueData ldata = gdata.getLeagueByChannel(event.getChannel());
+		if (ldata == null) {
+			event.getChannel().sendMessage("This is not a valid league.").queue();
+			return true;
+		}
+		SetData set = ldata.getSetDataById(id);
 		if (set == null) {
 			event.getChannel().sendMessage(Report.getInsult()+" The set with id "+id+" does not exist!").queue();
 			return true;
@@ -84,8 +94,8 @@ public class ReportAdmin implements ICommand {
 			event.getChannel().sendMessage(Report.getInsult()+" This set id does not have those players!").queue();
 			return true;
 		} else if (result == ReportResult.SetVerified) {
-			gdata.getUserDataById(set.getP1Id()).setLastActive(currentData);
-			gdata.getUserDataById(set.getP2Id()).setLastActive(currentData);
+			ldata.getUserDataById(set.getP1Id()).setLastActive(currentData);
+			ldata.getUserDataById(set.getP2Id()).setLastActive(currentData);
 			event.getChannel().sendMessage("Admin Override Successful!").queue();
 		} else if (result == ReportResult.AlreadyVerified) {
 			event.getChannel().sendMessage("This set has already been processed"
@@ -94,7 +104,7 @@ public class ReportAdmin implements ICommand {
 			return true;
 		}
 		//display new sets
-		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("pairings"));
+		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, ldata.getChannelId("pairings"));
 		set.displaySet(pairsChannel);
 		GlobalData.saveData();
 		return true;

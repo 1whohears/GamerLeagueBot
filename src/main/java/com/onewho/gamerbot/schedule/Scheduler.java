@@ -1,6 +1,7 @@
 package com.onewho.gamerbot.schedule;
 
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -16,10 +17,12 @@ public class Scheduler {
 	}
 	
 	private static void runWeekly() {
+		System.out.println(new Date()+" running weekly tasks");
 		GlobalData.genScheduledPairsForAllLeagues();
 	}
 	
 	private static void runDaily() {
+		System.out.println(new Date()+" running daily tasks");
 		GlobalData.updateRanksForAllLeagues();
 	}
 	

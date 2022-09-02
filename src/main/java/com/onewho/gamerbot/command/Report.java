@@ -7,6 +7,7 @@ import java.util.Random;
 
 import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
+import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.ReportResult;
 import com.onewho.gamerbot.data.SetData;
@@ -73,8 +74,17 @@ public class Report implements ICommand {
 			return true;
 		}
 		Guild guild = event.getGuild();
-		LeagueData gdata = GlobalData.getGuildDataById(guild.getIdLong()).getLeagueByChannel(event.getChannel());
-		SetData set = gdata.getSetDataById(id);
+		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
+		if (gdata == null) {
+			event.getChannel().sendMessage("This guild doesn't have any leagues.").queue();
+			return true;
+		}
+		LeagueData ldata = gdata.getLeagueByChannel(event.getChannel());
+		if (ldata == null) {
+			event.getChannel().sendMessage("This is not a valid league.").queue();
+			return true;
+		}
+		SetData set = ldata.getSetDataById(id);
 		if (set == null) {
 			event.getChannel().sendMessage(getInsult()+" The set with id "+id+" does not exist!").queue();
 			return true;
@@ -90,7 +100,7 @@ public class Report implements ICommand {
 					+ "If you are correct have your opponent report again, or get a hold of an admin.").queue();
 			break;
 		case SetVerified:
-			gdata.getUserDataById(event.getAuthor().getIdLong()).setLastActive(currentData);
+			ldata.getUserDataById(event.getAuthor().getIdLong()).setLastActive(currentData);
 			event.getChannel().sendMessage("Set reported and verified by opponent!").queue();
 			break;
 		case WaitingForOpponent:
@@ -98,7 +108,7 @@ public class Report implements ICommand {
 				.addEmbeds(getVerifyEmbed(set, pingId))
 				.addActionRow(getVerifyButtons())
 				.build();
-			gdata.getUserDataById(event.getAuthor().getIdLong()).setLastActive(currentData);
+			ldata.getUserDataById(event.getAuthor().getIdLong()).setLastActive(currentData);
 			event.getChannel().sendMessage(mcd).queue();
 			break;
 		case AlreadyVerified:
@@ -106,7 +116,7 @@ public class Report implements ICommand {
 			break;
 		}
 		//display new sets
-		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, gdata.getChannelId("pairings"));
+		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, ldata.getChannelId("pairings"));
 		set.displaySet(pairsChannel);
 		GlobalData.saveData();
 		return true;

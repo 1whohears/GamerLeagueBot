@@ -27,7 +27,7 @@ public class Setup implements ICommand {
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		System.out.println("running setup command");
 		Guild guild = event.getGuild();
-		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
+		GuildData gdata = GlobalData.createGuildData(guild.getIdLong());
 		if (gdata == null) {
 			event.getChannel().sendMessage("This guild doesn't have any leagues.").queue();
 			return true;

@@ -48,6 +48,8 @@ public class CommandParser {
 		commands.add(new RefreshSet());
 		commands.add(new CreateSet());
 		commands.add(new CreateLeague());
+		commands.add(new AutoGenPairs());
+		commands.add(new AutoUpdateRanks());
 	}
 	
 }
