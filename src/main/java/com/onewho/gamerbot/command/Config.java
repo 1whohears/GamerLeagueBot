@@ -45,6 +45,7 @@ public class Config implements ICommand {
 		}
 		int value;
 		double valueD;
+		boolean valueB = false;
 		switch (params[1]) {
 		case "max-sets-per-week":
 			value = parseInt(params[2]);
@@ -104,6 +105,28 @@ public class Config implements ICommand {
 			}
 			ldata.setK(valueD);
 			event.getChannel().sendMessage("`"+params[1]+"` set to `"+valueD+"`");
+			GlobalData.saveData();
+			return true;
+		case "auto-gen-pairs":
+			if (params[2].equals("true")) valueB = true;
+			else if (params[2].equals("false")) valueB = false;
+			else {
+				event.getChannel().sendMessage(Report.getInsult()+" is not true or false!").queue();
+				return true;
+			}
+			ldata.autoGenPairs = valueB;
+			event.getChannel().sendMessage("`"+params[1]+"` set to `"+valueB+"`");
+			GlobalData.saveData();
+			return true;
+		case "auto-update-ranks":
+			if (params[2].equals("true")) valueB = true;
+			else if (params[2].equals("false")) valueB = false;
+			else {
+				event.getChannel().sendMessage(Report.getInsult()+" is not true or false!").queue();
+				return true;
+			}
+			ldata.autoUpdateRanks = valueB;
+			event.getChannel().sendMessage("`"+params[1]+"` set to `"+valueB+"`");
 			GlobalData.saveData();
 			return true;
 		}
