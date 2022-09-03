@@ -58,7 +58,7 @@ public class LeagueData {
 	 * @param data league data written from disk
 	 */
 	protected LeagueData(JsonObject data) {
-		name = ParseData.getString(data, name, name);
+		name = ParseData.getString(data, "name", name);
 		
 		maxSetsPerWeek = ParseData.getInt(data, "max sets a week", maxSetsPerWeek);
 		weeksBeforeAutoInactive = ParseData.getInt(data, "weeks before auto inactive", weeksBeforeAutoInactive);
@@ -97,6 +97,7 @@ public class LeagueData {
 	 */
 	public JsonObject getJson() {
 		JsonObject data = new JsonObject();
+		data.addProperty("name", name);
 		data.addProperty("max sets a week", maxSetsPerWeek);
 		data.addProperty("weeks before auto inactive", weeksBeforeAutoInactive);
 		data.addProperty("weeks before set expires", weeksBeforeSetExpires);

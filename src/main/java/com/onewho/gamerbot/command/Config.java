@@ -54,7 +54,7 @@ public class Config implements ICommand {
 				return true;
 			}
 			ldata.setMaxSetsPerWeek(value);
-			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`");
+			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
 			GlobalData.saveData();
 			return true;
 		case "weeks-before-auto-inactive":
@@ -64,7 +64,7 @@ public class Config implements ICommand {
 				return true;
 			}
 			ldata.setWeeksBeforeAutoInactive(value);
-			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`");
+			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
 			GlobalData.saveData();
 			return true;
 		case "weeks-before-set-expires":
@@ -74,7 +74,7 @@ public class Config implements ICommand {
 				return true;
 			}
 			ldata.setWeeksBeforeSetExpires(value);
-			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`");
+			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
 			GlobalData.saveData();
 			return true;
 		case "weeks-before-set-repeat":
@@ -84,7 +84,7 @@ public class Config implements ICommand {
 				return true;
 			}
 			ldata.setWeeksBeforeSetRepeat(value);
-			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`");
+			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
 			GlobalData.saveData();
 			return true;
 		case "default-score":
@@ -94,7 +94,7 @@ public class Config implements ICommand {
 				return true;
 			}
 			ldata.setDefaultScore(value);
-			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`");
+			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
 			GlobalData.saveData();
 			return true;
 		case "K":
@@ -104,7 +104,7 @@ public class Config implements ICommand {
 				return true;
 			}
 			ldata.setK(valueD);
-			event.getChannel().sendMessage("`"+params[1]+"` set to `"+valueD+"`");
+			event.getChannel().sendMessage("`"+params[1]+"` set to `"+valueD+"`").queue();
 			GlobalData.saveData();
 			return true;
 		case "auto-gen-pairs":
@@ -115,7 +115,7 @@ public class Config implements ICommand {
 				return true;
 			}
 			ldata.autoGenPairs = valueB;
-			event.getChannel().sendMessage("`"+params[1]+"` set to `"+valueB+"`");
+			event.getChannel().sendMessage("`"+params[1]+"` set to `"+valueB+"`").queue();
 			GlobalData.saveData();
 			return true;
 		case "auto-update-ranks":
@@ -126,7 +126,7 @@ public class Config implements ICommand {
 				return true;
 			}
 			ldata.autoUpdateRanks = valueB;
-			event.getChannel().sendMessage("`"+params[1]+"` set to `"+valueB+"`");
+			event.getChannel().sendMessage("`"+params[1]+"` set to `"+valueB+"`").queue();
 			GlobalData.saveData();
 			return true;
 		}
