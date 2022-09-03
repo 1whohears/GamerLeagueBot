@@ -628,16 +628,10 @@ public class LeagueData {
 	}
 	
 	private TextChannel setupChannel(String name, Category cat, Guild guild) {
-		TextChannel channel = null;
-		if (getChannelId(name) == -1) {
+		TextChannel channel = guild.getTextChannelById(getChannelId(name));
+		if (channel == null) {
 			channel = cat.createTextChannel(name).complete();
 			setChannelId(name, channel.getIdLong());
-		} else {
-			channel = guild.getTextChannelById(getChannelId(name));
-			if (channel == null) {
-				channel = cat.createTextChannel(name).complete();
-				setChannelId(name, channel.getIdLong());
-			}
 		}
 		channel.getManager().sync(cat.getPermissionContainer()).complete();
 		return channel;
@@ -709,6 +703,7 @@ public class LeagueData {
 	 * @param debugChannel channel for debug messages
 	 */
 	public void genWeeklyPairs(Guild guild, MessageChannelUnion debugChannel) {
+		debugChannel.sendMessage("Generating Pairs...").queue();
 		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, this.getChannelId("pairings"));
 		this.removeOldSets(pairsChannel);
 		List<UserData> activeUsers = this.getAvailableSortedUsers();
