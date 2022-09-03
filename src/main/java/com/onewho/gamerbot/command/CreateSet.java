@@ -3,6 +3,7 @@ package com.onewho.gamerbot.command;
 import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.GuildData;
+import com.onewho.gamerbot.data.Important;
 import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.SetData;
 
@@ -30,19 +31,19 @@ public class CreateSet implements ICommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		if (params.length != 3) {
-			event.getChannel().sendMessage(Report.getInsult()
+			event.getChannel().sendMessage(Important.getInsult()
 					+" do: `"+BotMain.PREFIX+"createset [p1 ping] [p2 ping]`").queue();
 			return true;
 		}
 		long id1 = getIdFromMention(params[1]);
 		long id2 = getIdFromMention(params[2]);
 		if (id1 == -1) {
-			event.getChannel().sendMessage(Report.getInsult()+" "+params[1]
+			event.getChannel().sendMessage(Important.getInsult()+" "+params[1]
 					+" is not a mention!").queue();
 			return true;
 		}
 		if (id2 == -1) {
-			event.getChannel().sendMessage(Report.getInsult()+" "+params[2]
+			event.getChannel().sendMessage(Important.getInsult()+" "+params[2]
 					+" is not a mention!").queue();
 			return true;
 		}
@@ -58,18 +59,18 @@ public class CreateSet implements ICommand {
 			return true;
 		}
 		if (ldata.getUserDataById(id1) == null) {
-			event.getChannel().sendMessage(Report.getInsult()
+			event.getChannel().sendMessage(Important.getInsult()
 					+" The first user/mention is not in this league!").queue();
 			return true;
 		}
 		if (ldata.getUserDataById(id2) == null) {
-			event.getChannel().sendMessage(Report.getInsult()
+			event.getChannel().sendMessage(Important.getInsult()
 					+" The second user/mention is not in this league!").queue();
 			return true;
 		}
 		SetData set = ldata.createSet(id1, id2);
 		if (set == null) {
-			event.getChannel().sendMessage(Report.getInsult()
+			event.getChannel().sendMessage(Important.getInsult()
 					+" You can't make someone fight themself!").queue();
 			return true;
 		}

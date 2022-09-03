@@ -8,6 +8,7 @@ import java.util.Random;
 import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.GuildData;
+import com.onewho.gamerbot.data.Important;
 import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.ReportResult;
 import com.onewho.gamerbot.data.SetData;
@@ -42,14 +43,14 @@ public class Report implements ICommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		if (params.length != 5) {
-			event.getChannel().sendMessage(getInsult()
+			event.getChannel().sendMessage(Important.getInsult()
 					+" do: `"+BotMain.PREFIX+"report [set id] [your score] [opponent score] [opponent ping]`").queue();
 			return true;
 		}
 		int id = -1, s1 = -1, s2 = -1;
 		long pingId = -1;
 		if (!checkIfMention(params[4])) {
-			event.getChannel().sendMessage(getInsult()+" "+params[4]+" is not a mention!").queue();
+			event.getChannel().sendMessage(Important.getInsult()+" "+params[4]+" is not a mention!").queue();
 			return true;
 		}
 		String pingString = params[4].substring(2, params[4].length()-1);
@@ -61,16 +62,16 @@ public class Report implements ICommand {
 		} catch (NumberFormatException e) {
 		}
 		if (id == -1) {
-			event.getChannel().sendMessage(getInsult()+" "+params[1]+" is not a number!").queue();
+			event.getChannel().sendMessage(Important.getInsult()+" "+params[1]+" is not a number!").queue();
 			return true;
 		} else if (s1 == -1) {
-			event.getChannel().sendMessage(getInsult()+" "+params[2]+" is not a number!").queue();
+			event.getChannel().sendMessage(Important.getInsult()+" "+params[2]+" is not a number!").queue();
 			return true;
 		} else if (s2 == -1) {
-			event.getChannel().sendMessage(getInsult()+" "+params[3]+" is not a number!").queue();
+			event.getChannel().sendMessage(Important.getInsult()+" "+params[3]+" is not a number!").queue();
 			return true;
 		} else if (pingId == -1) {
-			event.getChannel().sendMessage(getInsult()+" you didn't mention/ping your opponent correctly!").queue();
+			event.getChannel().sendMessage(Important.getInsult()+" you didn't mention/ping your opponent correctly!").queue();
 			return true;
 		}
 		Guild guild = event.getGuild();
@@ -86,14 +87,14 @@ public class Report implements ICommand {
 		}
 		SetData set = ldata.getSetDataById(id);
 		if (set == null) {
-			event.getChannel().sendMessage(getInsult()+" The set with id "+id+" does not exist!").queue();
+			event.getChannel().sendMessage(Important.getInsult()+" The set with id "+id+" does not exist!").queue();
 			return true;
 		}
 		String currentData = UtilCalendar.getCurrentDateString();
 		ReportResult result = set.report(event.getAuthor().getIdLong(), pingId, s1, s2, currentData);
 		switch (result) {
 		case IDsDontMatch:
-			event.getChannel().sendMessage(getInsult()+" This set id does not have those players!").queue();
+			event.getChannel().sendMessage(Important.getInsult()+" This set id does not have those players!").queue();
 			break;
 		case ScoreConflict:
 			event.getChannel().sendMessage("This conflicts with the score that your opponent reported! "
@@ -152,28 +153,6 @@ public class Report implements ICommand {
 	
 	private String getMention(long id) {
 		return "<@"+id+">";
-	}
-	
-	private static String[] insults = {"STUPID!", "IDIOT!", "BRUH!", "WRONG!", "UHHGGG!",  
-			"WOW!", "WHY!?", "DONKEYKONG?", "This is why I didn't go to your birthday party.",
-			"Your faliures would be so funny if they weren't so sad.", "sigh...", "SAD!",
-			"You have less brain cells than a yoshi player.", "wrong wrong wrong...",
-			"Dr Doofenshmirtz is no longer the dumbest person in the tristate area!",
-			"CRINGE!", "BAD!", "L", "RATIO", "LOL!", "yikes...", "man", "ROFL!", 
-			"It's nice to know that no one read the docs.", "oof", "INCORRECT!",
-			"I'm going to start a twitter account just to make fun of you.", "get good",
-			"no", "Wrong again.", "Are you even trying?", "yeeeaahhh....no", "ur bad!",
-			"You would think after billions of years of evolution all Earthlings"
-			+ " would be competent by now. I'll tell my buddies from Proxima Centauri"
-			+ " to delay the invasion at least a thousand earth years so y'all have a chance.",
-			"This is just sad.", "You won't like the side of the IQ bell curve that your on.",
-			"When the gurus tell you to clear your mind they don't mean remove your brain"
-			+ " from your skull you idiot.", "I would feel bad for you..but I can't because"
-			+ " I am hundreds of lines of code.", "Why are people so afraid of AI taking over?"
-			+ " Y'all are going to destroy yourselves from incompetence.", "Go see a doctor."};
-	
-	public static String getInsult() {
-		return insults[(int)(Math.random()*insults.length)];
 	}
 
 }

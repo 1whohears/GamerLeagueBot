@@ -3,6 +3,7 @@ package com.onewho.gamerbot.command;
 import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.GuildData;
+import com.onewho.gamerbot.data.Important;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -27,7 +28,7 @@ public class CreateLeague implements ICommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		if (params.length < 2) {
-			event.getChannel().sendMessage(Report.getInsult()
+			event.getChannel().sendMessage(Important.getInsult()
 					+" do: `"+BotMain.PREFIX+"createleague [league name]`").queue();
 			return true;
 		}

@@ -3,6 +3,7 @@ package com.onewho.gamerbot.command;
 import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.GuildData;
+import com.onewho.gamerbot.data.Important;
 import com.onewho.gamerbot.data.LeagueData;
 
 import net.dv8tion.jda.api.entities.Guild;
@@ -28,7 +29,7 @@ public class Config implements ICommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		if (params.length != 3) {
-			event.getChannel().sendMessage(Report.getInsult()
+			event.getChannel().sendMessage(Important.getInsult()
 					+" do: `"+BotMain.PREFIX+"config [setting] [value]`").queue();
 			return true;
 		}
@@ -111,7 +112,7 @@ public class Config implements ICommand {
 			if (params[2].equals("true")) valueB = true;
 			else if (params[2].equals("false")) valueB = false;
 			else {
-				event.getChannel().sendMessage(Report.getInsult()+" is not true or false!").queue();
+				event.getChannel().sendMessage(Important.getInsult()+" is not true or false!").queue();
 				return true;
 			}
 			ldata.autoGenPairs = valueB;
@@ -122,7 +123,7 @@ public class Config implements ICommand {
 			if (params[2].equals("true")) valueB = true;
 			else if (params[2].equals("false")) valueB = false;
 			else {
-				event.getChannel().sendMessage(Report.getInsult()+" is not true or false!").queue();
+				event.getChannel().sendMessage(Important.getInsult()+" is not true or false!").queue();
 				return true;
 			}
 			ldata.autoUpdateRanks = valueB;
@@ -130,7 +131,7 @@ public class Config implements ICommand {
 			GlobalData.saveData();
 			return true;
 		}
-		event.getChannel().sendMessage(Report.getInsult()
+		event.getChannel().sendMessage(Important.getInsult()
 				+" setting "+params[1]+" doesn't exist. Try `"+BotMain.PREFIX+"help`!").queue();
 		return true;
 	}
@@ -152,7 +153,7 @@ public class Config implements ICommand {
 	}
 	
 	private void notNumber(MessageReceivedEvent event) {
-		event.getChannel().sendMessage(Report.getInsult()+" is not a number!").queue();
+		event.getChannel().sendMessage(Important.getInsult()+" is not a number!").queue();
 	}
 
 }
