@@ -8,44 +8,22 @@ mainClassName = 'com.onewho.gamerbot.BotMain'
 
 compileJava.options.encoding = 'UTF-8'
 
-task procfile(type: Copy) {
-	from ("Procfile")
-	into ("$buildDir/libs")
-}
-
-task fatJar(type: Jar) {
-	manifest {
+jar {
+	 manifest {
         attributes( 
-             'Implementation-Title': project.name,  
-             'Implementation-Version': 0.1,
-        	 'Main-Class': 'com.onewho.gamerbot.BotMain'
+        	'Implementation-Title': project.name,  
+        	'Implementation-Version': 1.0,
+       		'Main-Class': 'com.onewho.gamerbot.BotMain'
         )
     }
-    baseName = project.name
-    from { configurations.compile
-    			.findAll { !it.name.endsWith('pom') }
-    			.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-    
-    exclude "META-INF/*.SF"
-  	exclude "META-INF/*.DSA"
-  	exclude "META-INF/*.RSA"
-}
-
-task heroku(type: Exec) {
-	commandLine 'cmd','/c','heroku_upload.bat'
-}
-
-task publish(type: GradleBuild) {
-	tasks = ['clean','fatJar','procfile','heroku']
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
 
 repositories {
     mavenCentral()
-	maven {
-    	name 'm2-dv8tion'
-    	url 'https://m2.dv8tion.net/releases'
-	}
 }
 
 dependencies {
