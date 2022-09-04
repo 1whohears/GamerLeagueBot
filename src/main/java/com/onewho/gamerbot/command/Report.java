@@ -43,14 +43,14 @@ public class Report implements ICommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		if (params.length != 5) {
-			event.getChannel().sendMessage(Important.getInsult()
+			event.getChannel().sendMessage(Important.getError()
 					+" do: `"+BotMain.PREFIX+"report [set id] [your score] [opponent score] [opponent ping]`").queue();
 			return true;
 		}
 		int id = -1, s1 = -1, s2 = -1;
 		long pingId = -1;
 		if (!checkIfMention(params[4])) {
-			event.getChannel().sendMessage(Important.getInsult()+" "+params[4]+" is not a mention!").queue();
+			event.getChannel().sendMessage(Important.getError()+" "+params[4]+" is not a mention!").queue();
 			return true;
 		}
 		String pingString = params[4].substring(2, params[4].length()-1);
@@ -62,16 +62,16 @@ public class Report implements ICommand {
 		} catch (NumberFormatException e) {
 		}
 		if (id == -1) {
-			event.getChannel().sendMessage(Important.getInsult()+" "+params[1]+" is not a number!").queue();
+			event.getChannel().sendMessage(Important.getError()+" "+params[1]+" is not a number!").queue();
 			return true;
 		} else if (s1 == -1) {
-			event.getChannel().sendMessage(Important.getInsult()+" "+params[2]+" is not a number!").queue();
+			event.getChannel().sendMessage(Important.getError()+" "+params[2]+" is not a number!").queue();
 			return true;
 		} else if (s2 == -1) {
-			event.getChannel().sendMessage(Important.getInsult()+" "+params[3]+" is not a number!").queue();
+			event.getChannel().sendMessage(Important.getError()+" "+params[3]+" is not a number!").queue();
 			return true;
 		} else if (pingId == -1) {
-			event.getChannel().sendMessage(Important.getInsult()+" you didn't mention/ping your opponent correctly!").queue();
+			event.getChannel().sendMessage(Important.getError()+" you didn't mention/ping your opponent correctly!").queue();
 			return true;
 		}
 		Guild guild = event.getGuild();
@@ -87,14 +87,14 @@ public class Report implements ICommand {
 		}
 		SetData set = ldata.getSetDataById(id);
 		if (set == null) {
-			event.getChannel().sendMessage(Important.getInsult()+" The set with id "+id+" does not exist!").queue();
+			event.getChannel().sendMessage(Important.getError()+" The set with id "+id+" does not exist!").queue();
 			return true;
 		}
 		String currentData = UtilCalendar.getCurrentDateString();
 		ReportResult result = set.report(event.getAuthor().getIdLong(), pingId, s1, s2, currentData);
 		switch (result) {
 		case IDsDontMatch:
-			event.getChannel().sendMessage(Important.getInsult()+" This set id does not have those players!").queue();
+			event.getChannel().sendMessage(Important.getError()+" This set id does not have those players!").queue();
 			break;
 		case ScoreConflict:
 			event.getChannel().sendMessage("This conflicts with the score that your opponent reported! "

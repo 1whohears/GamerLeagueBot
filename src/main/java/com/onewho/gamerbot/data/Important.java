@@ -11,18 +11,18 @@ import com.google.gson.JsonSyntaxException;
 
 public class Important {
 
-	public static String getInsult() {
-		return insults[(int)(Math.random()*insults.length)];
+	public static String getError() {
+		return errors[(int)(Math.random()*errors.length)];
 	}
 	
-	private static String[] insults = { "ERROR!" };
+	private static String[] errors = { "ERROR!" };
 	
 	public static void load() throws JsonSyntaxException, JsonIOException, IOException {
-		JsonObject jsonO = GlobalData.getGson().fromJson(Files.newBufferedReader(Paths.get("token.json")), JsonObject.class);
+		JsonObject jsonO = GlobalData.getGson().fromJson(Files.newBufferedReader(Paths.get("important.json")), JsonObject.class);
 		if (jsonO.get("insults") == null) return;
 		JsonArray json = jsonO.get("insults").getAsJsonArray();
-		insults = new String[json.size()];
-		for (int i = 0; i < json.size(); ++i) insults[i] = json.get(i).getAsString();
+		errors = new String[json.size()];
+		for (int i = 0; i < json.size(); ++i) errors[i] = json.get(i).getAsString();
 	}
 	
 }

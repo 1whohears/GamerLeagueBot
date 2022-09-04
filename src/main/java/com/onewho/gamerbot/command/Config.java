@@ -29,7 +29,7 @@ public class Config implements ICommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		if (params.length != 3) {
-			event.getChannel().sendMessage(Important.getInsult()
+			event.getChannel().sendMessage(Important.getError()
 					+" do: `"+BotMain.PREFIX+"config [setting] [value]`").queue();
 			return true;
 		}
@@ -112,7 +112,7 @@ public class Config implements ICommand {
 			if (params[2].equals("true")) valueB = true;
 			else if (params[2].equals("false")) valueB = false;
 			else {
-				event.getChannel().sendMessage(Important.getInsult()+" is not true or false!").queue();
+				event.getChannel().sendMessage(Important.getError()+" is not true or false!").queue();
 				return true;
 			}
 			ldata.autoGenPairs = valueB;
@@ -123,7 +123,7 @@ public class Config implements ICommand {
 			if (params[2].equals("true")) valueB = true;
 			else if (params[2].equals("false")) valueB = false;
 			else {
-				event.getChannel().sendMessage(Important.getInsult()+" is not true or false!").queue();
+				event.getChannel().sendMessage(Important.getError()+" is not true or false!").queue();
 				return true;
 			}
 			ldata.autoUpdateRanks = valueB;
@@ -131,7 +131,7 @@ public class Config implements ICommand {
 			GlobalData.saveData();
 			return true;
 		}
-		event.getChannel().sendMessage(Important.getInsult()
+		event.getChannel().sendMessage(Important.getError()
 				+" setting "+params[1]+" doesn't exist. Try `"+BotMain.PREFIX+"help`!").queue();
 		return true;
 	}
@@ -153,7 +153,7 @@ public class Config implements ICommand {
 	}
 	
 	private void notNumber(MessageReceivedEvent event) {
-		event.getChannel().sendMessage(Important.getInsult()+" is not a number!").queue();
+		event.getChannel().sendMessage(Important.getError()+" is not a number!").queue();
 	}
 
 }

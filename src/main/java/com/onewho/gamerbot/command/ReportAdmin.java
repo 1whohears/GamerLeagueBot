@@ -33,18 +33,18 @@ public class ReportAdmin implements ICommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		if (params.length != 6) {
-			event.getChannel().sendMessage(Important.getInsult()
+			event.getChannel().sendMessage(Important.getError()
 					+" do: `"+BotMain.PREFIX+"reportadmin [set id] [p1 ping] [p1 score] [p2 ping] [p2 score]`").queue();
 			return true;
 		}
 		int id = -1, s1 = -1, s2 = -1;
 		long pingId1 = -1, pingId2 = -1;
 		if (!checkIfMention(params[2])) {
-			event.getChannel().sendMessage(Important.getInsult()+" "+params[2]+" is not a mention!").queue();
+			event.getChannel().sendMessage(Important.getError()+" "+params[2]+" is not a mention!").queue();
 			return true;
 		}
 		if (!checkIfMention(params[4])) {
-			event.getChannel().sendMessage(Important.getInsult()+" "+params[4]+" is not a mention!").queue();
+			event.getChannel().sendMessage(Important.getError()+" "+params[4]+" is not a mention!").queue();
 			return true;
 		}
 		String pingS1 = params[2].substring(2, params[2].length()-1);
@@ -58,19 +58,19 @@ public class ReportAdmin implements ICommand {
 		} catch (NumberFormatException e) {
 		}
 		if (id == -1) {
-			event.getChannel().sendMessage(Important.getInsult()+" "+params[1]+" is not a number!").queue();
+			event.getChannel().sendMessage(Important.getError()+" "+params[1]+" is not a number!").queue();
 			return true;
 		} else if (s1 == -1) {
-			event.getChannel().sendMessage(Important.getInsult()+" "+params[3]+" is not a number!").queue();
+			event.getChannel().sendMessage(Important.getError()+" "+params[3]+" is not a number!").queue();
 			return true;
 		} else if (s2 == -1) {
-			event.getChannel().sendMessage(Important.getInsult()+" "+params[5]+" is not a number!").queue();
+			event.getChannel().sendMessage(Important.getError()+" "+params[5]+" is not a number!").queue();
 			return true;
 		} else if (pingId1 == -1) {
-			event.getChannel().sendMessage(Important.getInsult()+" you didn't mention/ping player 1 correctly!").queue();
+			event.getChannel().sendMessage(Important.getError()+" you didn't mention/ping player 1 correctly!").queue();
 			return true;
 		} else if (pingId2 == -1) {
-			event.getChannel().sendMessage(Important.getInsult()+" you didn't mention/ping player 2 correctly!").queue();
+			event.getChannel().sendMessage(Important.getError()+" you didn't mention/ping player 2 correctly!").queue();
 			return true;
 		}
 		Guild guild = event.getGuild();
@@ -86,13 +86,13 @@ public class ReportAdmin implements ICommand {
 		}
 		SetData set = ldata.getSetDataById(id);
 		if (set == null) {
-			event.getChannel().sendMessage(Important.getInsult()+" The set with id "+id+" does not exist!").queue();
+			event.getChannel().sendMessage(Important.getError()+" The set with id "+id+" does not exist!").queue();
 			return true;
 		}
 		String currentData = UtilCalendar.getCurrentDateString();
 		ReportResult result = set.reportAdmin(pingId1, pingId2, s1, s2, currentData);
 		if (result == ReportResult.IDsDontMatch) {
-			event.getChannel().sendMessage(Important.getInsult()+" This set id does not have those players!").queue();
+			event.getChannel().sendMessage(Important.getError()+" This set id does not have those players!").queue();
 			return true;
 		} else if (result == ReportResult.SetVerified) {
 			ldata.getUserDataById(set.getP1Id()).setLastActive(currentData);
