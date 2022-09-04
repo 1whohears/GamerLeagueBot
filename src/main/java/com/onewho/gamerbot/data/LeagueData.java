@@ -707,6 +707,7 @@ public class LeagueData {
 		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, this.getChannelId("pairings"));
 		this.removeOldSets(pairsChannel);
 		List<UserData> activeUsers = this.getAvailableSortedUsers();
+		List<SetData> newSets = new ArrayList<SetData>();
 		boolean createdSet = true;
 		while (createdSet) {
 			createdSet = false;
@@ -732,14 +733,18 @@ public class LeagueData {
 					}
 					long id1 = udata.getId(), id2 = activeUsers.get(ksort[i]).getId();
 					if (id1 == id2) continue;
-					this.createSet(id1, id2);
-					createdSet = true;
-					break;
+					SetData newSet = this.createSet(id1, id2);
+					if (newSet != null) {
+						newSets.add(newSet);
+						createdSet = true;
+						break;
+					}
 				}
 			}
 		}
-		this.displaySetsByDate(UtilCalendar.getCurrentDateString(), pairsChannel);
-		debugChannel.sendMessage("Finished Generating Pairings!").queue();
+		for (SetData set : newSets) set.displaySet(pairsChannel);
+		if (newSets.size() > 0) debugChannel.sendMessage("Generated "+newSets.size()+" new Pairings!").queue();
+		else debugChannel.sendMessage("No new pairings were generated!").queue();
 	}
 	
 	public void updateRanks(Guild guild, MessageChannelUnion debugChannel) {
