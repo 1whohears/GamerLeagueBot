@@ -572,7 +572,7 @@ public class LeagueData {
 			gamerRole = guild.createRole().complete();
 			setLeagueRoleId(gamerRole.getIdLong());
 			gamerRole.getManager()
-				.setName("GAMERS")
+				.setName(name)
 				.setColor(getRandomColor())
 				.queue();
 		}
@@ -615,8 +615,7 @@ public class LeagueData {
 		setupOptions(optionsChannel);
 		//finish
 		GlobalData.saveData();
-		System.out.println("setup command complete");
-		debugChannel.sendMessage("Bot Channel Setup Complete!").queue();		
+		debugChannel.sendMessage("Bot Channel Setup for League "+name+" Complete!").queue();		
 	}
 	
 	private Color getRandomColor() {

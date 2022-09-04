@@ -25,7 +25,6 @@ public class Setup implements ICommand {
 
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
-		System.out.println("running setup command");
 		Guild guild = event.getGuild();
 		GuildData gdata = GlobalData.createGuildData(guild.getIdLong());
 		if (gdata == null) {
