@@ -12,7 +12,7 @@ public class Scheduler {
 	public static void init() {
 		ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
 		//service.scheduleAtFixedRate(Scheduler::runWeekly, 0, 1, TimeUnit.of(ChronoUnit.WEEKS)); // doesn't work
-		service.scheduleAtFixedRate(Scheduler::runDaily, 0, 1, TimeUnit.DAYS);
+		service.scheduleAtFixedRate(getDailyRun(), 0, 1, TimeUnit.DAYS);
 	}
 	
 	/*private static void runWeekly() {
@@ -25,6 +25,14 @@ public class Scheduler {
 		System.out.println(new Date()+" running daily tasks");
 		GlobalData.updateRanksForAllLeagues();
 		GlobalData.genScheduledPairsForAllLeagues();
+	}
+	
+	private static Runnable getDailyRun() {
+		return new Runnable() {
+			public void run() {
+				runDaily();
+			}
+		};
 	}
 	
 }
