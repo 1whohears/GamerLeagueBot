@@ -23,6 +23,7 @@ public class BotMain {
 	public static void main(String [] arg) {
 		try {
 			Important.load();
+			Scheduler.init();
 			jda = JDABuilder.createDefault(TokenReader.getJDAToken(), 
 					GatewayIntent.GUILD_MEMBERS, 
 					GatewayIntent.GUILD_MESSAGES,
@@ -35,7 +36,7 @@ public class BotMain {
 		} catch (LoginException | IOException e) {
 			e.printStackTrace();
 		}
-		Scheduler.init();
+		
 	}
 	
 }
