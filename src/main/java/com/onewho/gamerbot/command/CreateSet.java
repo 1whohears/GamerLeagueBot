@@ -41,8 +41,7 @@ public class CreateSet implements ICommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		if (params.length != 3) {
-			event.getChannel().sendMessage(Important.getError()
-					+" do: `"+BotMain.PREFIX+"createset [p1 ping] [p2 ping]`").queue();
+			event.getChannel().sendMessage(Important.getError()+" DO: "+getHelp()).queue();
 			return true;
 		}
 		long id1 = getIdFromMention(params[1]);

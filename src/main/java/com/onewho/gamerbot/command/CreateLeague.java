@@ -38,8 +38,7 @@ public class CreateLeague implements ICommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		if (params.length < 2) {
-			event.getChannel().sendMessage(Important.getError()
-					+" do: `"+BotMain.PREFIX+"createleague [league name]`").queue();
+			event.getChannel().sendMessage(Important.getError()+" DO: "+getHelp()).queue();
 			return true;
 		}
 		Guild guild = event.getGuild();

@@ -41,8 +41,7 @@ public class Config implements ICommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		if (params.length != 3) {
-			event.getChannel().sendMessage(Important.getError()
-					+" do: `"+BotMain.PREFIX+"config [setting] [value]`").queue();
+			event.getChannel().sendMessage(Important.getError()+" DO: "+getHelp()).queue();
 			return true;
 		}
 		Guild guild = event.getGuild();
