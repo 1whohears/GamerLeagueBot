@@ -29,6 +29,11 @@ public class Report implements ICommand {
 	public boolean getNeedsAdmin() {
 		return false;
 	}
+	
+	@Override
+	public boolean getNeedsTO() {
+		return false;
+	}
 
 	@Override
 	public String getCommandString() {

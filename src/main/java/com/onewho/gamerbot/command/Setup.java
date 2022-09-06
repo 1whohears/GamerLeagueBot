@@ -14,6 +14,11 @@ public class Setup implements ICommand {
 	}
 	
 	@Override
+	public boolean getNeedsTO() {
+		return true;
+	}
+	
+	@Override
 	public String getCommandString() {
 		return "setup";
 	}

@@ -19,16 +19,23 @@ public class CommandParser {
 		//System.out.println("command received: "+command[0]+" in channel "+event.getChannel().getName());
 		//System.out.println("the user "+event.getMember().getNickname()+" has admin? "+event.getMember().hasPermission(Permission.ADMINISTRATOR));
 		for (ICommand c : commands) {
-			if (c.getCommandString().equals(command[0])) {
-				//System.out.println("command "+c.getCommandString()+" requires channel name "+c.getRequiredChannelName()+" and admin? "+c.getNeedsAdmin());
-				if (c.getRequiredChannelName() != null && !event.getChannel().getName().equals(c.getRequiredChannelName())) return true;
-				if (c.getNeedsAdmin() && !event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-					event.getChannel().sendMessage("That command requires admin permission to use!").queue();
-					return true;
-				}
-				c.runCommand(event, command);
+			if (!c.getCommandString().equals(command[0])) continue;
+			//System.out.println("command "+c.getCommandString()+" requires channel name "+c.getRequiredChannelName()+" and admin? "+c.getNeedsAdmin());
+			if (c.getRequiredChannelName() != null && !event.getChannel().getName().equals(c.getRequiredChannelName())) return true;
+			boolean admin = event.getMember().hasPermission(Permission.ADMINISTRATOR);
+			if (c.getNeedsAdmin() && !admin) {
+				event.getChannel().sendMessage("That command requires admin permission to use!").queue();
 				return true;
 			}
+			if (c.getNeedsTO() && !admin) {
+				boolean to = true;
+				if (!to) {
+					event.getChannel().sendMessage("That command requires tournament organizer role to use!").queue();
+					return true;
+				}
+			}
+			c.runCommand(event, command);
+			return true;
 		}
 		return false;
 	}

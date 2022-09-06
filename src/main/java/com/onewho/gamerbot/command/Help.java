@@ -13,6 +13,11 @@ public class Help implements ICommand {
 	}
 	
 	@Override
+	public boolean getNeedsTO() {
+		return false;
+	}
+	
+	@Override
 	public String getCommandString() {
 		return "help";
 	}

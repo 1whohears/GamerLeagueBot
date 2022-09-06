@@ -49,6 +49,7 @@ public class LeagueData {
 	private List<SetData> sets = new ArrayList<SetData>();
 	
 	private long leagueRoleId = -1;
+	private long toRoleId = -1;
 	private long leagueCategoryId = -1;
 	private long joinLeagueOptionId = -1;
 	private long setsaweekOptionId = -1;
@@ -78,6 +79,7 @@ public class LeagueData {
 		for (int i = 0; i < ss.size(); ++i) sets.add(new SetData(ss.get(i).getAsJsonObject()));
 		
 		leagueRoleId = ParseData.getLong(data, "league role id", leagueRoleId);
+		toRoleId = ParseData.getLong(data, "to role id", toRoleId);
 		leagueCategoryId = ParseData.getLong(data, "league category id", leagueCategoryId);
 		joinLeagueOptionId = ParseData.getLong(data, "join league option id", joinLeagueOptionId);
 		setsaweekOptionId = ParseData.getLong(data, "setsaweek option id", setsaweekOptionId);
@@ -109,6 +111,7 @@ public class LeagueData {
 		data.add("users", getUsersJson());
 		data.add("sets", getSetsJson());
 		data.addProperty("league role id", leagueRoleId);
+		data.addProperty("to role id", toRoleId);
 		data.addProperty("league category id", leagueCategoryId);
 		data.addProperty("join league option id", joinLeagueOptionId);
 		data.addProperty("setsaweek option id", setsaweekOptionId);
@@ -251,6 +254,20 @@ public class LeagueData {
 	 */
 	public void setLeagueRoleId(long leagueRoleId) {
 		this.leagueRoleId = leagueRoleId;
+	}
+	
+	/**
+	 * @return the id of the role given to TOs of this league by admin
+	 */
+	public long getToRoleId() {
+		return toRoleId;
+	}
+	
+	/**
+	 * @param toRoleId the id of the role given to TOs of this league by admin
+	 */
+	public void setToRoleId(long toRoleId) {
+		this.toRoleId = toRoleId;
 	}
 	
 	/**
@@ -576,6 +593,15 @@ public class LeagueData {
 				.setColor(getRandomColor())
 				.queue();
 		}
+		Role toRole = guild.getRoleById(getToRoleId());
+		if (toRole == null) {
+			toRole = guild.createRole().complete();
+			setToRoleId(toRole.getIdLong());
+			toRole.getManager()
+				.setName("TO "+name)
+				.setColor(getRandomColor())
+				.queue();
+		}
 		//setup category
 		Category gamerCat = guild.getCategoryById(getLeagueCategoryId());
 		if (gamerCat == null) {
@@ -591,6 +617,8 @@ public class LeagueData {
 			.putRolePermissionOverride(guild.getBotRole().getIdLong(), perm1, null)
 			.putRolePermissionOverride(guild.getBotRole().getIdLong(), perm2, null)
 			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), perm1, perm2)
+			.putRolePermissionOverride(toRole.getIdLong(), perm1, null)
+			.putRolePermissionOverride(toRole.getIdLong(), perm2, null)
 			.complete();
 		perm1.clear();
 		perm2.clear();

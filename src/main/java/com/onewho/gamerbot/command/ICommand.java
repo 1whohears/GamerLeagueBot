@@ -6,6 +6,8 @@ public interface ICommand {
 	
 	public boolean getNeedsAdmin();
 	
+	public boolean getNeedsTO();
+	
 	public String getCommandString();
 	
 	public String getRequiredChannelName();

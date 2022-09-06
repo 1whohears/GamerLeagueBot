@@ -14,6 +14,11 @@ public class RefreshSet implements ICommand {
 	public boolean getNeedsAdmin() {
 		return true;
 	}
+	
+	@Override
+	public boolean getNeedsTO() {
+		return true;
+	}
 
 	@Override
 	public String getCommandString() {

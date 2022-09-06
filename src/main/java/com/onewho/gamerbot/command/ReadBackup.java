@@ -23,6 +23,11 @@ public class ReadBackup implements ICommand {
 
 	@Override
 	public boolean getNeedsAdmin() {
+		return false;
+	}
+	
+	@Override
+	public boolean getNeedsTO() {
 		return true;
 	}
 
