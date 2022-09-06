@@ -29,6 +29,11 @@ public class CreateLeague implements ICommand {
 	public String getRequiredChannelName() {
 		return null;
 	}
+	
+	@Override
+	public String getHelp() {
+		return "`"+BotMain.PREFIX+getCommandString()+" [league name]` ";
+	}
 
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {

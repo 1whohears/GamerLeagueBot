@@ -1,5 +1,6 @@
 package com.onewho.gamerbot.command;
 
+import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.GuildData;
 
@@ -26,6 +27,12 @@ public class Setup implements ICommand {
 	@Override
 	public String getRequiredChannelName() {
 		return null;
+	}
+	
+	@Override
+	public String getHelp() {
+		return "`"+BotMain.PREFIX+getCommandString()+"` Sets up channels/roles for this server's leagues."
+				+ " Run this command if you accidentally delete a channel.";
 	}
 
 	@Override

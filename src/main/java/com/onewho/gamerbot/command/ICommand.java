@@ -12,6 +12,8 @@ public interface ICommand {
 	
 	public String getRequiredChannelName();
 	
+	public String getHelp();
+	
 	public boolean runCommand(MessageReceivedEvent event, String[] params);
 	
 }

@@ -32,6 +32,11 @@ public class CreateSet implements ICommand {
 	public String getRequiredChannelName() {
 		return "bot-commands";
 	}
+	
+	@Override
+	public String getHelp() {
+		return "`"+BotMain.PREFIX+getCommandString()+" [p1 ping] [p2 ping]` create a set with these 2 users.";
+	}
 
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {

@@ -11,6 +11,7 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.onewho.gamerbot.data.LeagueData;
+import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.GuildData;
 
@@ -39,6 +40,11 @@ public class ReadBackup implements ICommand {
 	@Override
 	public String getRequiredChannelName() {
 		return "bot-commands";
+	}
+	
+	@Override
+	public String getHelp() {
+		return "`"+BotMain.PREFIX+getCommandString()+"` Upload a backup file with this command to restore old user/set data.";
 	}
 
 	@Override

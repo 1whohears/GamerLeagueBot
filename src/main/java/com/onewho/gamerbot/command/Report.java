@@ -44,6 +44,12 @@ public class Report implements ICommand {
 	public String getRequiredChannelName() {
 		return "bot-commands";
 	}
+	
+	@Override
+	public String getHelp() {
+		return "`"+BotMain.PREFIX+getCommandString()+" [set id] [your score] [opponent score] [opponent ping]`"
+				+ " report one of your sets";
+	}
 
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {

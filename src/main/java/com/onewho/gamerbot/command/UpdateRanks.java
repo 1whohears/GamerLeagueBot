@@ -1,5 +1,6 @@
 package com.onewho.gamerbot.command;
 
+import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.LeagueData;
@@ -27,6 +28,11 @@ public class UpdateRanks implements ICommand {
 	@Override
 	public String getRequiredChannelName() {
 		return "bot-commands";
+	}
+	
+	@Override
+	public String getHelp() {
+		return "`"+BotMain.PREFIX+getCommandString()+"` Updates users scores and ranks based on their reported sets.";
 	}
 
 	@Override

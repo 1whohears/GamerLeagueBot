@@ -1,23 +1,16 @@
-/**
- * this command is for development purposes only
- */
-
 package com.onewho.gamerbot.command;
 
-import java.io.IOException;
-
 import com.onewho.gamerbot.BotMain;
-import com.onewho.gamerbot.data.GlobalData;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class Reload implements ICommand {
+public class RenameLeague implements ICommand {
 
 	@Override
 	public boolean getNeedsAdmin() {
-		return true;
+		return false;
 	}
-	
+
 	@Override
 	public boolean getNeedsTO() {
 		return true;
@@ -25,7 +18,7 @@ public class Reload implements ICommand {
 
 	@Override
 	public String getCommandString() {
-		return "reload";
+		return "renameleague";
 	}
 
 	@Override
@@ -40,13 +33,7 @@ public class Reload implements ICommand {
 
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
-		try {
-			GlobalData.readJsonData();
-			event.getChannel().sendMessage("Realoaded Data File!").queue();
-			System.out.println("Reloading JsonData");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		
 		return true;
 	}
 

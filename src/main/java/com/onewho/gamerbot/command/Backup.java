@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import com.google.gson.JsonObject;
+import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.LeagueData;
@@ -36,6 +37,11 @@ public class Backup implements ICommand {
 	@Override
 	public String getRequiredChannelName() {
 		return "bot-commands";
+	}
+	
+	@Override
+	public String getHelp() {
+		return "`"+BotMain.PREFIX+getCommandString()+"` Puts all user and set data in a backup file.";
 	}
 
 	@Override

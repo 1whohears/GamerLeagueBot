@@ -3,7 +3,13 @@ package com.onewho.gamerbot.command;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.onewho.gamerbot.data.GlobalData;
+import com.onewho.gamerbot.data.GuildData;
+import com.onewho.gamerbot.data.LeagueData;
+
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class CommandParser {
@@ -28,8 +34,24 @@ public class CommandParser {
 				return true;
 			}
 			if (c.getNeedsTO() && !admin) {
-				boolean to = true;
-				if (!to) {
+				Guild guild = event.getGuild();
+				GuildData gdata = GlobalData.createGuildData(guild.getIdLong());
+				if (gdata == null) {
+					event.getChannel().sendMessage("That command requires tournament organizer role to use in a league!").queue();
+					return true;
+				}
+				LeagueData ldata = gdata.getLeagueByChannel(event.getChannel());
+				if (ldata == null) {
+					event.getChannel().sendMessage("That command requires tournament organizer role to use in a league!").queue();
+					return true;
+				}
+				Role toRole = guild.getRoleById(ldata.getToRoleId());
+				if (toRole == null) {
+					event.getChannel().sendMessage("This league doesn't have a TO role."
+							+ " Please use the `setup` command!").queue();
+					return true;
+				}
+				if (event.getMember().getRoles().contains(toRole)) {
 					event.getChannel().sendMessage("That command requires tournament organizer role to use!").queue();
 					return true;
 				}
@@ -44,7 +66,6 @@ public class CommandParser {
 		commands = new ArrayList<ICommand>();
 		commands.add(new Help());
 		commands.add(new Setup());
-		commands.add(new Reload());
 		commands.add(new Config());
 		commands.add(new GenPairs());
 		commands.add(new Report());
@@ -52,9 +73,44 @@ public class CommandParser {
 		commands.add(new UpdateRanks());
 		commands.add(new Backup());
 		commands.add(new ReadBackup());
-		commands.add(new RefreshSet());
 		commands.add(new CreateSet());
 		commands.add(new CreateLeague());
+		//commands.add(new Reload()); // for testing
+		//commands.add(new RefreshSet()); // for testing
+	}
+	
+	private static List<ICommand> userCommands;
+	private static List<ICommand> toCommands;
+	private static List<ICommand> adminCommands;
+	
+	public static List<ICommand> getUserCommands() {
+		if (userCommands == null) {
+			userCommands = new ArrayList<ICommand>();
+			for (ICommand c : commands) 
+				if (!c.getNeedsTO() && !c.getNeedsAdmin()) 
+					userCommands.add(c);
+		}
+		return userCommands;
+	}
+	
+	public static List<ICommand> getTOCommands() {
+		if (toCommands == null) {
+			toCommands = new ArrayList<ICommand>();
+			for (ICommand c : commands) 
+				if (c.getNeedsTO() && !c.getNeedsAdmin()) 
+					toCommands.add(c);
+		}
+		return toCommands;
+	}
+	
+	public static List<ICommand> getAdminCommands() {
+		if (adminCommands == null) {
+			adminCommands = new ArrayList<ICommand>();
+			for (ICommand c : commands) 
+				if (c.getNeedsAdmin()) 
+					adminCommands.add(c);
+		}
+		return adminCommands;
 	}
 	
 }

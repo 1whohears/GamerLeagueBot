@@ -1,6 +1,7 @@
 package com.onewho.gamerbot.command;
 
 import com.onewho.gamerbot.data.LeagueData;
+import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.SetData;
 
@@ -28,6 +29,11 @@ public class RefreshSet implements ICommand {
 	@Override
 	public String getRequiredChannelName() {
 		return "bot-commands";
+	}
+	
+	@Override
+	public String getHelp() {
+		return "`"+BotMain.PREFIX+getCommandString()+"` ";
 	}
 
 	@Override

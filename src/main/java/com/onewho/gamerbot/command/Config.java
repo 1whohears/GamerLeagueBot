@@ -30,6 +30,13 @@ public class Config implements ICommand {
 	public String getRequiredChannelName() {
 		return "bot-commands";
 	}
+	
+	@Override
+	public String getHelp() {
+		return "`"+BotMain.PREFIX+getCommandString()+" [setting] [value]`"
+				+ " Settings: `max-sets-per-week`, `weeks-before-auto-inactive`, `weeks-before-set-expires`,"
+				+ " `weeks-before-set-repeat`, `default-score`, `K` (elo K constant), `auto-gen-pairs`, `auto-update-ranks`";
+	}
 
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {

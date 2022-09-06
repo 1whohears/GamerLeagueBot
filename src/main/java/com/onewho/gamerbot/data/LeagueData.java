@@ -584,30 +584,25 @@ public class LeagueData {
 	 */
 	public void setupDiscordStuff(Guild guild, MessageChannelUnion debugChannel) {
 		//setup roles
+		Color color = getRandomColor();
 		Role gamerRole = guild.getRoleById(getLeagueRoleId());
 		if (gamerRole == null) {
-			gamerRole = guild.createRole().complete();
+			gamerRole = guild.createRole().setColor(color).complete();
 			setLeagueRoleId(gamerRole.getIdLong());
-			gamerRole.getManager()
-				.setName(name)
-				.setColor(getRandomColor())
-				.queue();
 		}
+		gamerRole.getManager().setName(name).queue();
 		Role toRole = guild.getRoleById(getToRoleId());
 		if (toRole == null) {
-			toRole = guild.createRole().complete();
+			toRole = guild.createRole().setColor(color).complete();
 			setToRoleId(toRole.getIdLong());
-			toRole.getManager()
-				.setName("TO "+name)
-				.setColor(getRandomColor())
-				.queue();
 		}
+		toRole.getManager().setName("TO "+name).queue();
 		//setup category
 		Category gamerCat = guild.getCategoryById(getLeagueCategoryId());
 		if (gamerCat == null) {
 			gamerCat = guild.createCategory(name).complete();
 			setLeagueCategoryId(gamerCat.getIdLong());
-		}
+		} else gamerCat.getManager().setName(name).queue();
 		Collection<Permission> perm1 = new ArrayList<Permission>();
 		Collection<Permission> perm2 = new ArrayList<Permission>();
 		perm1.add(Permission.MESSAGE_HISTORY);
