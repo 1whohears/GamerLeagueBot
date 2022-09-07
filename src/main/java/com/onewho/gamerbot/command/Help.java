@@ -42,6 +42,7 @@ public class Help implements ICommand {
 
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
+		System.out.println("help command");
 		Guild guild = event.getGuild();
 		GuildData gdata = GlobalData.createGuildData(guild.getIdLong());
 		if (gdata == null) {
@@ -69,21 +70,21 @@ public class Help implements ICommand {
 		String help = "__**All Users Commands**__";
 		List<ICommand> commands = CommandParser.getUserCommands();
 		for (ICommand c : commands) help += "\n"+c.getHelp(); 
-		channel.sendMessage(help);
+		channel.sendMessage(help).queue();;
 	}
 	
 	private void helpTO(MessageChannelUnion channel) {
 		String help = "__**TO Commands**__";
 		List<ICommand> commands = CommandParser.getTOCommands();
 		for (ICommand c : commands) help += "\n"+c.getHelp(); 
-		channel.sendMessage(help);
+		channel.sendMessage(help).queue();;
 	}
 	
 	private void helpAdmin(MessageChannelUnion channel) {
 		String help = "__**Admin Commands**__";
 		List<ICommand> commands = CommandParser.getAdminCommands();
 		for (ICommand c : commands) help += "\n"+c.getHelp(); 
-		channel.sendMessage(help);
+		channel.sendMessage(help).queue();
 	}
 
 }

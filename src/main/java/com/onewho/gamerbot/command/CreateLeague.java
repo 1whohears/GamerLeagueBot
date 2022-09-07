@@ -46,6 +46,7 @@ public class CreateLeague implements ICommand {
 		String name = "";
 		for (int i = 1; i < params.length; ++i) name += params[i];
 		gdata.createLeague(guild, event.getChannel(), name);
+		GlobalData.saveData();
 		return true;
 	}
 
