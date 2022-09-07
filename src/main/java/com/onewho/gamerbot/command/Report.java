@@ -54,8 +54,7 @@ public class Report implements ICommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
 		if (params.length != 5) {
-			event.getChannel().sendMessage(Important.getError()
-					+" do: `"+BotMain.PREFIX+"report [set id] [your score] [opponent score] [opponent ping]`").queue();
+			event.getChannel().sendMessage(Important.getError()+" DO: "+getHelp()).queue();
 			return true;
 		}
 		int id = -1, s1 = -1, s2 = -1;
