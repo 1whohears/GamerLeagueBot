@@ -26,6 +26,7 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
+import net.dv8tion.jda.api.exceptions.MissingAccessException;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
@@ -588,6 +589,12 @@ public class LeagueData {
 			setupRoles(guild, debugChannel); 
 			Category leagueCategory = setupCategory(guild, debugChannel);
 			setupChannels(guild, debugChannel, leagueCategory);
+		} catch (MissingAccessException e) {
+			missingAccessError(guild, debugChannel);
+			System.out.println("PERMISSION ERROR: League discord setup for "+getName()+" failed!");
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+			return;
 		} catch (InsufficientPermissionException e) {
 			insufficientPermissionError(guild, debugChannel);
 			System.out.println("PERMISSION ERROR: League discord setup for "+getName()+" failed!");
@@ -599,10 +606,18 @@ public class LeagueData {
 		debugChannel.sendMessage("Bot Channel Setup for League "+name+" Complete!").queue();		
 	}
 	
+	private void missingAccessError(Guild guild, MessageChannelUnion debugChannel) {
+		debugChannel.sendMessage(Important.getError()+" Discord stuff setup for "+getName()
+				+ " failed because of a permission error! Please verify that "
+				+ getRoleMention(guild.getBotRole().getIdLong())+" has the `View Channel` permission"
+				+ " in all of this league's channels!")
+			.queue();
+	}
+	
 	private void insufficientPermissionError(Guild guild, MessageChannelUnion debugChannel) {
 		debugChannel.sendMessage(Important.getError()+" Discord stuff setup for "+getName()
 				+ " failed because of a permission error! Please verify that "
-				+ getMention(guild.getBotRole().getIdLong())+" has the following permisions!")
+				+ getRoleMention(guild.getBotRole().getIdLong())+" has the following permisions!")
 			.queue();
 		debugChannel.sendMessage("`View Channels`, `Manage Channels`, `Manage Roles`, `Send Messages`"
 				+ ", `Embed Links`, `Attach Files`, `Add Reactions`, `Manage Messages`, `Read Message History`")
@@ -660,12 +675,18 @@ public class LeagueData {
 			leagueCategory = guild.createCategory(name).complete();
 			setLeagueCategoryId(leagueCategory.getIdLong());
 		} else leagueCategory.getManager().setName(name).queue();
+		// BOT PERMS 
+		Collection<Permission> botPermsAllow = new ArrayList<Permission>();
+		botPermsAllow.add(Permission.VIEW_CHANNEL);
+		botPermsAllow.add(Permission.MESSAGE_SEND);
+		botPermsAllow.add(Permission.MESSAGE_ADD_REACTION);
 		// PUBLIC PERMS
 		Collection<Permission> publicPermsAllow = new ArrayList<Permission>();
 		publicPermsAllow.add(Permission.MESSAGE_HISTORY);
 		Collection<Permission> publicPermsDeny = new ArrayList<Permission>();
 		publicPermsDeny.add(Permission.VIEW_CHANNEL);
 		publicPermsDeny.add(Permission.MESSAGE_SEND);
+		publicPermsDeny.add(Permission.MESSAGE_ADD_REACTION);
 		// LEAGUE PERMS
 		Collection<Permission> leaguePermsAllow = new ArrayList<Permission>();
 		leaguePermsAllow.add(Permission.VIEW_CHANNEL);
@@ -675,8 +696,9 @@ public class LeagueData {
 		toPermsAllow.add(Permission.MESSAGE_SEND);
 		toPermsAllow.add(Permission.MESSAGE_ATTACH_FILES);
 		toPermsAllow.add(Permission.MESSAGE_MANAGE);
-		// SET PERMS
+		// SET PERMS (ORDER MATTERS)
 		leagueCategory.getManager()
+			.putRolePermissionOverride(guild.getBotRole().getIdLong(), botPermsAllow, null)
 			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), publicPermsAllow, publicPermsDeny)
 			.putRolePermissionOverride(getLeagueRoleId(), leaguePermsAllow, null)
 			.putRolePermissionOverride(getToRoleId(), toPermsAllow, null)
@@ -856,6 +878,10 @@ public class LeagueData {
 	
 	private String getMention(long id) {
 		return "<@"+id+">";
+	}
+	
+	private String getRoleMention(long id) {
+		return "<@&"+id+">";
 	}
 	
 	protected void genScheduledPairs(Guild guild) {
