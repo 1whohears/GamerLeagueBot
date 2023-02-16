@@ -74,8 +74,10 @@ public class CommandParser {
 		commands.add(new Backup());
 		commands.add(new ReadBackup());
 		commands.add(new CreateSet());
+		commands.add(new RemoveSet());
 		commands.add(new CreateLeague());
 		commands.add(new RenameLeague());
+		commands.add(new RemoveLeague());
 		//commands.add(new Reload()); // for testing
 		//commands.add(new RefreshSet()); // for testing
 	}
