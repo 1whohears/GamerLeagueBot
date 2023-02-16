@@ -608,23 +608,21 @@ public class LeagueData {
 		chatPerm.add(Permission.MESSAGE_ADD_REACTION);
 		Collection<Permission> sendPerm = new ArrayList<Permission>();
 		chatPerm.add(Permission.MESSAGE_SEND);
-		chatPerm.add(Permission.MESSAGE_ADD_REACTION);
 		// RULES
 		rulesChannel.getManager()
 			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), viewPerm, null)
-			.putRolePermissionOverride(guild.getBotRole().getIdLong(), null, sendPerm)
+			.putRolePermissionOverride(guild.getBotRole().getIdLong(), viewPerm, sendPerm)
 			.complete();
 		// CHAT
 		chatChannel.getManager()
 			.putRolePermissionOverride(getLeagueRoleId(), chatPerm, null)
-			.putRolePermissionOverride(guild.getBotRole().getIdLong(), null, sendPerm)
+			.putRolePermissionOverride(guild.getBotRole().getIdLong(), viewPerm, sendPerm)
 			.complete();
 		// COMMANDS
 		commandsChannel.getManager()
 			.putRolePermissionOverride(getLeagueRoleId(), chatPerm, null)
 			.complete();
 		// OPTIONS
-		viewPerm.add(Permission.MESSAGE_ADD_REACTION);
 		optionsChannel.getManager()
 			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), viewPerm, null)
 			.complete();
@@ -644,7 +642,6 @@ public class LeagueData {
 		Collection<Permission> publicPermsDeny = new ArrayList<Permission>();
 		publicPermsDeny.add(Permission.VIEW_CHANNEL);
 		publicPermsDeny.add(Permission.MESSAGE_SEND);
-		publicPermsDeny.add(Permission.MESSAGE_ADD_REACTION);
 		// LEAGUE PERMS
 		Collection<Permission> leaguePermsAllow = new ArrayList<Permission>();
 		leaguePermsAllow.add(Permission.VIEW_CHANNEL);
@@ -658,7 +655,6 @@ public class LeagueData {
 		Collection<Permission> botPermsAllow = new ArrayList<Permission>();
 		botPermsAllow.add(Permission.VIEW_CHANNEL);
 		botPermsAllow.add(Permission.MESSAGE_SEND);
-		botPermsAllow.add(Permission.MESSAGE_ADD_REACTION);
 		botPermsAllow.add(Permission.MESSAGE_ATTACH_FILES);
 		botPermsAllow.add(Permission.MESSAGE_HISTORY);
 		botPermsAllow.add(Permission.MESSAGE_MANAGE);
