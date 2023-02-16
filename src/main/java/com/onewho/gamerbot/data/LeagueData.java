@@ -645,10 +645,12 @@ public class LeagueData {
 			.complete();
 		// CHAT
 		chatChannel.getManager()
+			.putRolePermissionOverride(getLeagueRoleId(), viewPerm, null)
 			.putRolePermissionOverride(getLeagueRoleId(), chatPerm, null)
 			.complete();
 		// COMMANDS
 		commandsChannel.getManager()
+			.putRolePermissionOverride(getLeagueRoleId(), viewPerm, null)
 			.putRolePermissionOverride(getLeagueRoleId(), chatPerm, null)
 			.complete();
 		// OPTIONS
