@@ -609,8 +609,9 @@ public class LeagueData {
 	private void missingAccessError(Guild guild, MessageChannelUnion debugChannel) {
 		debugChannel.sendMessage(Important.getError()+" Discord stuff setup for "+getName()
 				+ " failed because of a permission error! Please verify that "
-				+ getRoleMention(guild.getBotRole().getIdLong())+" has the `View Channel` permission"
-				+ " in all of this league's channels!")
+				+ getRoleMention(guild.getBotRole().getIdLong())+" has the "
+				+ "`View Channel`, `Send Messages`, and `Add Reactions`"
+				+ " permission in all of this league's channels!")
 			.queue();
 	}
 	
@@ -639,9 +640,12 @@ public class LeagueData {
 		chatPerm.add(Permission.VIEW_CHANNEL);
 		chatPerm.add(Permission.MESSAGE_SEND);
 		chatPerm.add(Permission.MESSAGE_ADD_REACTION);
+		Collection<Permission> denyChatPerm = new ArrayList<Permission>();
+		chatPerm.add(Permission.MESSAGE_SEND);
+		chatPerm.add(Permission.MESSAGE_ADD_REACTION);
 		// RULES
 		rulesChannel.getManager()
-			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), viewPerm, null)
+			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), viewPerm, denyChatPerm)
 			.complete();
 		// CHAT
 		chatChannel.getManager()
@@ -653,7 +657,7 @@ public class LeagueData {
 			.complete();
 		// OPTIONS
 		optionsChannel.getManager()
-			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), viewPerm, null)
+			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), viewPerm, denyChatPerm)
 			.complete();
 		// SETUP SPECIAL CHANNELS
 		setupOptions(optionsChannel);
@@ -708,18 +712,18 @@ public class LeagueData {
 	
 	private void setupRoles(Guild guild, MessageChannelUnion debugChannel) throws InsufficientPermissionException {
 		Color color = getRandomColor();
-		Role gamerRole = guild.getRoleById(getLeagueRoleId());
-		if (gamerRole == null) {
-			gamerRole = guild.createRole().setColor(color).complete();
-			setLeagueRoleId(gamerRole.getIdLong());
-		}
-		gamerRole.getManager().setName(name).queue();
 		Role toRole = guild.getRoleById(getToRoleId());
 		if (toRole == null) {
 			toRole = guild.createRole().setColor(color).complete();
 			setToRoleId(toRole.getIdLong());
 		}
 		toRole.getManager().setName("TO "+name).queue();
+		Role gamerRole = guild.getRoleById(getLeagueRoleId());
+		if (gamerRole == null) {
+			gamerRole = guild.createRole().setColor(color).complete();
+			setLeagueRoleId(gamerRole.getIdLong());
+		}
+		gamerRole.getManager().setName(name).queue();
 	}
 	
 	private Color getRandomColor() {
