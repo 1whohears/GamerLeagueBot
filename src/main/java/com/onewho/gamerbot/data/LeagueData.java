@@ -743,8 +743,8 @@ public class LeagueData {
 	
 	private MessageEmbed getJLEmbed() {
 		EmbedBuilder jleb = new EmbedBuilder();
-		jleb.setTitle("Join this Server's Gamer League?");
-		jleb.setColor(Color.GREEN);
+		jleb.setTitle("Join "+getName()+"?");
+		jleb.setColor(getRandomColor());
 		jleb.setDescription("You will be pinged often and must complete your assigned matches!");
 		return jleb.build();
 	}
@@ -758,7 +758,7 @@ public class LeagueData {
 	private MessageEmbed getSWEmbed() {
 		EmbedBuilder sweb = new EmbedBuilder();
 		sweb.setTitle("Sets Per Week");
-		sweb.setColor(Color.BLUE);
+		sweb.setColor(getRandomColor());
 		sweb.setDescription("Most amount of sets you can do next week?");
 		return sweb.build();
 	}
