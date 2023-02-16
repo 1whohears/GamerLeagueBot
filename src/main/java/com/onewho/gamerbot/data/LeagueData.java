@@ -641,7 +641,7 @@ public class LeagueData {
 		chatPerm.add(Permission.MESSAGE_ADD_REACTION);
 		// RULES
 		rulesChannel.getManager()
-			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), viewPerm, null)
+			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), viewPerm, chatPerm)
 			.complete();
 		// CHAT
 		chatChannel.getManager()
@@ -653,7 +653,7 @@ public class LeagueData {
 			.complete();
 		// OPTIONS
 		optionsChannel.getManager()
-			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), viewPerm, null)
+			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), viewPerm, chatPerm)
 			.complete();
 		// SETUP SPECIAL CHANNELS
 		setupOptions(optionsChannel);
