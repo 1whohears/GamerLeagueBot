@@ -636,6 +636,7 @@ public class LeagueData {
 		try {
 			channel.getManager().sync(cat.getPermissionContainer()).complete();
 		} catch (InsufficientPermissionException e) {
+			System.out.println("ERROR: InsufficientPermissionException with channel "+name);
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
