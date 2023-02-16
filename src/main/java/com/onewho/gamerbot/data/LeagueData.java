@@ -583,7 +583,93 @@ public class LeagueData {
 	 * @param debugChannel channel debug info should be sent to
 	 */
 	public void setupDiscordStuff(Guild guild, MessageChannelUnion debugChannel) {
-		//setup roles
+		setupRoles(guild, debugChannel);
+		Category leagueCategory = setupCategory(guild, debugChannel);
+		setupChannels(guild, debugChannel, leagueCategory);
+		
+		GlobalData.saveData();
+		debugChannel.sendMessage("Bot Channel Setup for League "+name+" Complete!").queue();		
+	}
+	
+	private void setupChannels(Guild guild, MessageChannelUnion debugChannel, Category leagueCategory) {
+		TextChannel rulesChannel = setupChannel("rules", leagueCategory, guild);
+		TextChannel chatChannel = setupChannel("chat", leagueCategory, guild);
+		TextChannel commandsChannel = setupChannel("bot-commands", leagueCategory, guild);
+		TextChannel optionsChannel = setupChannel("options", leagueCategory, guild);
+		setupChannel("set-history", leagueCategory, guild);
+		setupChannel("ranks", leagueCategory, guild);
+		setupChannel("pairings", leagueCategory, guild);
+		// SPECIAL PERMS
+		Collection<Permission> viewPerm = new ArrayList<Permission>();
+		viewPerm.add(Permission.VIEW_CHANNEL);
+		Collection<Permission> chatPerm = new ArrayList<Permission>();
+		chatPerm.add(Permission.VIEW_CHANNEL);
+		chatPerm.add(Permission.MESSAGE_SEND);
+		chatPerm.add(Permission.MESSAGE_ADD_REACTION);
+		// RULES
+		rulesChannel.getManager()
+			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), viewPerm, null)
+			.putRolePermissionOverride(guild.getBotRole().getIdLong(), null, viewPerm)
+			.complete();
+		// CHAT
+		chatChannel.getManager()
+			.putRolePermissionOverride(getLeagueRoleId(), chatPerm, null)
+			.putRolePermissionOverride(guild.getBotRole().getIdLong(), null, viewPerm)
+			.complete();
+		// COMMANDS
+		commandsChannel.getManager()
+			.putRolePermissionOverride(getLeagueRoleId(), chatPerm, null)
+			.complete();
+		// OPTIONS
+		viewPerm.add(Permission.MESSAGE_ADD_REACTION);
+		optionsChannel.getManager()
+			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), viewPerm, null)
+			.complete();
+		// SETUP SPECIAL CHANNELS
+		setupOptions(optionsChannel);
+	}
+	
+	private Category setupCategory(Guild guild, MessageChannelUnion debugChannel) {
+		Category leagueCategory = guild.getCategoryById(getLeagueCategoryId());
+		if (leagueCategory == null) {
+			leagueCategory = guild.createCategory(name).complete();
+			setLeagueCategoryId(leagueCategory.getIdLong());
+		} else leagueCategory.getManager().setName(name).queue();
+		// PUBLIC PERMS
+		Collection<Permission> publicPermsAllow = new ArrayList<Permission>();
+		publicPermsAllow.add(Permission.MESSAGE_HISTORY);
+		Collection<Permission> publicPermsDeny = new ArrayList<Permission>();
+		publicPermsDeny.add(Permission.VIEW_CHANNEL);
+		publicPermsDeny.add(Permission.MESSAGE_SEND);
+		publicPermsDeny.add(Permission.MESSAGE_ADD_REACTION);
+		// LEAGUE PERMS
+		Collection<Permission> leaguePermsAllow = new ArrayList<Permission>();
+		leaguePermsAllow.add(Permission.VIEW_CHANNEL);
+		// TO PERMS
+		Collection<Permission> toPermsAllow = new ArrayList<Permission>();
+		toPermsAllow.add(Permission.VIEW_CHANNEL);
+		toPermsAllow.add(Permission.MESSAGE_SEND);
+		toPermsAllow.add(Permission.MESSAGE_ATTACH_FILES);
+		toPermsAllow.add(Permission.MESSAGE_MANAGE);
+		// BOT PERMS
+		Collection<Permission> botPermsAllow = new ArrayList<Permission>();
+		botPermsAllow.add(Permission.VIEW_CHANNEL);
+		botPermsAllow.add(Permission.MESSAGE_SEND);
+		botPermsAllow.add(Permission.MESSAGE_ADD_REACTION);
+		botPermsAllow.add(Permission.MESSAGE_ATTACH_FILES);
+		botPermsAllow.add(Permission.MESSAGE_HISTORY);
+		botPermsAllow.add(Permission.MESSAGE_MANAGE);
+		// SET PERMS
+		leagueCategory.getManager()
+			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), publicPermsAllow, publicPermsDeny)
+			.putRolePermissionOverride(getLeagueRoleId(), leaguePermsAllow, null)
+			.putRolePermissionOverride(getToRoleId(), toPermsAllow, null)
+			.putRolePermissionOverride(guild.getBotRole().getIdLong(), botPermsAllow, null)
+			.complete();
+		return leagueCategory;
+	}
+	
+	private void setupRoles(Guild guild, MessageChannelUnion debugChannel) {
 		Color color = getRandomColor();
 		Role gamerRole = guild.getRoleById(getLeagueRoleId());
 		if (gamerRole == null) {
@@ -597,48 +683,6 @@ public class LeagueData {
 			setToRoleId(toRole.getIdLong());
 		}
 		toRole.getManager().setName("TO "+name).queue();
-		//setup category
-		Category gamerCat = guild.getCategoryById(getLeagueCategoryId());
-		if (gamerCat == null) {
-			gamerCat = guild.createCategory(name).complete();
-			setLeagueCategoryId(gamerCat.getIdLong());
-		} else gamerCat.getManager().setName(name).queue();
-		Collection<Permission> perm1 = new ArrayList<Permission>();
-		Collection<Permission> perm2 = new ArrayList<Permission>();
-		perm1.add(Permission.MESSAGE_HISTORY);
-		perm2.add(Permission.MESSAGE_SEND);
-		perm2.add(Permission.MESSAGE_ADD_REACTION);
-		gamerCat.getManager()
-			.putRolePermissionOverride(guild.getBotRole().getIdLong(), perm1, null)
-			.putRolePermissionOverride(guild.getBotRole().getIdLong(), perm2, null)
-			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), perm1, perm2)
-			.putRolePermissionOverride(toRole.getIdLong(), perm1, null)
-			.putRolePermissionOverride(toRole.getIdLong(), perm2, null)
-			.complete();
-		perm1.clear();
-		perm2.clear();
-		//setup channels
-		TextChannel commandsChannel = setupChannel("bot-commands", gamerCat, guild);
-		TextChannel optionsChannel = setupChannel("options", gamerCat, guild);
-		setupChannel("set-history", gamerCat, guild);
-		setupChannel("ranks", gamerCat, guild);
-		setupChannel("pairings", gamerCat, guild);
-		perm1.add(Permission.MESSAGE_SEND);
-		perm1.add(Permission.MESSAGE_ADD_REACTION);
-		commandsChannel.getManager()
-			.putRolePermissionOverride(gamerRole.getIdLong(), perm1, null)
-			.complete();
-		perm2.add(Permission.MESSAGE_ADD_REACTION);
-		optionsChannel.getManager()
-			.putRolePermissionOverride(gamerRole.getIdLong(), perm2, null)
-			.complete();
-		perm1.clear();
-		perm2.clear();
-		//setup options channel
-		setupOptions(optionsChannel);
-		//finish
-		GlobalData.saveData();
-		debugChannel.sendMessage("Bot Channel Setup for League "+name+" Complete!").queue();		
 	}
 	
 	private Color getRandomColor() {
