@@ -601,8 +601,8 @@ public class LeagueData {
 	
 	private void insufficientPermissionError(Guild guild, MessageChannelUnion debugChannel) {
 		debugChannel.sendMessage(Important.getError()+" Discord stuff setup for "+getName()
-			+ " failed because of a permission error! Please verify that "
-			+ getMention(guild.getBotRole().getIdLong())+" has the following permisions!")
+				+ " failed because of a permission error! Please verify that "
+				+ getMention(guild.getBotRole().getIdLong())+" has the following permisions!")
 			.queue();
 		debugChannel.sendMessage("`View Channels`, `Manage Channels`, `Manage Roles`, `Send Messages`"
 				+ ", `Embed Links`, `Attach Files`, `Add Reactions`, `Manage Messages`, `Read Message History`")
@@ -675,20 +675,11 @@ public class LeagueData {
 		toPermsAllow.add(Permission.MESSAGE_SEND);
 		toPermsAllow.add(Permission.MESSAGE_ATTACH_FILES);
 		toPermsAllow.add(Permission.MESSAGE_MANAGE);
-		// TODO BOT PERMS (this shouldn't be needed???)
-		/*Collection<Permission> botPermsAllow = new ArrayList<Permission>();
-		botPermsAllow.add(Permission.VIEW_CHANNEL);
-		botPermsAllow.add(Permission.MESSAGE_SEND);
-		botPermsAllow.add(Permission.MESSAGE_ADD_REACTION);
-		botPermsAllow.add(Permission.MESSAGE_ATTACH_FILES);
-		botPermsAllow.add(Permission.MESSAGE_HISTORY);
-		botPermsAllow.add(Permission.MESSAGE_MANAGE);*/
 		// SET PERMS
 		leagueCategory.getManager()
 			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), publicPermsAllow, publicPermsDeny)
 			.putRolePermissionOverride(getLeagueRoleId(), leaguePermsAllow, null)
 			.putRolePermissionOverride(getToRoleId(), toPermsAllow, null)
-			//.putRolePermissionOverride(guild.getBotRole().getIdLong(), botPermsAllow, null)
 			.complete();
 		return leagueCategory;
 	}
