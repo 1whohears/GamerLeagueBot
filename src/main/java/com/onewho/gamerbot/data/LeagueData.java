@@ -606,15 +606,18 @@ public class LeagueData {
 		chatPerm.add(Permission.VIEW_CHANNEL);
 		chatPerm.add(Permission.MESSAGE_SEND);
 		chatPerm.add(Permission.MESSAGE_ADD_REACTION);
+		Collection<Permission> sendPerm = new ArrayList<Permission>();
+		chatPerm.add(Permission.MESSAGE_SEND);
+		chatPerm.add(Permission.MESSAGE_ADD_REACTION);
 		// RULES
 		rulesChannel.getManager()
 			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), viewPerm, null)
-			.putRolePermissionOverride(guild.getBotRole().getIdLong(), null, viewPerm)
+			.putRolePermissionOverride(guild.getBotRole().getIdLong(), null, sendPerm)
 			.complete();
 		// CHAT
 		chatChannel.getManager()
 			.putRolePermissionOverride(getLeagueRoleId(), chatPerm, null)
-			.putRolePermissionOverride(guild.getBotRole().getIdLong(), null, viewPerm)
+			.putRolePermissionOverride(guild.getBotRole().getIdLong(), null, sendPerm)
 			.complete();
 		// COMMANDS
 		commandsChannel.getManager()
