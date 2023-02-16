@@ -25,6 +25,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
@@ -626,6 +627,21 @@ public class LeagueData {
 		setupOptions(optionsChannel);
 	}
 	
+	private TextChannel setupChannel(String name, Category cat, Guild guild) {
+		TextChannel channel = guild.getTextChannelById(getChannelId(name));
+		if (channel == null) {
+			channel = cat.createTextChannel(name).complete();
+			setChannelId(name, channel.getIdLong());
+		}
+		try {
+			channel.getManager().sync(cat.getPermissionContainer()).complete();
+		} catch (InsufficientPermissionException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+		return channel;
+	}
+	
 	private Category setupCategory(Guild guild, MessageChannelUnion debugChannel) {
 		Category leagueCategory = guild.getCategoryById(getLeagueCategoryId());
 		if (leagueCategory == null) {
@@ -651,6 +667,7 @@ public class LeagueData {
 		Collection<Permission> botPermsAllow = new ArrayList<Permission>();
 		botPermsAllow.add(Permission.VIEW_CHANNEL);
 		botPermsAllow.add(Permission.MESSAGE_SEND);
+		botPermsAllow.add(Permission.MESSAGE_ADD_REACTION);
 		botPermsAllow.add(Permission.MESSAGE_ATTACH_FILES);
 		botPermsAllow.add(Permission.MESSAGE_HISTORY);
 		botPermsAllow.add(Permission.MESSAGE_MANAGE);
@@ -686,16 +703,6 @@ public class LeagueData {
 		float saturation = 0.9f;
 		float luminance = 1.0f;
 		return Color.getHSBColor(hue, saturation, luminance);
-	}
-	
-	private TextChannel setupChannel(String name, Category cat, Guild guild) {
-		TextChannel channel = guild.getTextChannelById(getChannelId(name));
-		if (channel == null) {
-			channel = cat.createTextChannel(name).complete();
-			setChannelId(name, channel.getIdLong());
-		}
-		channel.getManager().sync(cat.getPermissionContainer()).complete();
-		return channel;
 	}
 	
 	public void updateOptions(Guild guild) {
