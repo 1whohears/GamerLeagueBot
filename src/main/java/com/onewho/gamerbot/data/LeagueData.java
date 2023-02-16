@@ -703,6 +703,12 @@ public class LeagueData {
 		return channel;
 	}
 	
+	public void updateOptions(Guild guild) {
+		TextChannel options = guild.getTextChannelById(getChannelId("options"));
+		if (options == null) return;
+		setupOptions(options);
+	}
+	
 	private void setupOptions(TextChannel channel) {
 		if (getJoinLeagueOptionId() == -1) {
 			MessageCreateData jlc = new MessageCreateBuilder()

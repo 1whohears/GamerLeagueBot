@@ -66,6 +66,7 @@ public class Config implements ICommand {
 				return true;
 			}
 			ldata.setMaxSetsPerWeek(value);
+			ldata.updateOptions(guild);
 			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
 			GlobalData.saveData();
 			return true;
