@@ -643,19 +643,18 @@ public class LeagueData {
 		rulesChannel.getManager()
 			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), viewPerm, chatPerm)
 			.complete();
+		// OPTIONS
+		optionsChannel.getManager()
+			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), viewPerm, chatPerm)
+			.complete();
 		// CHAT
+		chatPerm.addAll(viewPerm);
 		chatChannel.getManager()
-			.putRolePermissionOverride(getLeagueRoleId(), viewPerm, null)
 			.putRolePermissionOverride(getLeagueRoleId(), chatPerm, null)
 			.complete();
 		// COMMANDS
 		commandsChannel.getManager()
-			.putRolePermissionOverride(getLeagueRoleId(), viewPerm, null)
 			.putRolePermissionOverride(getLeagueRoleId(), chatPerm, null)
-			.complete();
-		// OPTIONS
-		optionsChannel.getManager()
-			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), viewPerm, chatPerm)
 			.complete();
 		// SETUP SPECIAL CHANNELS
 		setupOptions(optionsChannel);
