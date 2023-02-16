@@ -584,15 +584,32 @@ public class LeagueData {
 	 * @param debugChannel channel debug info should be sent to
 	 */
 	public void setupDiscordStuff(Guild guild, MessageChannelUnion debugChannel) {
-		setupRoles(guild, debugChannel);
-		Category leagueCategory = setupCategory(guild, debugChannel);
-		setupChannels(guild, debugChannel, leagueCategory);
-		
+		try { 
+			setupRoles(guild, debugChannel); 
+			Category leagueCategory = setupCategory(guild, debugChannel);
+			setupChannels(guild, debugChannel, leagueCategory);
+		} catch (InsufficientPermissionException e) {
+			insufficientPermissionError(guild, debugChannel);
+			System.out.println("PERMISSION ERROR: League discord setup for "+getName()+" failed!");
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+			return;
+		}
 		GlobalData.saveData();
 		debugChannel.sendMessage("Bot Channel Setup for League "+name+" Complete!").queue();		
 	}
 	
-	private void setupChannels(Guild guild, MessageChannelUnion debugChannel, Category leagueCategory) {
+	private void insufficientPermissionError(Guild guild, MessageChannelUnion debugChannel) {
+		debugChannel.sendMessage(Important.getError()+" Discord stuff setup for "+getName()
+			+ " failed because of a permission error! Please verify that "
+			+ getMention(guild.getBotRole().getIdLong())+" has the following permisions!")
+			.queue();
+		debugChannel.sendMessage("`View Channels`, `Manage Channels`, `Manage Roles`, `Send Messages`"
+				+ ", `Embed Links`, `Attach Files`, `Add Reactions`, `Manage Messages`, `Read Message History`")
+			.queue();
+	}
+	
+	private void setupChannels(Guild guild, MessageChannelUnion debugChannel, Category leagueCategory) throws InsufficientPermissionException {
 		TextChannel rulesChannel = setupChannel("rules", leagueCategory, guild);
 		TextChannel chatChannel = setupChannel("chat", leagueCategory, guild);
 		TextChannel commandsChannel = setupChannel("bot-commands", leagueCategory, guild);
@@ -627,23 +644,17 @@ public class LeagueData {
 		setupOptions(optionsChannel);
 	}
 	
-	private TextChannel setupChannel(String name, Category cat, Guild guild) {
+	private TextChannel setupChannel(String name, Category cat, Guild guild) throws InsufficientPermissionException {
 		TextChannel channel = guild.getTextChannelById(getChannelId(name));
 		if (channel == null) {
 			channel = cat.createTextChannel(name).complete();
 			setChannelId(name, channel.getIdLong());
 		}
-		try {
-			channel.getManager().sync(cat.getPermissionContainer()).complete();
-		} catch (InsufficientPermissionException e) {
-			System.out.println("ERROR: InsufficientPermissionException with channel "+name);
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-		}
+		channel.getManager().sync(cat.getPermissionContainer()).complete();
 		return channel;
 	}
 	
-	private Category setupCategory(Guild guild, MessageChannelUnion debugChannel) {
+	private Category setupCategory(Guild guild, MessageChannelUnion debugChannel) throws InsufficientPermissionException{
 		Category leagueCategory = guild.getCategoryById(getLeagueCategoryId());
 		if (leagueCategory == null) {
 			leagueCategory = guild.createCategory(name).complete();
@@ -664,25 +675,25 @@ public class LeagueData {
 		toPermsAllow.add(Permission.MESSAGE_SEND);
 		toPermsAllow.add(Permission.MESSAGE_ATTACH_FILES);
 		toPermsAllow.add(Permission.MESSAGE_MANAGE);
-		// BOT PERMS
-		Collection<Permission> botPermsAllow = new ArrayList<Permission>();
+		// TODO BOT PERMS (this shouldn't be needed???)
+		/*Collection<Permission> botPermsAllow = new ArrayList<Permission>();
 		botPermsAllow.add(Permission.VIEW_CHANNEL);
 		botPermsAllow.add(Permission.MESSAGE_SEND);
 		botPermsAllow.add(Permission.MESSAGE_ADD_REACTION);
 		botPermsAllow.add(Permission.MESSAGE_ATTACH_FILES);
 		botPermsAllow.add(Permission.MESSAGE_HISTORY);
-		botPermsAllow.add(Permission.MESSAGE_MANAGE);
+		botPermsAllow.add(Permission.MESSAGE_MANAGE);*/
 		// SET PERMS
 		leagueCategory.getManager()
 			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), publicPermsAllow, publicPermsDeny)
 			.putRolePermissionOverride(getLeagueRoleId(), leaguePermsAllow, null)
 			.putRolePermissionOverride(getToRoleId(), toPermsAllow, null)
-			.putRolePermissionOverride(guild.getBotRole().getIdLong(), botPermsAllow, null)
+			//.putRolePermissionOverride(guild.getBotRole().getIdLong(), botPermsAllow, null)
 			.complete();
 		return leagueCategory;
 	}
 	
-	private void setupRoles(Guild guild, MessageChannelUnion debugChannel) {
+	private void setupRoles(Guild guild, MessageChannelUnion debugChannel) throws InsufficientPermissionException {
 		Color color = getRandomColor();
 		Role gamerRole = guild.getRoleById(getLeagueRoleId());
 		if (gamerRole == null) {
@@ -706,6 +717,11 @@ public class LeagueData {
 		return Color.getHSBColor(hue, saturation, luminance);
 	}
 	
+	/**
+	 * Used to change re-configure the buttons in the options channel.
+	 * Mostly used after the sets-per-week config is changed.
+	 * @param guild this league's guild
+	 */
 	public void updateOptions(Guild guild) {
 		TextChannel options = guild.getTextChannelById(getChannelId("options"));
 		if (options == null) return;
