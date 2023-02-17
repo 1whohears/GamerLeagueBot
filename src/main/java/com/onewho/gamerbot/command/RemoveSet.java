@@ -66,7 +66,7 @@ public class RemoveSet implements ICommand {
 			event.getChannel().sendMessage(Important.getError()+" None of these sets could be removed!").queue();
 			return true;
 		}
-		event.getChannel().sendMessage(Important.getError()+" Removed "+num+" sets!").queue();
+		event.getChannel().sendMessage("Removed "+num+" sets!").queue();
 		GlobalData.saveData();
 		return true;
 	}
