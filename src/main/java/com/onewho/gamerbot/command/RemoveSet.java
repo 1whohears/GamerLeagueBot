@@ -33,7 +33,7 @@ public class RemoveSet implements ICommand {
 
 	@Override
 	public String getHelp() {
-		return "`"+BotMain.PREFIX+getCommandString()+" [set id] (set id) (set id)...` remove this set.";
+		return "`"+BotMain.PREFIX+getCommandString()+" [set id] (set id) (set id)...` remove these sets.";
 	}
 
 	@Override
