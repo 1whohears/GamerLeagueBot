@@ -298,12 +298,11 @@ public class SetData {
 	 * remove this set from being displayed in discord
 	 * @param channel the channel this set should be removed from
 	 */
-	public void removeSetDisplay(TextChannel channel) {
-		try {
-			channel.deleteMessageById(messageId).queue();
-		} catch (ErrorResponseException e) {
-		}
+	public boolean removeSetDisplay(TextChannel channel) {
+		try { channel.deleteMessageById(messageId).queue(); }
+		catch (ErrorResponseException e) { return false; }
 		messageId = -1;
+		return true;
 	}
 	
 	/**

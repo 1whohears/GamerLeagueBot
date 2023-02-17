@@ -411,7 +411,7 @@ public class LeagueData {
 	 * remove incomplete sets based on weeks before auto expire
 	 * @param pairsChannel the pairs channel of this league
 	 */
-	public void removeOldSets(TextChannel pairsChannel) {
+	private void removeOldSets(TextChannel pairsChannel) {
 		for (int i = 0; i < sets.size(); ++i) {
 			if (sets.get(i).isComplete()) continue;
 			int weekDiff = UtilCalendar.getWeekDiff(
@@ -425,15 +425,25 @@ public class LeagueData {
 	}
 	
 	/**
-	 * remove this set
-	 * @param id the set id
-	 * @param pairsChannel the pairs channel of this league
+	 * @param guild the guild this league is in
+	 * @param leagueChannel a channel in this league
+	 * @param ids list of set ids to remove
+	 * @return number of sets successfully removed
 	 */
-	public void removeSet(int id, TextChannel pairsChannel) {
-		SetData set = this.getSetDataById(id);
-		if (set == null) return;
-		set.removeSetDisplay(pairsChannel);
-		sets.remove(set);
+	public int removeSets(Guild guild, MessageChannelUnion leagueChannel, int[] ids) {
+		Backup.createBackup(guild, "pre_removesets_backup", leagueChannel);
+		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, getChannelId("pairings"));
+		if (pairsChannel == null) return 0;
+		int success = 0;
+		for (int i = 0; i < ids.length; ++i) if (removeSet(ids[i], pairsChannel)) ++success;
+		return success;
+	}
+	
+	private boolean removeSet(int id, TextChannel pairsChannel) {
+		SetData set = getSetDataById(id);
+		if (set == null) return false;
+		if (!set.removeSetDisplay(pairsChannel)) return false;
+		return sets.remove(set);
 	}
 	
 	/**
@@ -809,9 +819,14 @@ public class LeagueData {
 	 */
 	public void genWeeklyPairs(Guild guild, MessageChannelUnion debugChannel) {
 		debugChannel.sendMessage("Generating Pairs...").queue();
-		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, this.getChannelId("pairings"));
-		this.removeOldSets(pairsChannel);
-		List<UserData> activeUsers = this.getAvailableSortedUsers();
+		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, getChannelId("pairings"));
+		if (pairsChannel == null) {
+			debugChannel.sendMessage(Important.getError()+
+					" Can't generate pairings because the pairings channel is gone!").queue();
+			return;
+		}
+		removeOldSets(pairsChannel);
+		List<UserData> activeUsers = getAvailableSortedUsers();
 		List<SetData> newSets = new ArrayList<SetData>();
 		boolean createdSet = true;
 		while (createdSet) {
