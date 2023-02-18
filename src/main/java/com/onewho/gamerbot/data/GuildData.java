@@ -9,6 +9,7 @@ import com.onewho.gamerbot.BotMain;
 
 import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 public class GuildData {
@@ -82,10 +83,19 @@ public class GuildData {
 	}
 	
 	/**
-	 * not working yet
+	 * remove this league. generates a backup in system messages. 
+	 * @param guild
+	 * @param debugChannel
+	 * @param name
 	 */
-	public void archiveLeague() {
-		// TODO archive league command
+	public boolean removeLeague(Guild guild, MessageChannelUnion debugChannel, String name) {
+		TextChannel system = guild.getSystemChannel();
+		if (system == null) {
+			debugChannel.sendMessage(Important.getError()+" Please set a system messages channel in this server!").queue();
+			return false;
+		}
+		// TODO remove league
+		return true;
 	}
 	
 	/**

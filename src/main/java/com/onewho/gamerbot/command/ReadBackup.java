@@ -84,7 +84,6 @@ public class ReadBackup implements ICommand {
 			return true;
 		}
 		Guild guild = event.getGuild();
-		Backup.createBackup(guild, "pre-readbackup", event.getChannel());
 		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
 		if (gdata == null) {
 			event.getChannel().sendMessage("This guild doesn't have any leagues.").queue();
@@ -95,6 +94,7 @@ public class ReadBackup implements ICommand {
 			event.getChannel().sendMessage("This is not a valid league.").queue();
 			return true;
 		}
+		ldata.backup(guild, event.getChannel(), "pre-readbackup");
 		try {
 			ldata.readBackup(backup);
 		} catch (IllegalStateException e) {

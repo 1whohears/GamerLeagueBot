@@ -1,6 +1,9 @@
 package com.onewho.gamerbot.data;
 
 import java.awt.Color;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -11,7 +14,6 @@ import javax.annotation.Nullable;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.onewho.gamerbot.command.Backup;
 import com.onewho.gamerbot.util.UtilCalendar;
 import com.onewho.gamerbot.util.UtilKClosest;
 
@@ -28,6 +30,7 @@ import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.exceptions.MissingAccessException;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
@@ -426,12 +429,12 @@ public class LeagueData {
 	
 	/**
 	 * @param guild the guild this league is in
-	 * @param leagueChannel a channel in this league
+	 * @param debugChannel a channel in this league
 	 * @param ids list of set ids to remove
 	 * @return number of sets successfully removed
 	 */
-	public int removeSets(Guild guild, MessageChannelUnion leagueChannel, int[] ids) {
-		Backup.createBackup(guild, "pre_removesets_backup", leagueChannel);
+	public int removeSets(Guild guild, MessageChannelUnion debugChannel, int[] ids) {
+		backup(guild, debugChannel, "pre_removesets_backup");
 		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, getChannelId("pairings"));
 		if (pairsChannel == null) return 0;
 		int success = 0;
@@ -868,7 +871,7 @@ public class LeagueData {
 	}
 	
 	public void updateRanks(Guild guild, MessageChannelUnion debugChannel) {
-		Backup.createBackup(guild, "pre_updateranks_backup", debugChannel);
+		backup(guild, debugChannel, "pre_updateranks_backup");
 		int num = processSets();
 		//display
 		if (num == 0) {
@@ -902,16 +905,42 @@ public class LeagueData {
 	
 	protected void genScheduledPairs(Guild guild) {
 		if (autoGenPairs) {
-			MessageChannelUnion channel = guild.getChannelById(MessageChannelUnion.class, this.getChannelId("bot-commands"));
+			MessageChannelUnion channel = guild.getChannelById(MessageChannelUnion.class, getChannelId("bot-commands"));
 			genWeeklyPairs(guild, channel);
 		}
 	}
 	
 	protected void updateRanks(Guild guild) {
 		if (autoGenPairs) {
-			MessageChannelUnion channel = guild.getChannelById(MessageChannelUnion.class, this.getChannelId("bot-commands"));
+			MessageChannelUnion channel = guild.getChannelById(MessageChannelUnion.class, getChannelId("bot-commands"));
 			updateRanks(guild, channel);
 		}
+	}
+	
+	/**
+	 * backup this league
+	 * @param guild
+	 * @param debugChannel
+	 * @return if backup worked
+	 */
+	public boolean backup(Guild guild, MessageChannelUnion debugChannel, String backupName) {
+		TextChannel historyChannel = guild.getChannelById(TextChannel.class, getChannelId("set-history"));
+		if (historyChannel == null) {
+			debugChannel.sendMessage(Important.getError()+" Can't backup because the backup channel is gone!").queue();
+			return false;
+		}
+		JsonObject backup = getBackupJson();
+		String data = GlobalData.getGson().toJson(backup);
+		FileUpload fu = FileUpload.fromData(new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)), 
+				guild.getName()+"_"+backupName+"_"+UtilCalendar.getCurrentDateTimeString()+".json");
+		historyChannel.sendFiles(fu).queue();
+		try { fu.close(); } 
+		catch (IOException e) { 
+			debugChannel.sendMessage(Important.getError()+" Can't backup because of an error: "+e.getMessage()).queue();
+			e.printStackTrace(); 
+			return false; 
+		}
+		return true;
 	}
 	
 }
