@@ -3,7 +3,6 @@ package com.onewho.gamerbot.schedule;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +26,7 @@ public class Scheduler {
 	}
 	
 	private static void runDaily() {
-		System.out.println(new Date()+" running daily tasks");
+		System.out.println("RUNNING DAILY TASKS "+ZonedDateTime.now(ZoneId.of("America/Chicago")));
 		GlobalData.updateRanksForAllLeagues();
 		GlobalData.genScheduledPairsForAllLeagues();
 	}

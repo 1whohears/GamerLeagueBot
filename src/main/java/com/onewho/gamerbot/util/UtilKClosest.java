@@ -1,15 +1,62 @@
 package com.onewho.gamerbot.util;
 
+import javax.annotation.Nullable;
+
 /** 
  * Code stolen from Rajat Mishra 
  * https://www.geeksforgeeks.org/find-k-closest-elements-given-value/
  */
 
-public class UtilKClosest 
-{ 
+public class UtilKClosest { 
+	
+	/**
+	 * 
+	 * @param a
+	 * @param index
+	 * @param k
+	 * @return
+	 */
+	@Nullable
+	public static int[] getKClosestIndexArray(int a[], int index, int k) {
+		if (a == null || a.length < 1|| index >= a.length || index < 0) return null;
+		if (k > a.length-1) k = a.length-1;
+		
+		int base = a[index];
+		int[] b = new int[k];
+		for (int i = 0; i < b.length; ++i) b[i] = -1;
+		
+		for (int i = 0; i < b.length; ++i) {
+			int min_diff = Integer.MAX_VALUE;
+			int min_index = -1;
+			for (int j = 0; j < a.length; ++j) {
+				if (j == index || contains(b, j)) continue;
+				int diff = Math.abs(a[j]-base);
+				if (diff < min_diff) {
+					min_diff = diff;
+					min_index = j;
+				}
+			}
+			b[i] = min_index;
+		}
+		return b;
+	}
+	
+	private static boolean contains(int[] a, int b) {
+		for (int i = 0; i < a.length; ++i) if (a[i] == b) return true;
+		return false;
+	}
+	
+	/*private static int[] removeIndex(int[] a, int index) {
+		if (index >= a.length || index < 0) return null;
+		int[] b = new int[a.length-1];
+		for (int i = 0, x = 0; i < a.length; ++i) if (i != index) b[x++] = a[i];
+		return b;
+	}*/
+	
     /* Function to find the cross over point (the point before 
        which elements are smaller than or equal to x and after 
        which greater than x)*/
+	@Deprecated
     private static int findCrossOver(int arr[], int low, int high, int x) 
     { 
         // Base cases 
@@ -35,8 +82,10 @@ public class UtilKClosest
   
     // This function prints k closest elements to x in arr[]. 
     // n is the number of elements in arr[] 
-    public static int[] getKclosest(int arr[], int x, int k, int n) 
+	@Deprecated
+    public static int[] getKclosest(int[] arr, int x, int k) 
     { 
+    	int n = arr.length;
         int[] b = new int[k];
         // Find the crossover point 
         int l = findCrossOver(arr, 0, n-1, x);  
@@ -84,9 +133,11 @@ public class UtilKClosest
 
         return b;
     }
-
-    public static int[] getKclosestIndex(int arr[], int x, int k, int n) 
+	
+	@Deprecated
+    public static int[] getKclosestIndex(int[] arr, int x, int k) 
     { 
+    	int n = arr.length;
         int[] b = new int[k];
         // Find the crossover point 
         int l = findCrossOver(arr, 0, n-1, x);  

@@ -102,7 +102,7 @@ public class UserData {
 	
 	@Override
 	public String toString() {
-		return id+"/"+active+"/"+setsPerWeek+"/"+setsPerWeek;
+		return id+"/"+active+"/"+setsPerWeek+"/"+score;
 	}
 
 	/**

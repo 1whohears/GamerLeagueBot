@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.onewho.gamerbot.util.UtilCalendar;
+import com.onewho.gamerbot.util.UtilDebug;
 import com.onewho.gamerbot.util.UtilKClosest;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -415,6 +416,7 @@ public class LeagueData {
 	 * @param pairsChannel the pairs channel of this league
 	 */
 	private void removeOldSets(TextChannel pairsChannel) {
+		System.out.println("REMOVING OLD SETS");
 		for (int i = 0; i < sets.size(); ++i) {
 			if (sets.get(i).isComplete()) continue;
 			int weekDiff = UtilCalendar.getWeekDiff(
@@ -453,21 +455,20 @@ public class LeagueData {
 	 * @return a list of active/available user data
 	 */
 	public List<UserData> getAvailableSortedUsers() {
+		System.out.println("GETTING AVAILABLE USERS");
 		List<UserData> available = new ArrayList<UserData>();
-		System.out.println("getting available users");
 		for (int i = 0; i < users.size(); ++i) {
-			System.out.println(users.get(i));
 			if (!users.get(i).getActive()) continue;
 			if (users.get(i).getSetsPerWeek() < 1) continue;
 			int weekDiff = UtilCalendar.getWeekDiff(
 					UtilCalendar.getDate(users.get(i).getLastActive()), 
 					UtilCalendar.getCurrentDate());
-			System.out.println("week diff = "+weekDiff);
+			//System.out.println("last active week diff = "+weekDiff);
 			if (weeksBeforeAutoInactive != -1 && weekDiff > weeksBeforeAutoInactive) {
 				users.get(i).setActive(false);
 				continue;
 			}
-			System.out.println("added");
+			System.out.println("added user "+users.get(i));
 			available.add(users.get(i));
 		}
 		sortByScoreDescend(available);
@@ -556,7 +557,7 @@ public class LeagueData {
 	public static int[] getClosestUserIndexsByScore(UserData user, List<UserData> sortedUsers) {
 		int[] scores = new int[sortedUsers.size()];
 		for (int i = 0; i < scores.length; ++i) scores[i] = sortedUsers.get(i).getScore();
-		return UtilKClosest.getKclosestIndex(scores, user.getScore(), sortedUsers.size(), sortedUsers.size());
+		return UtilKClosest.getKClosestIndexArray(scores, sortedUsers.indexOf(user), scores.length-1);
 	}
 	
 	/**
@@ -821,6 +822,7 @@ public class LeagueData {
 	 * @param debugChannel channel for debug messages
 	 */
 	public void genWeeklyPairs(Guild guild, MessageChannelUnion debugChannel) {
+		System.out.println("GENERATING WEEKLY PAIRS: "+getName());
 		debugChannel.sendMessage("Generating Pairs...").queue();
 		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, getChannelId("pairings"));
 		if (pairsChannel == null) {
@@ -836,28 +838,30 @@ public class LeagueData {
 			createdSet = false;
 			System.out.println("BIG LOOP");
 			for (UserData udata : activeUsers) {
-				System.out.println("user "+udata.getId());
-				List<SetData> incompleteSets = this.getIncompleteOrCurrentSetsByPlayer(udata.getId());
+				System.out.println("user "+udata);
+				List<SetData> incompleteSets = getIncompleteOrCurrentSetsByPlayer(udata.getId());
 				System.out.println("incomplete sets "+incompleteSets.size());
 				if (incompleteSets.size() >= udata.getSetsPerWeek()) continue;
 				int[] ksort = LeagueData.getClosestUserIndexsByScore(udata, activeUsers);
+				UtilDebug.printIntArray("k index sort", ksort);
 				for (int i = 0; i < ksort.length; ++i) {
 					UserData userk = activeUsers.get(ksort[i]);
 					System.out.println("userk "+userk.getId());
-					List<SetData> incompleteSetsK = this.getIncompleteOrCurrentSetsByPlayer(userk.getId());
+					List<SetData> incompleteSetsK = getIncompleteOrCurrentSetsByPlayer(userk.getId());
 					System.out.println("incomplete sets k "+incompleteSetsK.size());
 					if (incompleteSetsK.size() >= userk.getSetsPerWeek()) continue;
-					SetData recentSet = this.getNewestSetBetweenUsers(udata.getId(), userk.getId());
-					System.out.println("recent set "+recentSet);
+					SetData recentSet = getNewestSetBetweenUsers(udata.getId(), userk.getId());
 					if (recentSet != null) {
 						int diff = UtilCalendar.getWeekDiff(
 								UtilCalendar.getDate(recentSet.getCreatedDate()), UtilCalendar.getCurrentDate());
-						if (diff <= this.getWeeksBeforeSetRepeat()) continue;
+						System.out.println("recent set week diff "+diff);
+						if (diff <= getWeeksBeforeSetRepeat()) continue;
 					}
-					long id1 = udata.getId(), id2 = activeUsers.get(ksort[i]).getId();
+					long id1 = udata.getId(), id2 = userk.getId();
 					if (id1 == id2) continue;
-					SetData newSet = this.createSet(id1, id2);
+					SetData newSet = createSet(id1, id2);
 					if (newSet != null) {
+						System.out.println("created set "+newSet);
 						newSets.add(newSet);
 						createdSet = true;
 						break;
