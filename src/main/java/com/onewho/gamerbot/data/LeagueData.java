@@ -45,6 +45,7 @@ public class LeagueData {
 	private int weeksBeforeAutoInactive = -1;
 	private int weeksBeforeSetExpires = -1;
 	private int weeksBeforeSetRepeat = -1;
+	private int dayOfWeek = 1;
 	private int defaultScore = 1000;
 	private double K = 20d;
 	
@@ -419,10 +420,9 @@ public class LeagueData {
 		System.out.println("REMOVING OLD SETS");
 		for (int i = 0; i < sets.size(); ++i) {
 			if (sets.get(i).isComplete()) continue;
-			int weekDiff = UtilCalendar.getWeekDiff(
-					UtilCalendar.getDate(sets.get(i).getCreatedDate()), 
-					UtilCalendar.getCurrentDate()); 
-			System.out.println("SET "+sets.get(i)+" weekDiff = "+weekDiff+" "+weeksBeforeSetExpires);
+			int weekDiff = UtilCalendar.getWeekDiffByWeekDayFromNow(
+					sets.get(i).getCreatedDate(), dayOfWeek); 
+			System.out.println("SET "+sets.get(i)+" weekDiff = "+weekDiff+" > "+weeksBeforeSetExpires);
 			if (weeksBeforeSetExpires == -1 || weekDiff <= weeksBeforeSetExpires) continue;
 			removeSet(sets.get(i).getId(), pairsChannel);
 			System.out.println("removed");
@@ -460,10 +460,9 @@ public class LeagueData {
 		for (int i = 0; i < users.size(); ++i) {
 			if (!users.get(i).getActive()) continue;
 			if (users.get(i).getSetsPerWeek() < 1) continue;
-			int weekDiff = UtilCalendar.getWeekDiff(
-					UtilCalendar.getDate(users.get(i).getLastActive()), 
-					UtilCalendar.getCurrentDate());
-			//System.out.println("last active week diff = "+weekDiff);
+			int weekDiff = UtilCalendar.getWeekDiffByWeekDayFromNow(
+					users.get(i).getLastActive(), dayOfWeek);
+			System.out.println("last active week diff = "+weekDiff+" <= "+weeksBeforeAutoInactive);
 			if (weeksBeforeAutoInactive != -1 && weekDiff > weeksBeforeAutoInactive) {
 				users.get(i).setActive(false);
 				continue;
@@ -482,9 +481,8 @@ public class LeagueData {
 	public List<SetData> getIncompleteOrCurrentSetsByPlayer(long id) {
 		List<SetData> userSets = new ArrayList<SetData>();
 		for (SetData set : sets) if (set.hasPlayer(id) 
-					&& (UtilCalendar.getWeekDiff(
-						UtilCalendar.getDate(set.getCreatedDate()), 
-						UtilCalendar.getCurrentDate()) == 0
+					&& (UtilCalendar.getWeekDiffByWeekDayFromNow(
+						set.getCreatedDate(), dayOfWeek) == 0
 					|| (!set.isComplete() && !set.isUnconfirmed()))) 
 				userSets.add(set);
 		return userSets;
@@ -566,7 +564,7 @@ public class LeagueData {
 	 */
 	public List<SetData> getSetsAtWeekOfDate(String date) {
 		List<SetData> saw = new ArrayList<SetData>();
-		for (SetData set : sets) if (UtilCalendar.getWeekDiff(date, set.getCreatedDate()) == 0) saw.add(set);
+		for (SetData set : sets) if (UtilCalendar.getWeekDiffByWeekDay(date, set.getCreatedDate(), dayOfWeek) == 0) saw.add(set);
 		return saw;
 	}
 	
@@ -576,7 +574,7 @@ public class LeagueData {
 	 * @param channel the pairs channel to display this leagues sets in
 	 */
 	public void displaySetsByDate(String date, TextChannel channel) {
-		for (SetData set : sets) if (UtilCalendar.getWeekDiff(date, set.getCreatedDate()) == 0) set.displaySet(channel);
+		for (SetData set : sets) if (UtilCalendar.getWeekDiffByWeekDay(date, set.getCreatedDate(), dayOfWeek) == 0) set.displaySet(channel);
 	}
 	
 	/**
@@ -712,6 +710,7 @@ public class LeagueData {
 		toPermsAllow.add(Permission.MESSAGE_ATTACH_FILES);
 		toPermsAllow.add(Permission.MESSAGE_MANAGE);
 		// SET PERMS (ORDER MATTERS)
+		// TODO there are permission bugs make better debug messages
 		leagueCategory.getManager()
 			.putRolePermissionOverride(guild.getBotRole().getIdLong(), botPermsAllow, null)
 			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), publicPermsAllow, publicPermsDeny)
@@ -836,24 +835,25 @@ public class LeagueData {
 		boolean createdSet = true;
 		while (createdSet) {
 			createdSet = false;
-			System.out.println("BIG LOOP");
+			System.out.println("");
+			System.out.println("USER LOOP");
 			for (UserData udata : activeUsers) {
 				System.out.println("user "+udata);
 				List<SetData> incompleteSets = getIncompleteOrCurrentSetsByPlayer(udata.getId());
 				System.out.println("incomplete sets "+incompleteSets.size());
 				if (incompleteSets.size() >= udata.getSetsPerWeek()) continue;
 				int[] ksort = LeagueData.getClosestUserIndexsByScore(udata, activeUsers);
-				UtilDebug.printIntArray("k index sort", ksort);
+				UtilDebug.printIntArray("K LOOP index sort", ksort);
 				for (int i = 0; i < ksort.length; ++i) {
 					UserData userk = activeUsers.get(ksort[i]);
-					System.out.println("userk "+userk.getId());
+					System.out.println("user k "+userk);
 					List<SetData> incompleteSetsK = getIncompleteOrCurrentSetsByPlayer(userk.getId());
 					System.out.println("incomplete sets k "+incompleteSetsK.size());
 					if (incompleteSetsK.size() >= userk.getSetsPerWeek()) continue;
 					SetData recentSet = getNewestSetBetweenUsers(udata.getId(), userk.getId());
 					if (recentSet != null) {
-						int diff = UtilCalendar.getWeekDiff(
-								UtilCalendar.getDate(recentSet.getCreatedDate()), UtilCalendar.getCurrentDate());
+						int diff = UtilCalendar.getWeekDiffByWeekDayFromNow(
+								recentSet.getCreatedDate(), dayOfWeek);
 						System.out.println("recent set week diff "+diff);
 						if (diff <= getWeeksBeforeSetRepeat()) continue;
 					}

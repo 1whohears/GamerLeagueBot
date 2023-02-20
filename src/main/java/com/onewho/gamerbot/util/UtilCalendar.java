@@ -46,6 +46,10 @@ public class UtilCalendar {
 		return getDate(dateString).get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
 	}
 	
+	public static int getWeek(LocalDate date) {
+		return date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
+	}
+	
 	/**
 	 * @param dateString format dd-MM-yyyy
 	 */
@@ -74,18 +78,66 @@ public class UtilCalendar {
 	}
 	
 	public static int getWeekDiff(int w1, int y1, int w2, int y2) {
-		LocalDateTime startDate = getLDTofWY(w1,y1);
-		LocalDateTime endDate = getLDTofWY(w2,y2);
+		LocalDateTime startDate = weekYearToLocalDate(w1,y1);
+		LocalDateTime endDate = weekYearToLocalDate(w2,y2);
 		return (int)ChronoUnit.WEEKS.between(startDate, endDate);
 	}
 	
-	private static LocalDateTime getLDTofWY(int week, int year) {
+	/**
+	 * @param start
+	 * @param end
+	 * @param dayOfWeek
+	 * @return
+	 */
+	public static int getWeekDiffByWeekDay(LocalDate start, LocalDate end, int dayOfWeek) {
+		if (dayOfWeek < 1) dayOfWeek = 1;
+		else if (dayOfWeek > 7) dayOfWeek = 7;
+		return (int)ChronoUnit.WEEKS.between(
+				toDayInWeek(start, dayOfWeek), 
+				toDayInWeek(end, dayOfWeek));
+	}
+	
+	public static int getWeekDiffByWeekDay(String start, String end, int dayOfWeek) {
+		return getWeekDiffByWeekDay(getDate(start), getDate(end), dayOfWeek);
+	}
+	
+	public static int getWeekDiffByWeekDayFromNow(String start, int dayOfWeek) {
+		return getWeekDiffByWeekDay(getDate(start), getCurrentDate(), dayOfWeek);
+	}
+	
+	/**
+	 * @param week
+	 * @param year
+	 * @param dayOfWeek
+	 * @return
+	 */
+	public static LocalDateTime weekYearToLocalDate(int week, int year, int dayOfWeek) {
+		if (dayOfWeek < 1) dayOfWeek = 1;
+		else if (dayOfWeek > 7) dayOfWeek = 7;
 		WeekFields wf = WeekFields.of(Locale.getDefault());
 		LocalDateTime ldt = LocalDateTime.now()
                 .withYear(year)
                 .with(wf.weekOfYear(), week)
-                .with(wf.dayOfWeek(), 1);
+                .with(wf.dayOfWeek(), dayOfWeek);
 		return ldt;
+	}
+	
+	/**
+	 * @param date
+	 * @param dayOfWeek
+	 * @return
+	 */
+	public static LocalDateTime toDayInWeek(LocalDate date, int dayOfWeek) {
+		return weekYearToLocalDate(getWeek(date), date.getYear(), dayOfWeek);
+	}
+	
+	/**
+	 * @param week
+	 * @param year
+	 * @return
+	 */
+	public static LocalDateTime weekYearToLocalDate(int week, int year) {
+		return weekYearToLocalDate(week, year, 1);
 	}
 	
 	public static boolean isNewer(LocalDate d1, LocalDate d2) {
