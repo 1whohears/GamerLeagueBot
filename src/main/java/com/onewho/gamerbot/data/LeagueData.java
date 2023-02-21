@@ -29,7 +29,6 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
-import net.dv8tion.jda.api.exceptions.MissingAccessException;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
@@ -601,15 +600,10 @@ public class LeagueData {
 			setupRoles(guild, debugChannel); 
 			Category leagueCategory = setupCategory(guild, debugChannel);
 			setupChannels(guild, debugChannel, leagueCategory);
-		} catch (MissingAccessException e) {
-			missingAccessError(guild, debugChannel);
-			System.out.println("PERMISSION ERROR: League discord setup for "+getName()+" failed!");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			return;
 		} catch (InsufficientPermissionException e) {
-			insufficientPermissionError(guild, debugChannel);
-			System.out.println("PERMISSION ERROR: League discord setup for "+getName()+" failed!");
+			insufficientPermissionError(guild, debugChannel, e);
+			System.out.println("PERMISSION ERROR: League discord setup for "+getName()+" failed"
+					+ " because this permission is missing! "+e.getPermission());
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 			return;
@@ -618,22 +612,14 @@ public class LeagueData {
 		debugChannel.sendMessage("Bot Channel Setup for League "+name+" Complete!").queue();		
 	}
 	
-	private void missingAccessError(Guild guild, MessageChannelUnion debugChannel) {
+	private void insufficientPermissionError(Guild guild, MessageChannelUnion debugChannel, InsufficientPermissionException e) {
 		debugChannel.sendMessage(Important.getError()+" Discord stuff setup for "+getName()
 				+ " failed because of a permission error! Please verify that "
-				+ getRoleMention(guild.getBotRole().getIdLong())+" has the "
-				+ "`View Channel`, `Send Messages`, and `Add Reactions`"
-				+ " permission in all of this league's channels!")
+				+ getRoleMention(guild.getBotRole().getIdLong())+" the following permission! "
+				+ "`"+e.getPermission().getName()+"`")
 			.queue();
-	}
-	
-	private void insufficientPermissionError(Guild guild, MessageChannelUnion debugChannel) {
-		debugChannel.sendMessage(Important.getError()+" Discord stuff setup for "+getName()
-				+ " failed because of a permission error! Please verify that "
-				+ getRoleMention(guild.getBotRole().getIdLong())+" has the following permisions!")
-			.queue();
-		debugChannel.sendMessage("`View Channels`, `Manage Channels`, `Manage Roles`, `Send Messages`"
-				+ ", `Embed Links`, `Attach Files`, `Add Reactions`, `Manage Messages`, `Read Message History`")
+		debugChannel.sendMessage("One possible fix is synching all the league channels with the"
+				+ " category and then running this command again.")
 			.queue();
 	}
 	
@@ -710,7 +696,6 @@ public class LeagueData {
 		toPermsAllow.add(Permission.MESSAGE_ATTACH_FILES);
 		toPermsAllow.add(Permission.MESSAGE_MANAGE);
 		// SET PERMS (ORDER MATTERS)
-		// TODO there are permission bugs make better debug messages
 		leagueCategory.getManager()
 			.putRolePermissionOverride(guild.getBotRole().getIdLong(), botPermsAllow, null)
 			.putRolePermissionOverride(guild.getPublicRole().getIdLong(), publicPermsAllow, publicPermsDeny)
