@@ -5,7 +5,6 @@ import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.Important;
 
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class CreateLeague extends AdminCommand {
@@ -25,13 +24,12 @@ public class CreateLeague extends AdminCommand {
 		if (!super.runCommand(event, params)) return false;
 		if (params.length < 2) {
 			event.getChannel().sendMessage(Important.getError()+" DO: "+getHelp()).queue();
-			return true;
+			return false;
 		}
-		Guild guild = event.getGuild();
-		GuildData gdata = GlobalData.createGuildData(guild.getIdLong());
+		GuildData gdata = GlobalData.createGuildData(event.getGuild().getIdLong());
 		String name = "";
 		for (int i = 1; i < params.length; ++i) name += params[i];
-		gdata.createLeague(guild, event.getChannel(), name);
+		gdata.createLeague(event.getGuild(), event.getChannel(), name);
 		GlobalData.saveData();
 		return true;
 	}

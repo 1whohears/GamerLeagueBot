@@ -9,7 +9,6 @@ import com.onewho.gamerbot.BotMain;
 
 import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
 public class GuildData {
@@ -68,6 +67,11 @@ public class GuildData {
 		return null;
 	}
 	
+	public LeagueData getLeagueByName(String name) {
+		for (LeagueData l : leagues) if (l.getName().equals(name)) return l;
+		return null;
+	}
+	
 	/**
 	 * create a new league for this guild
 	 * @param guild
@@ -86,15 +90,29 @@ public class GuildData {
 	 * remove this league. generates a backup in system messages. 
 	 * @param guild
 	 * @param debugChannel
-	 * @param name
+	 * @param leagueName
 	 */
-	public boolean removeLeague(Guild guild, MessageChannelUnion debugChannel, String name) {
-		TextChannel system = guild.getSystemChannel();
-		if (system == null) {
-			debugChannel.sendMessage(Important.getError()+" Please set a system messages channel in this server!").queue();
+	public boolean removeLeague(Guild guild, MessageChannelUnion debugChannel, String leagueName) {
+		LeagueData ldata = getLeagueByName(leagueName);
+		if (ldata == null) {
+			debugChannel.sendMessage(Important.getError()+" This server does not have a league named "
+					+ leagueName).queue();
 			return false;
 		}
-		// TODO remove league
+		if (!ldata.backup(guild, debugChannel, "pre_removeleague")) {
+			debugChannel.sendMessage(Important.getError()+" Could not remove this league because "
+					+ "making a backup failed!").queue();
+			return false;
+		}
+		leagues.remove(ldata);
+		debugChannel.sendMessage(leagueName+" data has been removed from this server! "
+				+ "**Download this backup just to be safe!** I will not interact with any of the "
+				+ "channels/roles/users that were previously in this league. You may delete or archive "
+				+ "this league content. Up to you! "
+				+ "\nIf you want to revive this league you must `$createleague` a new one and "
+				+ "`$readbackup` Users then rejoin and select the number of sets they want again!")
+			.queue();
+		GlobalData.saveData();
 		return true;
 	}
 	

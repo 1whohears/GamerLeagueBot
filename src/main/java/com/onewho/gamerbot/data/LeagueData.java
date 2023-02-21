@@ -914,16 +914,28 @@ public class LeagueData {
 	 * @return if backup worked
 	 */
 	public boolean backup(Guild guild, MessageChannelUnion debugChannel, String backupName) {
-		TextChannel historyChannel = guild.getChannelById(TextChannel.class, getChannelId("set-history"));
+		TextChannel historyChannel = guild.getChannelById(TextChannel.class, 
+				getChannelId("set-history"));
 		if (historyChannel == null) {
 			debugChannel.sendMessage(Important.getError()+" Can't backup because the backup channel is gone!").queue();
 			return false;
 		}
+		return backup(guild, debugChannel, backupName, historyChannel);
+	}
+	
+	/**
+	 * @param guild
+	 * @param debugChannel
+	 * @param backupName
+	 * @param backupChannel
+	 * @return
+	 */
+	public boolean backup(Guild guild, MessageChannelUnion debugChannel, String backupName, TextChannel backupChannel) {
 		JsonObject backup = getBackupJson();
 		String data = GlobalData.getGson().toJson(backup);
 		FileUpload fu = FileUpload.fromData(new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)), 
-				guild.getName()+"_"+backupName+"_"+UtilCalendar.getCurrentDateTimeString()+".json");
-		historyChannel.sendFiles(fu).queue();
+				guild.getName()+"_"+getName()+"_"+backupName+"_"+UtilCalendar.getCurrentDateTimeString()+".json");
+		backupChannel.sendFiles(fu).queue();
 		try { fu.close(); } 
 		catch (IOException e) { 
 			debugChannel.sendMessage(Important.getError()+" Can't backup because of an error: "+e.getMessage()).queue();
