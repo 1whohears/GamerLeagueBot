@@ -836,8 +836,9 @@ public class LeagueData {
 		while (createdSet) {
 			createdSet = false;
 			System.out.println("");
-			System.out.println("USER LOOP");
+			System.out.println("BIG LOOP");
 			for (UserData udata : activeUsers) {
+				System.out.println("USER LOOP");
 				System.out.println("user "+udata);
 				List<SetData> incompleteSets = getIncompleteOrCurrentSetsByPlayer(udata.getId());
 				System.out.println("incomplete sets "+incompleteSets.size());
