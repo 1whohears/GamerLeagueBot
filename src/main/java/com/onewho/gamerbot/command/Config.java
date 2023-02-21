@@ -10,6 +10,10 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class Config extends LeagueCommand {
 	
+	public Config() {
+		subCommands.put("max-sets-per-week", );
+	}
+	
 	@Override
 	public boolean getNeedsTO() {
 		return true;

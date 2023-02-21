@@ -54,5 +54,5 @@ public abstract class LeagueCommand implements ICommand {
 	}
 	
 	public abstract boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata);
-
+	
 }
