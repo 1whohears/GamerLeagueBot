@@ -6,8 +6,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 import javax.annotation.Nullable;
 
@@ -21,7 +20,7 @@ public class GlobalData {
 	private static Gson gson = null;
 	private static String dataFileName = "data.json";
 	
-	private static List<GuildData> guilds = new ArrayList<GuildData>();
+	private static HashMap<Long, GuildData> guilds = new HashMap<>();
 	
 	public static Gson getGson() {
 		if (gson == null) {
@@ -50,17 +49,20 @@ public class GlobalData {
 		}
 		guilds.clear();
 		JsonArray gs = json.get("guilds").getAsJsonArray();
-		for (int i = 0; i < gs.size(); ++i) guilds.add(new GuildData(gs.get(i).getAsJsonObject()));
+		for (int i = 0; i < gs.size(); ++i) {
+			GuildData gd = new GuildData(gs.get(i).getAsJsonObject());
+			guilds.put(gd.getId(), gd);
+		}
 		return json;
 	}
 	
 	/**
-	 * writes data for all servers/guilds to disk
+	 * writes data for all discord servers/guilds to disk
 	 */
 	public static void saveData() {
 		JsonObject json = new JsonObject();
 		JsonArray gs = new JsonArray();
-		for (int i = 0; i < guilds.size(); ++i) gs.add(guilds.get(i).getJson());
+		guilds.forEach((id, data) -> saveGuild(data, gs));
 		json.add("guilds", gs);
 		String data = gson.toJson(json);
 		BufferedWriter writer;
@@ -73,14 +75,17 @@ public class GlobalData {
 		}
 	}
 	
+	private static void saveGuild(GuildData data, JsonArray gs) {
+		gs.add(data.getJson());
+	}
+	
 	/**
 	 * @param id guild id
 	 * @return the league data for this guild
 	 */
 	@Nullable
 	public static GuildData getGuildDataById(long id) {
-		for (int i = 0; i < guilds.size(); ++i) if (guilds.get(i).getId() == id) return guilds.get(i);
-		return null;
+		return guilds.get(id);
 	}
 	
 	/**
@@ -91,16 +96,16 @@ public class GlobalData {
 		GuildData data = getGuildDataById(id);
 		if (data != null) return data;
 		data = new GuildData(id);
-		guilds.add(data);
+		guilds.put(id, data);
 		return data;
 	}
 	
 	public static void genScheduledPairsForAllLeagues() {
-		for (GuildData g : guilds) g.genScheduledPairsForAllLeagues();
+		guilds.forEach((id, data) -> data.genScheduledPairsForAllLeagues());
 	}
 	
 	public static void updateRanksForAllLeagues() {
-		for (GuildData g : guilds) g.updateRanksForAllLeagues();
+		guilds.forEach((id, data) -> data.updateRanksForAllLeagues());
 	}
 	
 }

@@ -5,26 +5,11 @@ import com.onewho.gamerbot.util.UtilKClosest;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class Test implements ICommand {
-
-	@Override
-	public boolean getNeedsAdmin() {
-		return true;
-	}
-
-	@Override
-	public boolean getNeedsTO() {
-		return true;
-	}
+public class Test extends AdminCommand {
 
 	@Override
 	public String getCommandString() {
 		return "test";
-	}
-
-	@Override
-	public String getRequiredChannelName() {
-		return null;
 	}
 
 	@Override
@@ -34,6 +19,7 @@ public class Test implements ICommand {
 
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
+		if (!super.runCommand(event, params)) return false;
 		int[] scores = new int[] {1010, 1010, 1010, 1009, 1000, 990, 990, 981};
 		System.out.println("descending");
 		for (int i = 0; i < scores.length; ++i) {

@@ -9,26 +9,11 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class RefreshSet implements ICommand {
-
-	@Override
-	public boolean getNeedsAdmin() {
-		return true;
-	}
-	
-	@Override
-	public boolean getNeedsTO() {
-		return true;
-	}
+public class RefreshSet extends AdminCommand {
 
 	@Override
 	public String getCommandString() {
 		return "refreshset";
-	}
-
-	@Override
-	public String getRequiredChannelName() {
-		return "bot-commands";
 	}
 	
 	@Override

@@ -9,16 +9,10 @@ import com.onewho.gamerbot.data.ReportResult;
 import com.onewho.gamerbot.data.SetData;
 import com.onewho.gamerbot.util.UtilCalendar;
 
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class ReportAdmin implements ICommand {
-
-	@Override
-	public boolean getNeedsAdmin() {
-		return false;
-	}
+public class ReportAdmin extends LeagueCommand {
 	
 	@Override
 	public boolean getNeedsTO() {
@@ -42,20 +36,20 @@ public class ReportAdmin implements ICommand {
 	}
 
 	@Override
-	public boolean runCommand(MessageReceivedEvent event, String[] params) {
+	public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 		if (params.length != 6) {
 			event.getChannel().sendMessage(Important.getError()+" DO: "+getHelp()).queue();
-			return true;
+			return false;
 		}
 		int id = -1, s1 = -1, s2 = -1;
 		long pingId1 = -1, pingId2 = -1;
 		if (!checkIfMention(params[2])) {
 			event.getChannel().sendMessage(Important.getError()+" "+params[2]+" is not a mention!").queue();
-			return true;
+			return false;
 		}
 		if (!checkIfMention(params[4])) {
 			event.getChannel().sendMessage(Important.getError()+" "+params[4]+" is not a mention!").queue();
-			return true;
+			return false;
 		}
 		String pingS1 = params[2].substring(2, params[2].length()-1);
 		String pingS2 = params[4].substring(2, params[4].length()-1);
@@ -69,41 +63,30 @@ public class ReportAdmin implements ICommand {
 		}
 		if (id == -1) {
 			event.getChannel().sendMessage(Important.getError()+" "+params[1]+" is not a number!").queue();
-			return true;
+			return false;
 		} else if (s1 == -1) {
 			event.getChannel().sendMessage(Important.getError()+" "+params[3]+" is not a number!").queue();
-			return true;
+			return false;
 		} else if (s2 == -1) {
 			event.getChannel().sendMessage(Important.getError()+" "+params[5]+" is not a number!").queue();
-			return true;
+			return false;
 		} else if (pingId1 == -1) {
 			event.getChannel().sendMessage(Important.getError()+" you didn't mention/ping player 1 correctly!").queue();
-			return true;
+			return false;
 		} else if (pingId2 == -1) {
 			event.getChannel().sendMessage(Important.getError()+" you didn't mention/ping player 2 correctly!").queue();
-			return true;
-		}
-		Guild guild = event.getGuild();
-		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
-		if (gdata == null) {
-			event.getChannel().sendMessage("This guild doesn't have any leagues.").queue();
-			return true;
-		}
-		LeagueData ldata = gdata.getLeagueByChannel(event.getChannel());
-		if (ldata == null) {
-			event.getChannel().sendMessage("This is not a valid league.").queue();
-			return true;
+			return false;
 		}
 		SetData set = ldata.getSetDataById(id);
 		if (set == null) {
 			event.getChannel().sendMessage(Important.getError()+" The set with id "+id+" does not exist!").queue();
-			return true;
+			return false;
 		}
 		String currentData = UtilCalendar.getCurrentDateString();
 		ReportResult result = set.reportAdmin(pingId1, pingId2, s1, s2, currentData);
 		if (result == ReportResult.IDsDontMatch) {
 			event.getChannel().sendMessage(Important.getError()+" This set id does not have those players!").queue();
-			return true;
+			return false;
 		} else if (result == ReportResult.SetVerified) {
 			ldata.getUserDataById(set.getP1Id()).setLastActive(currentData);
 			ldata.getUserDataById(set.getP2Id()).setLastActive(currentData);
@@ -115,7 +98,8 @@ public class ReportAdmin implements ICommand {
 			return true;
 		}
 		//display new sets
-		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, ldata.getChannelId("pairings"));
+		TextChannel pairsChannel = event.getGuild().getChannelById(TextChannel.class, 
+				ldata.getChannelId("pairings"));
 		set.displaySet(pairsChannel);
 		GlobalData.saveData();
 		return true;

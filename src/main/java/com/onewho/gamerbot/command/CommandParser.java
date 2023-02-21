@@ -3,63 +3,27 @@ package com.onewho.gamerbot.command;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.onewho.gamerbot.data.GlobalData;
-import com.onewho.gamerbot.data.GuildData;
-import com.onewho.gamerbot.data.LeagueData;
+import com.onewho.gamerbot.BotMain;
 
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class CommandParser {
 	
 	public static List<ICommand> commands;
 	
-	public static boolean parseCommand(MessageReceivedEvent event) {
-		if (event.getAuthor().equals(event.getJDA().getSelfUser())) return true;
+	public static void parseCommand(MessageReceivedEvent event) {
+		if (event.getAuthor().equals(event.getJDA().getSelfUser())) return;
 		if (commands == null) loadCommands();
 		String text = event.getMessage().getContentRaw();
-		if (text.length() < 2) return true;
+		if (text.length() < 2) return;
 		String[] command = text.substring(1, text.length()).split(" ");
-		//System.out.println("command received: "+command[0]+" in channel "+event.getChannel().getName());
-		//System.out.println("the user "+event.getMember().getNickname()+" has admin? "+event.getMember().hasPermission(Permission.ADMINISTRATOR));
 		for (ICommand c : commands) {
-			if (!c.getCommandString().equals(command[0])) continue;
-			//System.out.println("command "+c.getCommandString()+" requires channel name "+c.getRequiredChannelName()+" and admin? "+c.getNeedsAdmin());
-			if (c.getRequiredChannelName() != null && !event.getChannel().getName().equals(c.getRequiredChannelName())) return true;
-			boolean admin = event.getMember().hasPermission(Permission.ADMINISTRATOR);
-			if (c.getNeedsAdmin() && !admin) {
-				event.getChannel().sendMessage("That command requires admin permission to use!").queue();
-				return true;
+			if (c.getCommandString().equals(command[0])) {
+				c.runCommand(event, command);
+				return;
 			}
-			if (c.getNeedsTO() && !admin) {
-				Guild guild = event.getGuild();
-				GuildData gdata = GlobalData.createGuildData(guild.getIdLong());
-				if (gdata == null) {
-					event.getChannel().sendMessage("That command requires tournament organizer role to use in a league!").queue();
-					return true;
-				}
-				LeagueData ldata = gdata.getLeagueByChannel(event.getChannel());
-				if (ldata == null) {
-					event.getChannel().sendMessage("That command requires tournament organizer role to use in a league!").queue();
-					return true;
-				}
-				Role toRole = guild.getRoleById(ldata.getToRoleId());
-				if (toRole == null) {
-					event.getChannel().sendMessage("This league doesn't have a TO role."
-							+ " Please use the `setup` command!").queue();
-					return true;
-				}
-				if (event.getMember().getRoles().contains(toRole)) {
-					event.getChannel().sendMessage("That command requires tournament organizer role to use!").queue();
-					return true;
-				}
-			}
-			c.runCommand(event, command);
-			return true;
 		}
-		return false;
+		event.getChannel().sendMessage("That command doesn't exist! Try `"+BotMain.PREFIX+"help`!").queue();
 	}
 	
 	public static void loadCommands() {

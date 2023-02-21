@@ -3,22 +3,15 @@ package com.onewho.gamerbot.command;
 import java.util.List;
 
 import com.onewho.gamerbot.BotMain;
-import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.LeagueData;
 
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class Help implements ICommand {
-	
-	@Override
-	public boolean getNeedsAdmin() {
-		return false;
-	}
+public class Help extends LeagueCommand {
 	
 	@Override
 	public boolean getNeedsTO() {
@@ -39,24 +32,10 @@ public class Help implements ICommand {
 	public String getHelp() {
 		return "`"+BotMain.PREFIX+getCommandString()+"` does this";
 	}
-
+	
 	@Override
-	public boolean runCommand(MessageReceivedEvent event, String[] params) {
-		System.out.println("help command");
-		Guild guild = event.getGuild();
-		GuildData gdata = GlobalData.createGuildData(guild.getIdLong());
-		if (gdata == null) {
-			event.getChannel().sendMessage("This server doesn't have any leagues yet!"
-					+ " Tell an admin to run the `createleague` command!").queue();
-			return true;
-		}
-		LeagueData ldata = gdata.getLeagueByChannel(event.getChannel());
-		if (ldata == null) {
-			event.getChannel().sendMessage("This server doesn't have any leagues yet!"
-					+ " Tell an admin to run the `createleague` command!").queue();
-			return true;
-		}
-		Role toRole = guild.getRoleById(ldata.getToRoleId());
+	public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
+		Role toRole = event.getGuild().getRoleById(ldata.getToRoleId());
 		boolean to = false;
 		if (toRole != null) to = event.getMember().getRoles().contains(toRole);
 		boolean admin = event.getMember().hasPermission(Permission.ADMINISTRATOR);

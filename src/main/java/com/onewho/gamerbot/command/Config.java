@@ -6,15 +6,9 @@ import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.Important;
 import com.onewho.gamerbot.data.LeagueData;
 
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class Config implements ICommand {
-
-	@Override
-	public boolean getNeedsAdmin() {
-		return false;
-	}
+public class Config extends LeagueCommand {
 	
 	@Override
 	public boolean getNeedsTO() {
@@ -39,21 +33,10 @@ public class Config implements ICommand {
 	}
 
 	@Override
-	public boolean runCommand(MessageReceivedEvent event, String[] params) {
+	public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 		if (params.length != 3) {
 			event.getChannel().sendMessage(Important.getError()+" DO: "+getHelp()).queue();
-			return true;
-		}
-		Guild guild = event.getGuild();
-		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
-		if (gdata == null) {
-			event.getChannel().sendMessage("This guild doesn't have any leagues.").queue();
-			return true;
-		}
-		LeagueData ldata = gdata.getLeagueByChannel(event.getChannel());
-		if (ldata == null) {
-			event.getChannel().sendMessage("This is not a valid league.").queue();
-			return true;
+			return false;
 		}
 		int value;
 		double valueD;
@@ -66,7 +49,7 @@ public class Config implements ICommand {
 				return true;
 			}
 			ldata.setMaxSetsPerWeek(value);
-			ldata.updateOptions(guild);
+			ldata.updateOptions(event.getGuild());
 			event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
 			GlobalData.saveData();
 			return true;
@@ -145,7 +128,7 @@ public class Config implements ICommand {
 		}
 		event.getChannel().sendMessage(Important.getError()
 				+" setting "+params[1]+" doesn't exist. Try `"+BotMain.PREFIX+"help`!").queue();
-		return true;
+		return false;
 	}
 	
 	private int parseInt(String param) {

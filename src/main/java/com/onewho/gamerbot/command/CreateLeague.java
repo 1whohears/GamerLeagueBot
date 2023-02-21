@@ -8,26 +8,11 @@ import com.onewho.gamerbot.data.Important;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class CreateLeague implements ICommand {
-
-	@Override
-	public boolean getNeedsAdmin() {
-		return true;
-	}
-	
-	@Override
-	public boolean getNeedsTO() {
-		return true;
-	}
+public class CreateLeague extends AdminCommand {
 
 	@Override
 	public String getCommandString() {
 		return "createleague";
-	}
-
-	@Override
-	public String getRequiredChannelName() {
-		return null;
 	}
 	
 	@Override
@@ -37,6 +22,7 @@ public class CreateLeague implements ICommand {
 
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
+		if (!super.runCommand(event, params)) return false;
 		if (params.length < 2) {
 			event.getChannel().sendMessage(Important.getError()+" DO: "+getHelp()).queue();
 			return true;

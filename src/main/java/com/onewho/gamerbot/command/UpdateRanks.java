@@ -5,15 +5,9 @@ import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.LeagueData;
 
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class UpdateRanks implements ICommand {
-
-	@Override
-	public boolean getNeedsAdmin() {
-		return false;
-	}
+public class UpdateRanks extends LeagueCommand {
 	
 	@Override
 	public boolean getNeedsTO() {
@@ -36,19 +30,8 @@ public class UpdateRanks implements ICommand {
 	}
 
 	@Override
-	public boolean runCommand(MessageReceivedEvent event, String[] params) {
-		Guild guild = event.getGuild();
-		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
-		if (gdata == null) {
-			event.getChannel().sendMessage("This guild doesn't have any leagues.").queue();
-			return true;
-		}
-		LeagueData ldata = gdata.getLeagueByChannel(event.getChannel());
-		if (ldata == null) {
-			event.getChannel().sendMessage("This is not a valid league.").queue();
-			return true;
-		}
-		ldata.updateRanks(guild, event.getChannel());
+	public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
+		ldata.updateRanks(event.getGuild(), event.getChannel());
 		GlobalData.saveData();
 		return true;
 	}

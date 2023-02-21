@@ -6,15 +6,9 @@ import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.Important;
 import com.onewho.gamerbot.data.LeagueData;
 
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class RemoveSet implements ICommand {
-
-	@Override
-	public boolean getNeedsAdmin() {
-		return false;
-	}
+public class RemoveSet extends LeagueCommand {
 
 	@Override
 	public boolean getNeedsTO() {
@@ -37,10 +31,10 @@ public class RemoveSet implements ICommand {
 	}
 
 	@Override
-	public boolean runCommand(MessageReceivedEvent event, String[] params) {
+	public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 		if (params.length < 2) {
 			event.getChannel().sendMessage(Important.getError()+" DO: "+getHelp()).queue();
-			return true;
+			return false;
 		}
 		int[] ids = new int[params.length-1];
 		for (int i = 0; i < ids.length; ++i) {
@@ -50,21 +44,10 @@ public class RemoveSet implements ICommand {
 				ids[i] = -1;
 			}
 		}
-		Guild guild = event.getGuild();
-		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
-		if (gdata == null) {
-			event.getChannel().sendMessage("This guild doesn't have any leagues.").queue();
-			return true;
-		}
-		LeagueData ldata = gdata.getLeagueByChannel(event.getChannel());
-		if (ldata == null) {
-			event.getChannel().sendMessage("This is not a valid league.").queue();
-			return true;
-		}
-		int num = ldata.removeSets(guild, event.getChannel(), ids);
+		int num = ldata.removeSets(event.getGuild(), event.getChannel(), ids);
 		if (num == 0) {
 			event.getChannel().sendMessage(Important.getError()+" None of these sets could be removed!").queue();
-			return true;
+			return false;
 		}
 		event.getChannel().sendMessage("Removed "+num+" sets!").queue();
 		GlobalData.saveData();

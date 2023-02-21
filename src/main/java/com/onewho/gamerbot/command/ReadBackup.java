@@ -10,22 +10,16 @@ import java.util.concurrent.ExecutionException;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.GuildData;
+import com.onewho.gamerbot.data.LeagueData;
 
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.utils.FileProxy;
 
-public class ReadBackup implements ICommand {
-
-	@Override
-	public boolean getNeedsAdmin() {
-		return false;
-	}
+public class ReadBackup extends LeagueCommand {
 	
 	@Override
 	public boolean getNeedsTO() {
@@ -48,11 +42,11 @@ public class ReadBackup implements ICommand {
 	}
 
 	@Override
-	public boolean runCommand(MessageReceivedEvent event, String[] params) {
+	public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 		List<Attachment> att = event.getMessage().getAttachments();
 		if (att.size() == 0) {
 			event.getChannel().sendMessage("There were no files attached to your command.").queue();
-			return true;
+			return false;
 		}
 		String url = att.get(0).getUrl();
 		System.out.println(url);
@@ -67,7 +61,7 @@ public class ReadBackup implements ICommand {
 			event.getChannel().sendMessage("There was an error while downloading this file."
 					+ "\n"+e.getMessage()).queue();
 		}
-		if (stream == null) return true;
+		if (stream == null) return false;
 		Reader reader = new InputStreamReader(stream);
 		JsonObject backup = null;
 		try {
@@ -75,34 +69,23 @@ public class ReadBackup implements ICommand {
 			reader.close();
 		} catch (JsonSyntaxException e) {
 			event.getChannel().sendMessage("There is a syntax error in this json file").queue();
-			return true;
+			return false;
 		} catch (JsonIOException e) {
 		} catch (IOException e) {
 		}
 		if (backup == null || backup.get("users") == null || backup.get("sets") == null) {
 			event.getChannel().sendMessage("The uploaded file is not a backup file").queue();
-			return true;
+			return false;
 		}
-		Guild guild = event.getGuild();
-		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
-		if (gdata == null) {
-			event.getChannel().sendMessage("This guild doesn't have any leagues.").queue();
-			return true;
-		}
-		LeagueData ldata = gdata.getLeagueByChannel(event.getChannel());
-		if (ldata == null) {
-			event.getChannel().sendMessage("This is not a valid league.").queue();
-			return true;
-		}
-		ldata.backup(guild, event.getChannel(), "pre-readbackup");
+		ldata.backup(event.getGuild(), event.getChannel(), "pre-readbackup");
 		try {
 			ldata.readBackup(backup);
 		} catch (IllegalStateException e) {
 			event.getChannel().sendMessage("The uploaded file is not a backup file").queue();
-			return true;
+			return false;
 		} catch (ClassCastException e) {
 			event.getChannel().sendMessage("The uploaded file is not a backup file").queue();
-			return true;
+			return false;
 		}
 		GlobalData.saveData();
 		event.getChannel().sendMessage("Backup has been loaded!").queue();

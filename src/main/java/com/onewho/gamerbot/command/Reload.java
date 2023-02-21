@@ -11,26 +11,11 @@ import com.onewho.gamerbot.data.GlobalData;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class Reload implements ICommand {
-
-	@Override
-	public boolean getNeedsAdmin() {
-		return true;
-	}
-	
-	@Override
-	public boolean getNeedsTO() {
-		return true;
-	}
+public class Reload extends AdminCommand {
 
 	@Override
 	public String getCommandString() {
 		return "reload";
-	}
-
-	@Override
-	public String getRequiredChannelName() {
-		return "bot-commands";
 	}
 	
 	@Override
@@ -40,6 +25,7 @@ public class Reload implements ICommand {
 
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params) {
+		if (!super.runCommand(event, params)) return false;
 		try {
 			GlobalData.readJsonData();
 			event.getChannel().sendMessage("Realoaded Data File!").queue();
