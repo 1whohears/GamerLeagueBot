@@ -7,18 +7,20 @@ import com.google.gson.JsonObject;
 
 public class UserData {
 	
-	private long id = -1;
+	private final long id;
 	private boolean active = false;
 	private int setsPerWeek = 0;
 	private String lastActive = "";
 	private int score = 0;
+	private boolean locked = false;
 	
 	protected UserData(JsonObject data) {
-		id = ParseData.getLong(data, "id", id);
+		id = ParseData.getLong(data, "id", -1);
 		active = ParseData.getBoolean(data, "active", active);
 		setsPerWeek = ParseData.getInt(data, "sets per week", setsPerWeek);
 		setLastActive(ParseData.getString(data, "last active", lastActive));
 		setScore(ParseData.getInt(data, "score", score));
+		locked = ParseData.getBoolean(data, "locked", locked);
 	}
 	
 	protected UserData(long id) {
@@ -33,6 +35,7 @@ public class UserData {
 		data.addProperty("sets per week", setsPerWeek);
 		data.addProperty("last active", lastActive);
 		data.addProperty("score", score);
+		data.addProperty("locked", locked);
 		return data;
 	}
 	
@@ -117,6 +120,18 @@ public class UserData {
 	 */
 	public void setScore(int score) {
 		this.score = score;
+	}
+	
+	public boolean isLocked() {
+		return locked;
+	}
+	
+	public void lockUser() {
+		locked = true;
+	}
+	
+	public void unlockUser() {
+		locked = false;
 	}
 	
 }

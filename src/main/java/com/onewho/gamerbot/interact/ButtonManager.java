@@ -25,8 +25,7 @@ public class ButtonManager {
 		case "join-gamer-league":
 			UtilUsers.userJoinLeague(event.getGuild(), event.getUser(), event.getChannel());
 			//debug
-			event.reply("You have joined the Gamer League! Please select how many sets you want to do per week!"
-					+ " Use ~help in #bot-commands for more info!").setEphemeral(true).queue();
+			event.reply().setEphemeral(true).queue();
 			break;
 		case "quit-gamer-league":
 			UtilUsers.userQuitLeague(event.getGuild(), event.getUser(), event.getChannel());
