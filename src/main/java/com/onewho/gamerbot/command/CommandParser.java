@@ -32,17 +32,19 @@ public class CommandParser {
 		commands.add(new Setup());
 		commands.add(new Config());
 		commands.add(new GenPairs());
+		commands.add(new UpdateRanks());
 		commands.add(new Report());
 		commands.add(new ReportAdmin());
-		commands.add(new UpdateRanks());
-		commands.add(new Backup());
-		commands.add(new ReadBackup());
+		commands.add(new ManageUser());
+		commands.add(new Challenge());
 		commands.add(new CreateSet());
 		commands.add(new RemoveSet());
+		commands.add(new Backup());
+		commands.add(new ReadBackup());
 		commands.add(new CreateLeague());
 		commands.add(new RenameLeague());
 		commands.add(new RemoveLeague());
-		commands.add(new Test());
+		//commands.add(new Test());
 		//commands.add(new Reload()); // for testing
 		//commands.add(new RefreshSet()); // for testing
 	}
