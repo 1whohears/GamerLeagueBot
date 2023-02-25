@@ -20,16 +20,14 @@ public class UtilUsers {
 	 * @return result message
 	 */
 	public static String userJoinLeague(Guild guild, User user, Channel channel) {
-		//json data
 		LeagueData data = GlobalData.getGuildDataById(guild.getIdLong()).getLeagueByChannel(channel);
-		if (data == null) return "This channel isn't in a league!";
+		if (data == null) 
+			return "This channel isn't in a league!";
 		UserData userData = data.getUserDataById(user.getIdLong());
 		if (userData == null) userData = data.createUser(user.getIdLong());
-		if (userData.isLocked()) return "You are not allowed to join this league because"
-				+ " a TO locked you out!";
-		//join role
+		if (userData.isLocked()) 
+			return "You are not allowed to join this league because a TO locked you out!";
 		guild.addRoleToMember(user, guild.getRoleById(data.getLeagueRoleId())).queue();
-		//update league data
 		userData.setActive(true);
 		userData.setLastActive(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
 		GlobalData.saveData();
@@ -38,33 +36,32 @@ public class UtilUsers {
 	}
 	
 	public static String userQuitLeague(Guild guild, User user, Channel channel) {
-		//json data
 		LeagueData data = GlobalData.getGuildDataById(guild.getIdLong()).getLeagueByChannel(channel);
-		if (data == null) return false;
+		if (data == null) 
+			return "This channel isn't in a league!";
 		UserData userData = data.getUserDataById(user.getIdLong());
-		if (userData == null) return false;
-		//leave role
+		if (userData == null) 
+			return "How can you leave something that you aren't in?";
 		guild.removeRoleFromMember(user, guild.getRoleById(data.getLeagueRoleId())).queue();
-		//update league data
 		userData.setActive(false);
 		GlobalData.saveData();
-		return true;
+		return "You have left this league...sad...";
 	}
 	
-	public static String userSetsAWeek(Guild guild, User user, int sets, Channel channel) {
-		//json data
+	public static String userSetsAWeek(Guild guild, User user, Channel channel, int sets) {
 		LeagueData data = GlobalData.getGuildDataById(guild.getIdLong()).getLeagueByChannel(channel);
-		if (data == null) return "This channel isn't in a league!";
+		if (data == null) 
+			return "This channel isn't in a league!";
 		UserData userData = data.getUserDataById(user.getIdLong());
-		if (userData == null) userData = data.createUser(user.getIdLong());
-		//update league data
-		if (userData.isLocked()) return "You are not allowed to join this league because"
-				+ " a TO locked you out!";
-		if (!userData.getActive()) return "You have been set as an inactive player."
-				+ " Please rejoin the league first!";
+		if (userData == null) 
+			return "You must join this league first!";
+		if (userData.isLocked()) 
+			return "You are not allowed to join this league because a TO locked you out!";
+		if (!userData.getActive()) 
+			return "You have been set as an inactive player. Please rejoin the league first!";
 		userData.setSetsPerWeek(sets);
 		GlobalData.saveData();
-		return true;
+		return "I will try to give you "+sets+" pairings next week!";
 	}
 	
 }

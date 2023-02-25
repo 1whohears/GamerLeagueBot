@@ -16,21 +16,19 @@ public class ButtonManager {
 		String id = event.getButton().getId();
 		if (id.startsWith("setsaweek-")) {
 			int sets = Integer.parseInt(id.substring("setsaweek-".length(), id.length()));
-			if (UtilUsers.userSetsAWeek(event.getGuild(), event.getUser(), sets, event.getChannel())) 
-				event.reply("I will try to give you "+sets+" pairings next week!").setEphemeral(true).queue();
-			else event.reply("You must join the Gamer League first!").setEphemeral(true).queue();
+			String message = UtilUsers.userSetsAWeek(event.getGuild(), event.getUser(), event.getChannel(), sets);
+			event.reply(message).setEphemeral(true).queue();
 			return;
 		}
+		String message = "";
 		switch (id) {
 		case "join-gamer-league":
-			UtilUsers.userJoinLeague(event.getGuild(), event.getUser(), event.getChannel());
-			//debug
-			event.reply().setEphemeral(true).queue();
+			message = UtilUsers.userJoinLeague(event.getGuild(), event.getUser(), event.getChannel());
+			event.reply(message).setEphemeral(true).queue();
 			break;
 		case "quit-gamer-league":
-			UtilUsers.userQuitLeague(event.getGuild(), event.getUser(), event.getChannel());
-			//debug
-			event.reply("You have left the gamer league...sad...").setEphemeral(true).queue();
+			message = UtilUsers.userQuitLeague(event.getGuild(), event.getUser(), event.getChannel());
+			event.reply(message).setEphemeral(true).queue();
 			break;
 		case "report-verify":
 			handleReportVerifyButton(event);
