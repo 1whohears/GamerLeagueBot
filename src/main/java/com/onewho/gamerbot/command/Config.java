@@ -33,7 +33,7 @@ public class Config extends LeagueCommand {
 	}
 	
 	public Config() {
-		subCommands.put("max-sets-per-week", new SubCommand() {
+		addSubCommand(new SubCommand("max-sets-per-week") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 				int value = parseInt(params[2]);
@@ -48,7 +48,7 @@ public class Config extends LeagueCommand {
 				return true;
 			}
 		});
-		subCommands.put("weeks-before-auto-inactive", new SubCommand() {
+		addSubCommand(new SubCommand("weeks-before-auto-inactive") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 				int value = parseInt(params[2]);
@@ -62,7 +62,7 @@ public class Config extends LeagueCommand {
 				return true;
 			}
 		});
-		subCommands.put("weeks-before-set-expires", new SubCommand() {
+		addSubCommand(new SubCommand("weeks-before-set-expires") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 				int value = parseInt(params[2]);
@@ -76,7 +76,7 @@ public class Config extends LeagueCommand {
 				return true;
 			}
 		});
-		subCommands.put("weeks-before-set-repeat", new SubCommand() {
+		addSubCommand(new SubCommand("weeks-before-set-repeat") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 				int value = parseInt(params[2]);
@@ -90,7 +90,7 @@ public class Config extends LeagueCommand {
 				return true;
 			}
 		});
-		subCommands.put("default-score", new SubCommand() {
+		addSubCommand(new SubCommand("default-score") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 				int value = parseInt(params[2]);
@@ -104,7 +104,7 @@ public class Config extends LeagueCommand {
 				return true;
 			}
 		});
-		subCommands.put("K", new SubCommand() {
+		addSubCommand(new SubCommand("K") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 				double valueD = parseDouble(params[2]);
@@ -118,7 +118,7 @@ public class Config extends LeagueCommand {
 				return true;
 			}
 		});
-		subCommands.put("auto-gen-pairs", new SubCommand() {
+		addSubCommand(new SubCommand("auto-gen-pairs") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 				boolean valueB;
@@ -134,7 +134,7 @@ public class Config extends LeagueCommand {
 				return true;
 			}
 		});
-		subCommands.put("auto-update-ranks", new SubCommand() {
+		addSubCommand(new SubCommand("auto-update-ranks") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 				boolean valueB;

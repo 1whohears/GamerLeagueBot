@@ -36,6 +36,12 @@ public interface ICommand {
 		return SubCommandResult.SUCCESS;
 	}
 	
+	default boolean addSubCommand(SubCommand sub) {
+		if (subCommands.containsKey(sub.param)) return false;
+		subCommands.put(sub.param, sub);
+		return true;
+	}
+	
 	public static enum SubCommandResult {
 		NO_PARAMS,
 		PARAM_DNE,

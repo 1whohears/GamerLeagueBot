@@ -21,7 +21,7 @@ public class ManageUser extends LeagueCommand {
 
 	@Override
 	public String getHelp() {
-		return "`"+BotMain.PREFIX+getCommandString()+" [setting] [user ping] [value]`";
+		return "`"+BotMain.PREFIX+getCommandString()+" [setting] [user ping] (value)`";
 	}
 
 	@Override
@@ -30,35 +30,35 @@ public class ManageUser extends LeagueCommand {
 	}
 	
 	public ManageUser() {
-		subCommands.put("get", new SubCommand() {
+		addSubCommand(new SubCommand("get") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 				
 				return true;
 			}
 		});
-		subCommands.put("lock", new SubCommand() {
+		addSubCommand(new SubCommand("lock") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 				
 				return true;
 			}
 		});
-		subCommands.put("join", new SubCommand() {
+		addSubCommand(new SubCommand("join") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 				
 				return true;
 			}
 		});
-		subCommands.put("remove", new SubCommand() {
+		addSubCommand(new SubCommand("remove") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 				
 				return true;
 			}
 		});
-		subCommands.put("sets-per-week", new SubCommand() {
+		addSubCommand(new SubCommand("sets-per-week") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 				
