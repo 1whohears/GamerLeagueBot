@@ -834,6 +834,8 @@ public class LeagueData {
 				UtilDebug.printIntArray("K LOOP index sort", ksort);
 				for (int i = 0; i < ksort.length; ++i) {
 					UserData userk = activeUsers.get(ksort[i]);
+					long id1 = udata.getId(), id2 = userk.getId();
+					if (id1 == id2) continue;
 					System.out.println("user k "+userk);
 					List<SetData> incompleteSetsK = getIncompleteOrCurrentSetsByPlayer(userk.getId());
 					System.out.println("incomplete sets k "+incompleteSetsK.size());
@@ -845,8 +847,6 @@ public class LeagueData {
 						System.out.println("recent set week diff "+diff);
 						if (diff <= getWeeksBeforeSetRepeat()) continue;
 					}
-					long id1 = udata.getId(), id2 = userk.getId();
-					if (id1 == id2) continue;
 					SetData newSet = createSet(id1, id2);
 					if (newSet != null) {
 						System.out.println("created set "+newSet);
