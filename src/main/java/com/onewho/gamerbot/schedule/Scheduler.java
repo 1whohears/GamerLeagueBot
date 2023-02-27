@@ -29,6 +29,7 @@ public class Scheduler {
 		System.out.println("RUNNING DAILY TASKS "+ZonedDateTime.now(ZoneId.of("America/Chicago")));
 		GlobalData.updateRanksForAllLeagues();
 		GlobalData.genScheduledPairsForAllLeagues();
+		GlobalData.saveData();
 	}
 	
 	private static Runnable getDailyRun() {

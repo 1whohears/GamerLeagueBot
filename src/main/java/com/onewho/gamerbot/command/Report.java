@@ -52,19 +52,13 @@ public class Report extends LeagueCommand {
 			return false;
 		}
 		int id = -1, s1 = -1, s2 = -1;
-		long pingId = -1;
-		if (!checkIfMention(params[4])) {
-			event.getChannel().sendMessage(Important.getError()+" "+params[4]+" is not a mention!").queue();
-			return false;
-		}
-		String pingString = params[4].substring(2, params[4].length()-1);
 		try {
 			id = Integer.parseInt(params[1]);
 			s1 = Integer.parseInt(params[2]);
 			s2 = Integer.parseInt(params[3]);
-			pingId = Long.parseLong(pingString);
 		} catch (NumberFormatException e) {
 		}
+		long pingId = getIdFromMention(params[4]);
 		if (id == -1) {
 			event.getChannel().sendMessage(Important.getError()+" "+params[1]+" is not a number!").queue();
 			return false;
@@ -75,7 +69,7 @@ public class Report extends LeagueCommand {
 			event.getChannel().sendMessage(Important.getError()+" "+params[3]+" is not a number!").queue();
 			return false;
 		} else if (pingId == -1) {
-			event.getChannel().sendMessage(Important.getError()+" you didn't mention/ping your opponent correctly!").queue();
+			event.getChannel().sendMessage(Important.getError()+" "+params[4]+" is not a mention!").queue();
 			return false;
 		}
 		SetData set = ldata.getSetDataById(id);
@@ -83,8 +77,8 @@ public class Report extends LeagueCommand {
 			event.getChannel().sendMessage(Important.getError()+" The set with id "+id+" does not exist!").queue();
 			return false;
 		}
-		String currentData = UtilCalendar.getCurrentDateString();
-		ReportResult result = set.report(event.getAuthor().getIdLong(), pingId, s1, s2, currentData);
+		String currentDate = UtilCalendar.getCurrentDateString();
+		ReportResult result = set.report(event.getAuthor().getIdLong(), pingId, s1, s2, currentDate);
 		switch (result) {
 		case IDsDontMatch:
 			event.getChannel().sendMessage(Important.getError()+" This set id does not have those players!").queue();
@@ -94,7 +88,7 @@ public class Report extends LeagueCommand {
 					+ "If you are correct have your opponent report again, or get a hold of an admin.").queue();
 			break;
 		case SetVerified:
-			ldata.getUserDataById(event.getAuthor().getIdLong()).setLastActive(currentData);
+			ldata.getUserDataById(event.getAuthor().getIdLong()).setLastActive(currentDate);
 			event.getChannel().sendMessage("Set reported and verified by opponent!").queue();
 			break;
 		case WaitingForOpponent:
@@ -102,7 +96,7 @@ public class Report extends LeagueCommand {
 				.addEmbeds(getVerifyEmbed(set, pingId))
 				.addActionRow(getVerifyButtons())
 				.build();
-			ldata.getUserDataById(event.getAuthor().getIdLong()).setLastActive(currentData);
+			ldata.getUserDataById(event.getAuthor().getIdLong()).setLastActive(currentDate);
 			event.getChannel().sendMessage(mcd).queue();
 			break;
 		case AlreadyVerified:
@@ -115,10 +109,6 @@ public class Report extends LeagueCommand {
 		set.displaySet(pairsChannel);
 		GlobalData.saveData();
 		return true;
-	}
-	
-	private boolean checkIfMention(String m) {
-		return m.length() > 10 && m.charAt(0) == '<' && m.charAt(1) == '@' && m.charAt(m.length()-1) == '>';
 	}
 	
 	private MessageEmbed getVerifyEmbed(SetData set, long opponentId) {

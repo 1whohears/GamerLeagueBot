@@ -41,23 +41,19 @@ public class CreateSet extends LeagueCommand {
 		long id1 = getIdFromMention(params[1]);
 		long id2 = getIdFromMention(params[2]);
 		if (id1 == -1) {
-			event.getChannel().sendMessage(Important.getError()+" "+params[1]
-					+" is not a mention!").queue();
+			event.getChannel().sendMessage(Important.getError()+" "+params[1]+" is not a mention!").queue();
 			return false;
 		}
 		if (id2 == -1) {
-			event.getChannel().sendMessage(Important.getError()+" "+params[2]
-					+" is not a mention!").queue();
+			event.getChannel().sendMessage(Important.getError()+" "+params[2]+" is not a mention!").queue();
 			return false;
 		}
 		if (ldata.getUserDataById(id1) == null) {
-			event.getChannel().sendMessage(Important.getError()
-					+" The first user/mention is not in this league!").queue();
+			event.getChannel().sendMessage(Important.getError()+" The first user/mention is not in this league!").queue();
 			return false;
 		}
 		if (ldata.getUserDataById(id2) == null) {
-			event.getChannel().sendMessage(Important.getError()
-					+" The second user/mention is not in this league!").queue();
+			event.getChannel().sendMessage(Important.getError()+" The second user/mention is not in this league!").queue();
 			return false;
 		}
 		SetData set = ldata.createSet(id1, id2);
@@ -72,19 +68,6 @@ public class CreateSet extends LeagueCommand {
 		set.displaySet(pairsChannel);
 		GlobalData.saveData();
 		return true;
-	}
-	
-	private boolean checkIfMention(String m) {
-		return m.length() > 10 && m.charAt(0) == '<' && m.charAt(1) == '@' && m.charAt(m.length()-1) == '>';
-	}
-	
-	private long getIdFromMention(String m) {
-		if (!checkIfMention(m)) return -1;
-		long id = -1;
-		String pingString = m.substring(2, m.length()-1);
-		try { id = Long.parseLong(pingString); } 
-		catch (NumberFormatException e) {}
-		return id;
 	}
 
 }

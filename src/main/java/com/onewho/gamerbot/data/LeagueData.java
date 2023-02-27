@@ -827,14 +827,12 @@ public class LeagueData {
 		boolean createdSet = true;
 		while (createdSet) {
 			createdSet = false;
-			System.out.println("");
+			System.out.println("=====");
 			System.out.println("BIG LOOP");
 			for (UserData udata : activeUsers) {
 				System.out.println("USER LOOP");
 				System.out.println("user "+udata);
-				List<SetData> incompleteSets = getIncompleteOrCurrentSetsByPlayer(udata.getId());
-				System.out.println("incomplete sets "+incompleteSets.size());
-				if (incompleteSets.size() >= udata.getSetsPerWeek()) continue;
+				if (hasEnoughSets(udata)) continue;
 				int[] ksort = LeagueData.getClosestUserIndexsByScore(udata, activeUsers);
 				UtilDebug.printIntArray("K LOOP index sort", ksort);
 				for (int i = 0; i < ksort.length; ++i) {
@@ -842,17 +840,9 @@ public class LeagueData {
 					long id1 = udata.getId(), id2 = userk.getId();
 					if (id1 == id2) continue;
 					System.out.println("user k "+userk);
-					List<SetData> incompleteSetsK = getIncompleteOrCurrentSetsByPlayer(userk.getId());
-					System.out.println("incomplete sets k "+incompleteSetsK.size());
-					if (incompleteSetsK.size() >= userk.getSetsPerWeek()) continue;
-					SetData recentSet = getNewestSetBetweenUsers(udata.getId(), userk.getId());
-					if (recentSet != null) {
-						int diff = UtilCalendar.getWeekDiffByWeekDayFromNow(
-								recentSet.getCreatedDate(), dayOfWeek);
-						System.out.println("recent set week diff "+diff);
-						if (diff < getWeeksUntilSetRepeat()) continue;
-					}
-					SetData newSet = createSet(id1, id2);
+					if (hasEnoughSets(userk)) continue;
+					if (willSetRepeat(udata, userk)) continue;
+ 					SetData newSet = createSet(id1, id2);
 					if (newSet != null) {
 						System.out.println("created set "+newSet);
 						newSets.add(newSet);
@@ -865,6 +855,23 @@ public class LeagueData {
 		for (SetData set : newSets) set.displaySet(pairsChannel);
 		if (newSets.size() > 0) debugChannel.sendMessage("Generated "+newSets.size()+" new Pairings!").queue();
 		else debugChannel.sendMessage("No new pairings were generated!").queue();
+	}
+	
+	public boolean hasEnoughSets(UserData udata) {
+		List<SetData> incompleteSets = getIncompleteOrCurrentSetsByPlayer(udata.getId());
+		System.out.println("incomplete sets "+incompleteSets.size());
+		return incompleteSets.size() >= udata.getSetsPerWeek();
+	}
+	
+	public boolean willSetRepeat(UserData u1, UserData u2) {
+		SetData recentSet = getNewestSetBetweenUsers(u1.getId(), u2.getId());
+		if (recentSet != null) {
+			int diff = UtilCalendar.getWeekDiffByWeekDayFromNow(
+					recentSet.getCreatedDate(), dayOfWeek);
+			System.out.println("recent set week diff "+diff);
+			if (diff < getWeeksUntilSetRepeat()) return true;
+		}
+		return false;
 	}
 	
 	public void updateRanks(Guild guild, MessageChannelUnion debugChannel) {

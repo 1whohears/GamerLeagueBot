@@ -49,4 +49,17 @@ public interface ICommand {
 		SUCCESS
 	}
 	
+	default public boolean checkIfMention(String m) {
+		return m.length() > 10 && m.charAt(0) == '<' && m.charAt(1) == '@' && m.charAt(m.length()-1) == '>';
+	}
+	
+	default public long getIdFromMention(String m) {
+		if (!checkIfMention(m)) return -1;
+		long id = -1;
+		String pingString = m.substring(2, m.length()-1);
+		try { id = Long.parseLong(pingString); } 
+		catch (NumberFormatException e) {}
+		return id;
+	}
+	
 }

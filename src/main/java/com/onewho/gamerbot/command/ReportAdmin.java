@@ -42,25 +42,14 @@ public class ReportAdmin extends LeagueCommand {
 			return false;
 		}
 		int id = -1, s1 = -1, s2 = -1;
-		long pingId1 = -1, pingId2 = -1;
-		if (!checkIfMention(params[2])) {
-			event.getChannel().sendMessage(Important.getError()+" "+params[2]+" is not a mention!").queue();
-			return false;
-		}
-		if (!checkIfMention(params[4])) {
-			event.getChannel().sendMessage(Important.getError()+" "+params[4]+" is not a mention!").queue();
-			return false;
-		}
-		String pingS1 = params[2].substring(2, params[2].length()-1);
-		String pingS2 = params[4].substring(2, params[4].length()-1);
 		try {
 			id = Integer.parseInt(params[1]);
 			s1 = Integer.parseInt(params[3]);
 			s2 = Integer.parseInt(params[5]);
-			pingId1 = Long.parseLong(pingS1);
-			pingId2 = Long.parseLong(pingS2);
 		} catch (NumberFormatException e) {
 		}
+		long pingId1 = getIdFromMention(params[2]);
+		long pingId2 = getIdFromMention(params[4]);
 		if (id == -1) {
 			event.getChannel().sendMessage(Important.getError()+" "+params[1]+" is not a number!").queue();
 			return false;
@@ -71,10 +60,10 @@ public class ReportAdmin extends LeagueCommand {
 			event.getChannel().sendMessage(Important.getError()+" "+params[5]+" is not a number!").queue();
 			return false;
 		} else if (pingId1 == -1) {
-			event.getChannel().sendMessage(Important.getError()+" you didn't mention/ping player 1 correctly!").queue();
+			event.getChannel().sendMessage(Important.getError()+" "+params[2]+" is not a mention!").queue();
 			return false;
 		} else if (pingId2 == -1) {
-			event.getChannel().sendMessage(Important.getError()+" you didn't mention/ping player 2 correctly!").queue();
+			event.getChannel().sendMessage(Important.getError()+" "+params[4]+" is not a mention!").queue();
 			return false;
 		}
 		SetData set = ldata.getSetDataById(id);
@@ -103,10 +92,6 @@ public class ReportAdmin extends LeagueCommand {
 		set.displaySet(pairsChannel);
 		GlobalData.saveData();
 		return true;
-	}
-	
-	private boolean checkIfMention(String m) {
-		return m.length() > 10 && m.charAt(0) == '<' && m.charAt(1) == '@' && m.charAt(m.length()-1) == '>';
 	}
 	
 }
