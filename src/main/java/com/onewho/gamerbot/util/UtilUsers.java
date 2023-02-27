@@ -56,7 +56,7 @@ public class UtilUsers {
 		if (userData == null) 
 			return "You must join this league first!";
 		if (userData.isLocked()) 
-			return "You are not allowed to join this league because a TO locked you out!";
+			return "A TO locked your sets per week!";
 		if (!userData.getActive()) 
 			return "You have been set as an inactive player. Please rejoin the league first!";
 		userData.setSetsPerWeek(sets);

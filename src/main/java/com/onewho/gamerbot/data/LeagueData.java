@@ -407,8 +407,10 @@ public class LeagueData {
 	/**
 	 * @return list of all users league data 
 	 */
-	public List<UserData> getAllUsers() {
-		return users;
+	public List<UserData> getActiveUsers() {
+		List<UserData> active = new ArrayList<UserData>();
+		for (UserData user : users) if (user.getActive()) active.add(user);
+		return active;
 	}
 	
 	/**
@@ -463,7 +465,7 @@ public class LeagueData {
 					users.get(i).getLastActive(), dayOfWeek);
 			System.out.println("last active week diff = "+weekDiff+" <= "+weeksBeforeAutoInactive);
 			if (weeksBeforeAutoInactive != -1 && weekDiff > weeksBeforeAutoInactive) {
-				users.get(i).setActive(false);
+				users.get(i).setSetsPerWeek(0);
 				continue;
 			}
 			System.out.println("added user "+users.get(i));
@@ -870,7 +872,7 @@ public class LeagueData {
 		}
 		debugChannel.sendMessage("Processed "+num+" sets! Ranks and backups are being updated!").queue();
 		TextChannel ranksChannel = guild.getChannelById(TextChannel.class, getChannelId("ranks"));
-		List<UserData> users = getAllUsers();
+		List<UserData> users = getActiveUsers();
 		LeagueData.sortByScoreDescend(users);
 		MessageCreateBuilder mcb = new MessageCreateBuilder();
 		mcb.addContent("__**"+UtilCalendar.getCurrentDateString()+" RANKS**__");
