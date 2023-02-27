@@ -29,7 +29,7 @@ public class Config extends LeagueCommand {
 	public String getHelp() {
 		return "`"+BotMain.PREFIX+getCommandString()+" [setting] [value]`"
 				+ " Settings: `max-sets-per-week`, `weeks-before-auto-inactive`, `weeks-before-set-expires`,"
-				+ " `weeks-before-set-repeat`, `default-score`, `K` (elo K constant), `auto-gen-pairs`, `auto-update-ranks`";
+				+ " `weeks-until-set-repeat`, `default-score`, `K` (elo K constant), `auto-gen-pairs`, `auto-update-ranks`";
 	}
 	
 	public Config() {
@@ -41,7 +41,7 @@ public class Config extends LeagueCommand {
 					notNumber(event);
 					return false;
 				}
-				ldata.setMaxSetsPerWeek(value);
+				value = ldata.setMaxSetsPerWeek(value);
 				ldata.updateOptions(event.getGuild());
 				event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
 				GlobalData.saveData();
@@ -56,7 +56,7 @@ public class Config extends LeagueCommand {
 					notNumber(event);
 					return true;
 				}
-				ldata.setWeeksBeforeAutoInactive(value);
+				value = ldata.setWeeksBeforeAutoInactive(value);
 				event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
 				GlobalData.saveData();
 				return true;
@@ -70,13 +70,13 @@ public class Config extends LeagueCommand {
 					notNumber(event);
 					return true;
 				}
-				ldata.setWeeksBeforeSetExpires(value);
+				value = ldata.setWeeksBeforeSetExpires(value);
 				event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
 				GlobalData.saveData();
 				return true;
 			}
 		});
-		addSubCommand(new SubCommand("weeks-before-set-repeat") {
+		addSubCommand(new SubCommand("weeks-until-set-repeat") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 				int value = parseInt(params[2]);
@@ -84,7 +84,7 @@ public class Config extends LeagueCommand {
 					notNumber(event);
 					return true;
 				}
-				ldata.setWeeksBeforeSetRepeat(value);
+				value = ldata.setWeeksUntilSetRepeat(value);
 				event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
 				GlobalData.saveData();
 				return true;
@@ -98,7 +98,7 @@ public class Config extends LeagueCommand {
 					notNumber(event);
 					return true;
 				}
-				ldata.setDefaultScore(value);
+				value = ldata.setDefaultScore(value);
 				event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
 				GlobalData.saveData();
 				return true;

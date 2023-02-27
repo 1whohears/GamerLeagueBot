@@ -43,7 +43,7 @@ public class LeagueData {
 	private int maxSetsPerWeek = 3;
 	private int weeksBeforeAutoInactive = -1;
 	private int weeksBeforeSetExpires = -1;
-	private int weeksBeforeSetRepeat = -1;
+	private int weeksUntilSetRepeat = 1;
 	private int dayOfWeek = 1;
 	private int defaultScore = 1000;
 	private double K = 20d;
@@ -70,7 +70,7 @@ public class LeagueData {
 		maxSetsPerWeek = ParseData.getInt(data, "max sets a week", maxSetsPerWeek);
 		weeksBeforeAutoInactive = ParseData.getInt(data, "weeks before auto inactive", weeksBeforeAutoInactive);
 		weeksBeforeSetExpires = ParseData.getInt(data, "weeks before set expires", weeksBeforeSetExpires);
-		weeksBeforeSetRepeat = ParseData.getInt(data, "weeks before set repeat", weeksBeforeSetRepeat);
+		weeksUntilSetRepeat = ParseData.getInt(data, "weeks until set repeat", weeksUntilSetRepeat);
 		defaultScore = ParseData.getInt(data, "default score", defaultScore);
 		K = ParseData.getDouble(data, "K", K);
 		
@@ -109,7 +109,7 @@ public class LeagueData {
 		data.addProperty("max sets a week", maxSetsPerWeek);
 		data.addProperty("weeks before auto inactive", weeksBeforeAutoInactive);
 		data.addProperty("weeks before set expires", weeksBeforeSetExpires);
-		data.addProperty("weeks before set repeat", weeksBeforeSetRepeat);
+		data.addProperty("weeks until set repeat", weeksUntilSetRepeat);
 		data.addProperty("default score", defaultScore);
 		data.addProperty("K", K);
 		data.addProperty("auto gen pairs", autoGenPairs);
@@ -196,9 +196,10 @@ public class LeagueData {
 	/**
 	 * @param max change the max number of sets a user can be assigned every week
 	 */
-	public void setMaxSetsPerWeek(int max) {
+	public int setMaxSetsPerWeek(int max) {
 		if (max < 0) max = 0;
 		maxSetsPerWeek = max;
+		return maxSetsPerWeek;
 	}
 	
 	/**
@@ -243,9 +244,10 @@ public class LeagueData {
 	 * weeks of not completing sets before a user is automatically set to inactive
 	 * @param weeks set to -1 to disable this feature
 	 */
-	public void setWeeksBeforeAutoInactive(int weeks) {
+	public int setWeeksBeforeAutoInactive(int weeks) {
 		if (weeks < -1) weeks = -1;
 		weeksBeforeAutoInactive = weeks;
+		return weeksBeforeAutoInactive;
 	}
 	
 	/**
@@ -354,24 +356,26 @@ public class LeagueData {
 	/**
 	 * @param defaultScore the score new users are given
 	 */
-	public void setDefaultScore(int defaultScore) {
+	public int setDefaultScore(int defaultScore) {
 		this.defaultScore = defaultScore;
+		return this.defaultScore;
 	}
 	
 	/**
 	 * @return weeks before 2 players are allowed to be automatically paired together
 	 */
-	public int getWeeksBeforeSetRepeat() {
-		return weeksBeforeSetRepeat;
+	public int getWeeksUntilSetRepeat() {
+		return weeksUntilSetRepeat;
 	}
 	
 	/**
-	 * set weeks before 2 players are allowed to be automatically paired together
-	 * @param weeksBeforeSetRepeat -1 to disable this feature
+	 * set weeks until 2 players are allowed to be automatically paired together
+	 * @param weeksUntilSetRepeat 1 = instance of a pairing a week. 2 = 1 instance every 2 weeks.
 	 */
-	public void setWeeksBeforeSetRepeat(int weeksBeforeSetRepeat) {
-		if (weeksBeforeSetRepeat < -1) weeksBeforeSetRepeat = -1;
-		this.weeksBeforeSetRepeat = weeksBeforeSetRepeat;
+	public int setWeeksUntilSetRepeat(int weeksUntilSetRepeat) {
+		if (weeksUntilSetRepeat < 1) weeksUntilSetRepeat = 1;
+		this.weeksUntilSetRepeat = weeksUntilSetRepeat;
+		return this.weeksUntilSetRepeat;
 	}
 	
 	/**
@@ -385,9 +389,10 @@ public class LeagueData {
 	 * set weeks before an incomplete set is removed
 	 * @param weeks -1 to disable this feature
 	 */
-	public void setWeeksBeforeSetExpires(int weeks) {
+	public int setWeeksBeforeSetExpires(int weeks) {
 		if (weeks < -1) weeks = -1;
 		this.weeksBeforeSetExpires = weeks;
+		return this.weeksBeforeSetExpires;
 	}
 	
 	/**
@@ -845,7 +850,7 @@ public class LeagueData {
 						int diff = UtilCalendar.getWeekDiffByWeekDayFromNow(
 								recentSet.getCreatedDate(), dayOfWeek);
 						System.out.println("recent set week diff "+diff);
-						if (diff <= getWeeksBeforeSetRepeat()) continue;
+						if (diff < getWeeksUntilSetRepeat()) continue;
 					}
 					SetData newSet = createSet(id1, id2);
 					if (newSet != null) {
