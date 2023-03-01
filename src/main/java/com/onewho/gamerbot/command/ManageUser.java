@@ -33,35 +33,46 @@ public class ManageUser extends LeagueCommand {
 		addSubCommand(new SubCommand("get") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
-				
-				return true;
+				long pingId = getIdFromMention(params[3]);
+				if (pingId == -1) {
+					event.getChannel().sendMessage(Important.getError()+" "+params[3]+" is not a valid ping!").queue();
+					return false;
+				}
+				return ldata.postUserData(event.getGuild(), event.getChannel(), pingId);
 			}
 		});
 		addSubCommand(new SubCommand("lock") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
-				
+				// TODO lock sub command
+				event.getChannel().sendMessage(Important.getError()+" This command doesn't do anything yet!").queue();
 				return true;
 			}
 		});
 		addSubCommand(new SubCommand("join") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
-				
+				// TODO join sub command
+				event.getChannel().sendMessage(Important.getError()+" This command doesn't do anything yet!").queue();
 				return true;
 			}
 		});
 		addSubCommand(new SubCommand("remove") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
-				
-				return true;
+				long pingId = getIdFromMention(params[3]);
+				if (pingId == -1) {
+					event.getChannel().sendMessage(Important.getError()+" "+params[3]+" is not a valid ping!").queue();
+					return false;
+				}
+				return ldata.removeUser(event.getGuild(), event.getChannel(), pingId);
 			}
 		});
 		addSubCommand(new SubCommand("sets-per-week") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
-				
+				// TODO sets per week sub command
+				event.getChannel().sendMessage(Important.getError()+" This command doesn't do anything yet!").queue();
 				return true;
 			}
 		});
@@ -73,8 +84,6 @@ public class ManageUser extends LeagueCommand {
 			event.getChannel().sendMessage(Important.getError()+" DO: "+getHelp()).queue();
 			return false;
 		}
-		// TODO manage user sub commands
-		event.getChannel().sendMessage(Important.getError()+" This command doesn't do anything yet!").queue();
 		return runSubCommands(event, params, gdata, ldata) == SubCommandResult.SUCCESS;
 	}
 

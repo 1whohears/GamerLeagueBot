@@ -61,7 +61,7 @@ public class UserData {
 	/**
 	 * @return is this user active in this league
 	 */
-	public boolean getActive() {
+	public boolean isActive() {
 		return active;
 	}
 	

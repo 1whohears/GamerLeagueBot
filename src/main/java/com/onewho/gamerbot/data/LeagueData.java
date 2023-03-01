@@ -414,7 +414,7 @@ public class LeagueData {
 	 */
 	public List<UserData> getActiveUsers() {
 		List<UserData> active = new ArrayList<UserData>();
-		for (UserData user : users) if (user.getActive()) active.add(user);
+		for (UserData user : users) if (user.isActive()) active.add(user);
 		return active;
 	}
 	
@@ -464,7 +464,7 @@ public class LeagueData {
 		System.out.println("GETTING AVAILABLE USERS");
 		List<UserData> available = new ArrayList<UserData>();
 		for (int i = 0; i < users.size(); ++i) {
-			if (!users.get(i).getActive()) continue;
+			if (!users.get(i).isActive()) continue;
 			if (users.get(i).getSetsPerWeek() < 1) continue;
 			int weekDiff = UtilCalendar.getWeekDiffByWeekDayFromNow(
 					users.get(i).getLastActive(), dayOfWeek);
@@ -595,6 +595,34 @@ public class LeagueData {
 			++num;
 		}
 		return num;
+	}
+	
+	public boolean removeUser(Guild guild, MessageChannelUnion debugChannel, long id) {
+		UserData userData = getUserDataById(id);
+		if (userData == null) {
+			debugChannel.sendMessage("That player isn't in this league!").queue();
+			return false;
+		}
+		guild.removeRoleFromMember(guild.getMemberById(id), guild.getRoleById(getLeagueRoleId())).queue();
+		userData.setActive(false);
+		debugChannel.sendMessage("Removed "+getMention(id)+" from this league!").queue();
+		return true;
+	}
+	
+	public boolean postUserData(Guild guild, MessageChannelUnion debugChannel, long id) {
+		UserData userData = getUserDataById(id);
+		if (userData == null) {
+			debugChannel.sendMessage("That player isn't in this league!").queue();
+			return false;
+		}
+		String print = "__**"+getMention(id)+" Data**__"
+				+ "\n**Active**:      " + userData.isActive()
+				+ "\n**Last Active**: " + userData.getLastActive()
+				+ "\n**Sets/Week**:   " + userData.getSetsPerWeek()
+				+ "\n**Score**:       " + userData.getScore()
+				+ "\n**Locked**:      " + userData.isLocked();
+		debugChannel.sendMessage(print).queue();
+		return true;
 	}
 	
 	/**

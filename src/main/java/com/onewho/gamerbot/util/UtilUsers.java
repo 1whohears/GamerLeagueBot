@@ -57,7 +57,7 @@ public class UtilUsers {
 			return "You must join this league first!";
 		if (userData.isLocked()) 
 			return "A TO locked your sets per week!";
-		if (!userData.getActive()) 
+		if (!userData.isActive()) 
 			return "You have been set as an inactive player. Please rejoin the league first!";
 		userData.setSetsPerWeek(sets);
 		GlobalData.saveData();
