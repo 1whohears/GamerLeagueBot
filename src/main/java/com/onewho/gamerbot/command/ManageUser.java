@@ -34,9 +34,9 @@ public class ManageUser extends LeagueCommand {
 		addSubCommand(new SubCommand("get") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
-				long pingId = getIdFromMention(params[3]);
+				long pingId = getIdFromMention(params[2]);
 				if (pingId == -1) {
-					event.getChannel().sendMessage(Important.getError()+" "+params[3]+" is not a valid ping!").queue();
+					event.getChannel().sendMessage(Important.getError()+" "+params[2]+" is not a valid ping!").queue();
 					return false;
 				}
 				if (!ldata.postUserData(event.getGuild(), event.getChannel(), pingId)) return false;
@@ -63,9 +63,9 @@ public class ManageUser extends LeagueCommand {
 		addSubCommand(new SubCommand("remove") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
-				long pingId = getIdFromMention(params[3]);
+				long pingId = getIdFromMention(params[2]);
 				if (pingId == -1) {
-					event.getChannel().sendMessage(Important.getError()+" "+params[3]+" is not a valid ping!").queue();
+					event.getChannel().sendMessage(Important.getError()+" "+params[2]+" is not a valid ping!").queue();
 					return false;
 				}
 				if (!ldata.removeUser(event.getGuild(), event.getChannel(), pingId)) return false;
