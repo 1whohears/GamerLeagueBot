@@ -1,6 +1,7 @@
 package com.onewho.gamerbot.command;
 
 import com.onewho.gamerbot.BotMain;
+import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.Important;
 import com.onewho.gamerbot.data.LeagueData;
@@ -38,7 +39,9 @@ public class ManageUser extends LeagueCommand {
 					event.getChannel().sendMessage(Important.getError()+" "+params[3]+" is not a valid ping!").queue();
 					return false;
 				}
-				return ldata.postUserData(event.getGuild(), event.getChannel(), pingId);
+				if (!ldata.postUserData(event.getGuild(), event.getChannel(), pingId)) return false;
+				GlobalData.saveData();
+				return true;
 			}
 		});
 		addSubCommand(new SubCommand("lock") {
@@ -65,7 +68,9 @@ public class ManageUser extends LeagueCommand {
 					event.getChannel().sendMessage(Important.getError()+" "+params[3]+" is not a valid ping!").queue();
 					return false;
 				}
-				return ldata.removeUser(event.getGuild(), event.getChannel(), pingId);
+				if (!ldata.removeUser(event.getGuild(), event.getChannel(), pingId)) return false;
+				GlobalData.saveData();
+				return true;
 			}
 		});
 		addSubCommand(new SubCommand("sets-per-week") {
