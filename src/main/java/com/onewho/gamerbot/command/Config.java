@@ -125,7 +125,7 @@ public class Config extends LeagueCommand {
 				if (params[2].equals("true")) valueB = true;
 				else if (params[2].equals("false")) valueB = false;
 				else {
-					event.getChannel().sendMessage(Important.getError()+" is not true or false!").queue();
+					event.getChannel().sendMessage(Important.getError()+" "+params[2]+" is not true or false!").queue();
 					return true;
 				}
 				ldata.autoGenPairs = valueB;
@@ -141,7 +141,7 @@ public class Config extends LeagueCommand {
 				if (params[2].equals("true")) valueB = true;
 				else if (params[2].equals("false")) valueB = false;
 				else {
-					event.getChannel().sendMessage(Important.getError()+" is not true or false!").queue();
+					event.getChannel().sendMessage(Important.getError()+" "+params[2]+" is not true or false!").queue();
 					return true;
 				}
 				ldata.autoUpdateRanks = valueB;

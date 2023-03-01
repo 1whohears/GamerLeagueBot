@@ -47,8 +47,19 @@ public class ManageUser extends LeagueCommand {
 		addSubCommand(new SubCommand("lock") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
-				// TODO lock sub command
-				event.getChannel().sendMessage(Important.getError()+" This command doesn't do anything yet!").queue();
+				long pingId = getIdFromMention(params[2]);
+				if (pingId == -1) {
+					event.getChannel().sendMessage(Important.getError()+" "+params[2]+" is not a valid ping!").queue();
+					return false;
+				}
+				boolean valueB;
+				if (params[2].equals("true")) valueB = true;
+				else if (params[2].equals("false")) valueB = false;
+				else {
+					event.getChannel().sendMessage(Important.getError()+" "+params[2]+" is not true or false!").queue();
+					return true;
+				}
+				if (!ldata.lockUser(event.getGuild(), event.getChannel(), pingId, valueB)) return false;
 				return true;
 			}
 		});
@@ -76,6 +87,11 @@ public class ManageUser extends LeagueCommand {
 		addSubCommand(new SubCommand("sets-per-week") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
+				long pingId = getIdFromMention(params[2]);
+				if (pingId == -1) {
+					event.getChannel().sendMessage(Important.getError()+" "+params[2]+" is not a valid ping!").queue();
+					return false;
+				}
 				// TODO sets per week sub command
 				event.getChannel().sendMessage(Important.getError()+" This command doesn't do anything yet!").queue();
 				return true;

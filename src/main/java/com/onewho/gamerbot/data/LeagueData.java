@@ -626,6 +626,22 @@ public class LeagueData {
 		return true;
 	}
 	
+	public boolean lockUser(Guild guild, MessageChannelUnion debugChannel, long id, boolean lock) {
+		UserData userData = getUserDataById(id);
+		if (userData == null) {
+			debugChannel.sendMessage("That player isn't in this league!").queue();
+			return false;
+		}
+		if (lock) {
+			userData.lockUser();
+			debugChannel.sendMessage("That player's options have been locked!").queue();
+		} else {
+			userData.unlockUser();
+			debugChannel.sendMessage("That player's options have been unlocked!").queue();
+		}
+		return true;
+	}
+	
 	/**
 	 * setup this league's role/channels so info can be displayed to the user
 	 * @param guild this league's guild
