@@ -605,6 +605,7 @@ public class LeagueData {
 		}
 		guild.removeRoleFromMember(guild.getMemberById(id), guild.getRoleById(getLeagueRoleId())).queue();
 		userData.setActive(false);
+		userData.setSetsPerWeek(0);
 		debugChannel.sendMessage("Removed "+getMention(id)+" from this league!").queue();
 		return true;
 	}
@@ -616,11 +617,11 @@ public class LeagueData {
 			return false;
 		}
 		String print = "__**"+getMention(id)+" Data**__"
-				+ "\n**Active**:      " + userData.isActive()
+				+ "\n**Active**: " + userData.isActive()
 				+ "\n**Last Active**: " + userData.getLastActive()
-				+ "\n**Sets/Week**:   " + userData.getSetsPerWeek()
-				+ "\n**Score**:       " + userData.getScore()
-				+ "\n**Locked**:      " + userData.isLocked();
+				+ "\n**Sets/Week**: " + userData.getSetsPerWeek()
+				+ "\n**Score**: " + userData.getScore()
+				+ "\n**Locked**: " + userData.isLocked();
 		debugChannel.sendMessage(print).queue();
 		return true;
 	}
