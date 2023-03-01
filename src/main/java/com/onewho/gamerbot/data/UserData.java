@@ -18,7 +18,7 @@ public class UserData {
 		id = ParseData.getLong(data, "id", -1);
 		active = ParseData.getBoolean(data, "active", active);
 		setsPerWeek = ParseData.getInt(data, "sets per week", setsPerWeek);
-		setLastActive(ParseData.getString(data, "last active", lastActive));
+		lastActive = ParseData.getString(data, "last active", lastActive); // DO NOT USE setLastActive HERE!
 		setScore(ParseData.getInt(data, "score", score));
 		locked = ParseData.getBoolean(data, "locked", locked);
 	}
