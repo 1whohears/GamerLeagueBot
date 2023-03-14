@@ -1,6 +1,7 @@
 package com.onewho.gamerbot.interact;
 
 import com.onewho.gamerbot.data.GlobalData;
+import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.ReportResult;
 import com.onewho.gamerbot.data.SetData;
 import com.onewho.gamerbot.util.UtilCalendar;
@@ -8,11 +9,15 @@ import com.onewho.gamerbot.util.UtilUsers;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 
 public class ButtonManager {
 	
 	public static void handleButton(ButtonInteractionEvent event) {
+		LeagueData data = GlobalData.getGuildDataById(event.getGuild().getIdLong())
+				.getLeagueByChannel(event.getChannel());
+		if (data == null) return;
 		String id = event.getButton().getId();
 		if (id.startsWith("setsaweek-")) {
 			int sets = Integer.parseInt(id.substring("setsaweek-".length(), id.length()));
@@ -20,15 +25,12 @@ public class ButtonManager {
 			event.reply(message).setEphemeral(true).queue();
 			return;
 		}
-		String message = "";
 		switch (id) {
 		case "join-gamer-league":
-			message = UtilUsers.userJoinLeague(event.getGuild(), event.getUser(), event.getChannel());
-			event.reply(message).setEphemeral(true).queue();
+			handleJoinButton(event, event.getGuild(), event.getUser(), data);
 			break;
 		case "quit-gamer-league":
-			message = UtilUsers.userQuitLeague(event.getGuild(), event.getUser(), event.getChannel());
-			event.reply(message).setEphemeral(true).queue();
+			handleLeaveButton(event, event.getGuild(), event.getUser(), data);
 			break;
 		case "report-verify":
 			handleReportVerifyButton(event);
@@ -37,6 +39,23 @@ public class ButtonManager {
 			handleReportDisputeButton(event);
 			break;
 		}
+	}
+	
+	private static void handleJoinButton(ButtonInteractionEvent event, Guild guild, User user, LeagueData data) {
+		event.reply(
+			data.addUser(guild, user))
+				.setEphemeral(true).queue();
+	}
+	
+	private static void handleLeaveButton(ButtonInteractionEvent event, Guild guild, User user, LeagueData data) {
+		event.reply(
+			UtilUsers.userQuitLeague(guild, user, event.getChannel()))
+				.setEphemeral(true).queue();
+	}
+	
+	private static void handleSetsPerWeekButton(ButtonInteractionEvent event) {
+		
+		GlobalData.saveData();
 	}
 	
 	private static void handleReportVerifyButton(ButtonInteractionEvent event) {

@@ -4,9 +4,11 @@ import java.awt.Color;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -23,6 +25,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
@@ -216,7 +219,7 @@ public class LeagueData {
 	 * @param id
 	 * @return the new user data
 	 */
-	public UserData createUser(long id) {
+	protected UserData createUser(long id) {
 		UserData data = new UserData(id);
 		data.setScore(defaultScore);
 		users.add(data);
@@ -597,6 +600,24 @@ public class LeagueData {
 		return num;
 	}
 	
+	// TODO these should throw exceptions to send error messages idiot
+	
+	public String addUser(Guild guild, long id) {
+		UserData userData = getUserDataById(id);
+		if (userData == null) userData = createUser(id);
+		if (userData.isLocked()) 
+			return "You are not allowed to join this league because a TO locked you out!";
+		Member m = guild.getMemberById(id);
+		if (m == null) 
+			return "User with ID "+id+" isn't in this server or doesn't exist!";
+		guild.addRoleToMember(m, guild.getRoleById(getLeagueRoleId())).queue();
+		userData.setActive(true);
+		userData.setLastActive(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
+		GlobalData.saveData();
+		return "You have joined the Gamer League! Please select how many sets you want to do per week!"
+				+ " Use $help in #bot-commands for more info!";
+	}
+	
 	public boolean removeUser(Guild guild, MessageChannelUnion debugChannel, long id) {
 		UserData userData = getUserDataById(id);
 		if (userData == null) {
@@ -640,6 +661,10 @@ public class LeagueData {
 			debugChannel.sendMessage("That player's options have been unlocked!").queue();
 		}
 		return true;
+	}
+	
+	public boolean userSetsPerWeek(Guild guild, MessageChannelUnion debugChannel, long id, int setsPerWeek) {
+		
 	}
 	
 	/**
