@@ -17,7 +17,6 @@ import javax.annotation.Nullable;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.onewho.gamerbot.util.UtilCalendar;
-import com.onewho.gamerbot.util.UtilDebug;
 import com.onewho.gamerbot.util.UtilKClosest;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -47,6 +46,7 @@ public class LeagueData {
 	private int weeksBeforeAutoInactive = -1;
 	private int weeksBeforeSetExpires = -1;
 	private int weeksUntilSetRepeat = 1;
+	private int challengesPerWeek = 0;
 	private int dayOfWeek = 1;
 	private int defaultScore = 1000;
 	private double K = 20d;
@@ -64,6 +64,8 @@ public class LeagueData {
 	private long setsaweekOptionId = -1;
 	private JsonObject channelIds = new JsonObject();
 	
+	// TODO add a season system
+	
 	/**
 	 * @param data league data written from disk
 	 */
@@ -74,6 +76,7 @@ public class LeagueData {
 		weeksBeforeAutoInactive = ParseData.getInt(data, "weeks before auto inactive", weeksBeforeAutoInactive);
 		weeksBeforeSetExpires = ParseData.getInt(data, "weeks before set expires", weeksBeforeSetExpires);
 		weeksUntilSetRepeat = ParseData.getInt(data, "weeks until set repeat", weeksUntilSetRepeat);
+		challengesPerWeek = ParseData.getInt(data, "challenges per week", challengesPerWeek);
 		defaultScore = ParseData.getInt(data, "default score", defaultScore);
 		K = ParseData.getDouble(data, "K", K);
 		
@@ -113,6 +116,7 @@ public class LeagueData {
 		data.addProperty("weeks before auto inactive", weeksBeforeAutoInactive);
 		data.addProperty("weeks before set expires", weeksBeforeSetExpires);
 		data.addProperty("weeks until set repeat", weeksUntilSetRepeat);
+		data.addProperty("challenges per week", challengesPerWeek);
 		data.addProperty("default score", defaultScore);
 		data.addProperty("K", K);
 		data.addProperty("auto gen pairs", autoGenPairs);
@@ -203,6 +207,22 @@ public class LeagueData {
 		if (max < 0) max = 0;
 		maxSetsPerWeek = max;
 		return maxSetsPerWeek;
+	}
+	
+	/**
+	 * @return the number of challenges a user can be in per week. -1 means infinite
+	 */
+	public int getChallengesPerWeek() {
+		return challengesPerWeek;
+	}
+	
+	/**
+	 * @param ch the number of challenges a user can be in per week. -1 means infinite
+	 */
+	public int setChallengesPerWeek(int ch) {
+		if (ch < -1) ch = -1;
+		challengesPerWeek = ch;
+		return challengesPerWeek;
 	}
 	
 	/**
@@ -426,7 +446,7 @@ public class LeagueData {
 	 * @param pairsChannel the pairs channel of this league
 	 */
 	private void removeOldSets(TextChannel pairsChannel) {
-		System.out.println("REMOVING OLD SETS");
+		//System.out.println("REMOVING OLD SETS");
 		for (int i = 0; i < sets.size(); ++i) {
 			if (sets.get(i).isComplete()) continue;
 			int weekDiff = UtilCalendar.getWeekDiffByWeekDayFromNow(
@@ -434,7 +454,7 @@ public class LeagueData {
 			System.out.println("SET "+sets.get(i)+" weekDiff = "+weekDiff+" > "+weeksBeforeSetExpires);
 			if (weeksBeforeSetExpires == -1 || weekDiff <= weeksBeforeSetExpires) continue;
 			removeSet(sets.get(i).getId(), pairsChannel);
-			System.out.println("removed");
+			//System.out.println("removed");
 		}
 	}
 	
@@ -464,19 +484,19 @@ public class LeagueData {
 	 * @return a list of active/available user data
 	 */
 	public List<UserData> getAvailableSortedUsers() {
-		System.out.println("GETTING AVAILABLE USERS");
+		//System.out.println("GETTING AVAILABLE USERS");
 		List<UserData> available = new ArrayList<UserData>();
 		for (int i = 0; i < users.size(); ++i) {
 			if (!users.get(i).isActive()) continue;
 			if (users.get(i).getSetsPerWeek() < 1) continue;
 			int weekDiff = UtilCalendar.getWeekDiffByWeekDayFromNow(
 					users.get(i).getLastActive(), dayOfWeek);
-			System.out.println("last active week diff = "+weekDiff+" <= "+weeksBeforeAutoInactive);
+			//System.out.println("last active week diff = "+weekDiff+" <= "+weeksBeforeAutoInactive);
 			if (weeksBeforeAutoInactive != -1 && weekDiff > weeksBeforeAutoInactive) {
 				users.get(i).setSetsPerWeek(0);
 				continue;
 			}
-			System.out.println("added user "+users.get(i));
+			//System.out.println("added user "+users.get(i));
 			available.add(users.get(i));
 		}
 		sortByScoreDescend(available);
@@ -575,6 +595,14 @@ public class LeagueData {
 		List<SetData> saw = new ArrayList<SetData>();
 		for (SetData set : sets) if (UtilCalendar.getWeekDiffByWeekDay(date, set.getCreatedDate(), dayOfWeek) == 0) saw.add(set);
 		return saw;
+	}
+	
+	public List<SetData> getCurrentChallengesByPlayer(long id) {
+		List<SetData> c = getSetsAtWeekOfDate(UtilCalendar.getCurrentDateString());
+		for (int i = 0; i < c.size(); ++i) {
+			if (!c.get(i).isChallenge() || !c.get(i).hasPlayer(id)) c.remove(i--);
+		}
+		return c;
 	}
 	
 	/**
@@ -905,24 +933,24 @@ public class LeagueData {
 		boolean createdSet = true;
 		while (createdSet) {
 			createdSet = false;
-			System.out.println("=====");
-			System.out.println("BIG LOOP");
+			//System.out.println("=====");
+			//System.out.println("BIG LOOP");
 			for (UserData udata : activeUsers) {
-				System.out.println("USER LOOP");
-				System.out.println("user "+udata);
+				//System.out.println("USER LOOP");
+				//System.out.println("user "+udata);
 				if (hasEnoughSets(udata)) continue;
 				int[] ksort = LeagueData.getClosestUserIndexsByScore(udata, activeUsers);
-				UtilDebug.printIntArray("K LOOP index sort", ksort);
+				//UtilDebug.printIntArray("K LOOP index sort", ksort);
 				for (int i = 0; i < ksort.length; ++i) {
 					UserData userk = activeUsers.get(ksort[i]);
 					long id1 = udata.getId(), id2 = userk.getId();
 					if (id1 == id2) continue;
-					System.out.println("user k "+userk);
+					//System.out.println("user k "+userk);
 					if (hasEnoughSets(userk)) continue;
 					if (willSetRepeat(udata, userk)) continue;
  					SetData newSet = createSet(id1, id2);
 					if (newSet != null) {
-						System.out.println("created set "+newSet);
+						//System.out.println("created set "+newSet);
 						newSets.add(newSet);
 						createdSet = true;
 						break;
@@ -937,7 +965,7 @@ public class LeagueData {
 	
 	public boolean hasEnoughSets(UserData udata) {
 		List<SetData> incompleteSets = getIncompleteOrCurrentSetsByPlayer(udata.getId());
-		System.out.println("incomplete sets "+incompleteSets.size());
+		//System.out.println("incomplete sets "+incompleteSets.size());
 		return incompleteSets.size() >= udata.getSetsPerWeek();
 	}
 	
@@ -946,10 +974,36 @@ public class LeagueData {
 		if (recentSet != null) {
 			int diff = UtilCalendar.getWeekDiffByWeekDayFromNow(
 					recentSet.getCreatedDate(), dayOfWeek);
-			System.out.println("recent set week diff "+diff);
+			//System.out.println("recent set week diff "+diff);
 			if (diff < getWeeksUntilSetRepeat()) return true;
 		}
 		return false;
+	}
+	
+	public boolean canChallenge(long id1, long id2) {
+		int max = getChallengesPerWeek();
+		if (max == -1) return true;
+		else if (max == 0) return false;
+		if (getCurrentChallengesByPlayer(id1).size() >= max) return false;
+		if (getCurrentChallengesByPlayer(id2).size() >= max) return false;
+		return true;
+	}
+	
+	public boolean createChallenge(Guild guild, MessageChannelUnion debugChannel, long id1, long id2) {
+		if (!canChallenge(id1, id2)) {
+			debugChannel.sendMessage(Important.getError()+" Either you or the opponent ran out of challenges for the week!").queue();
+			return false;
+		}
+		SetData set = createSet(id1, id2);
+		if (set == null) {
+			debugChannel.sendMessage(Important.getError()+" This challenge could not be created!").queue();
+			return false;
+		}
+		set.setChallenge();
+		debugChannel.sendMessage("Successfully created challlenge! "+set.getId()).queue();
+		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, getChannelId("pairings"));
+		set.displaySet(pairsChannel);
+		return true;
 	}
 	
 	public void updateRanks(Guild guild, MessageChannelUnion debugChannel) {

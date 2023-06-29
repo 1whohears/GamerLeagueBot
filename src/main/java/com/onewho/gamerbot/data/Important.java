@@ -15,6 +15,10 @@ public class Important {
 		return errors[(int)(Math.random()*errors.length)];
 	}
 	
+	public static String getError(String msg) {
+		return getError()+" "+msg;
+	}
+	
 	private static String[] errors = { "ERROR!" };
 	
 	public static void load() throws JsonSyntaxException, JsonIOException, IOException {

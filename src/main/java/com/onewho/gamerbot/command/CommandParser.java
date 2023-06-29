@@ -37,6 +37,7 @@ public class CommandParser {
 		commands.add(new ReportAdmin());
 		commands.add(new ManageUser());
 		commands.add(new Challenge());
+		commands.add(new CancelChallenge());
 		commands.add(new CreateSet());
 		commands.add(new RemoveSet());
 		commands.add(new Backup());

@@ -22,6 +22,7 @@ public class SetData {
 	private String completed = "";
 	private long messageId = -1;
 	private boolean processed = false;
+	private boolean challenge = false;
 	
 	protected SetData(JsonObject data) {
 		id = ParseData.getInt(data, "id", id);
@@ -35,6 +36,7 @@ public class SetData {
 		completed = ParseData.getString(data, "completed", completed);
 		messageId = ParseData.getLong(data, "messageId", messageId);
 		processed = ParseData.getBoolean(data, "processed", processed);
+		challenge = ParseData.getBoolean(data, "challenge", challenge);
 	}
 	
 	protected SetData(int id, long p1Id, long p2Id, String created) {
@@ -57,6 +59,7 @@ public class SetData {
 		data.addProperty("completed", completed);
 		data.addProperty("messageId", messageId);
 		data.addProperty("processed", processed);
+		data.addProperty("challenge", challenge);
 		return data;
 	}
 	
@@ -158,6 +161,14 @@ public class SetData {
 	
 	public boolean isDraw() {
 		return isComplete() && p1s == p2s;
+	}
+	
+	public boolean isChallenge() {
+		return challenge;
+	}
+	
+	public void setChallenge() {
+		challenge = true;
 	}
 	
 	/**
@@ -268,8 +279,10 @@ public class SetData {
 			p2Name = "<@"+getP2Id()+">";
 			date = created;
 		}
+		String challengeMark = "";
+		if (isChallenge()) challengeMark = "!";
 		MessageCreateData mcd = new MessageCreateBuilder()
-				.addContent("__**ID:"+getId()+"**__ ")
+				.addContent("__**ID:"+getId()+challengeMark+"**__ ")
 				.addContent(p1Name)
 				.addContent(" **"+getP1score()+"** ")
 				.addContent(p2Name)

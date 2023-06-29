@@ -29,7 +29,8 @@ public class Config extends LeagueCommand {
 	public String getHelp() {
 		return "`"+BotMain.PREFIX+getCommandString()+" [setting] [value]`"
 				+ " Settings: `max-sets-per-week`, `weeks-before-auto-inactive`, `weeks-before-set-expires`,"
-				+ " `weeks-until-set-repeat`, `default-score`, `K` (elo K constant), `auto-gen-pairs`, `auto-update-ranks`";
+				+ " `weeks-until-set-repeat`, `default-score`, `K` (elo K constant), `auto-gen-pairs`, `auto-update-ranks`,"
+				+ " `challenges-per-week`";
 	}
 	
 	public Config() {
@@ -146,6 +147,20 @@ public class Config extends LeagueCommand {
 				}
 				ldata.autoUpdateRanks = valueB;
 				event.getChannel().sendMessage("`"+params[1]+"` set to `"+valueB+"`").queue();
+				GlobalData.saveData();
+				return true;
+			}
+		});
+		addSubCommand(new SubCommand("challenges-per-week") {
+			@Override
+			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
+				int value = parseInt(params[2]);
+				if (value == Integer.MIN_VALUE) {
+					notNumber(event);
+					return true;
+				}
+				value = ldata.setChallengesPerWeek(value);
+				event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
 				GlobalData.saveData();
 				return true;
 			}

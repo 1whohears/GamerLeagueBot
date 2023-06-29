@@ -1,6 +1,7 @@
 package com.onewho.gamerbot.command;
 
 import com.onewho.gamerbot.BotMain;
+import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.Important;
 import com.onewho.gamerbot.data.LeagueData;
@@ -35,8 +36,26 @@ public class Challenge extends LeagueCommand {
 			event.getChannel().sendMessage(Important.getError()+" DO: "+getHelp()).queue();
 			return false;
 		}
-		// TODO challenge command
-		event.getChannel().sendMessage(Important.getError()+" This command doesn't do anything yet!").queue();
+		long selfId = event.getAuthor().getIdLong();
+		long enemyId = getIdFromMention(params[1]);
+		if (enemyId == -1) {
+			event.getChannel().sendMessage(Important.getError()+" "+params[1]+" is not a mention!").queue();
+			return false;
+		}
+		if (selfId == enemyId) {
+			event.getChannel().sendMessage(Important.getError()+" You can't challenge yourself!").queue();
+			return false;
+		}
+		if (ldata.getUserDataById(selfId) == null) {
+			event.getChannel().sendMessage(Important.getError()+" You are not in this league!").queue();
+			return false;
+		}
+		if (ldata.getUserDataById(enemyId) == null) {
+			event.getChannel().sendMessage(Important.getError()+" Your desired opponent is not in this league!").queue();
+			return false;
+		}
+		if (!ldata.createChallenge(event.getGuild(), event.getChannel(), selfId, enemyId)) return false;
+		GlobalData.saveData();
 		return true;
 	}
 
