@@ -41,6 +41,9 @@ import net.dv8tion.jda.api.utils.messages.MessageEditData;
 public class LeagueData {
 	
 	private String name = "Gamer League";
+	private String seasonStart = "";
+	private String seasonEnd = "";
+	private int seasonId = 1;
 	
 	private int maxSetsPerWeek = 3;
 	private int weeksBeforeAutoInactive = -1;
@@ -64,13 +67,14 @@ public class LeagueData {
 	private long setsaweekOptionId = -1;
 	private JsonObject channelIds = new JsonObject();
 	
-	// TODO add a season system
-	
 	/**
 	 * @param data league data written from disk
 	 */
 	protected LeagueData(JsonObject data) {
 		name = ParseData.getString(data, "name", name);
+		seasonStart = ParseData.getString(data, "seasonStart", UtilCalendar.getCurrentDateString());
+		seasonEnd = ParseData.getString(data, "seasonEnd", seasonEnd);
+		seasonId = ParseData.getInt(data, "season id", seasonId);
 		
 		maxSetsPerWeek = ParseData.getInt(data, "max sets a week", maxSetsPerWeek);
 		weeksBeforeAutoInactive = ParseData.getInt(data, "weeks before auto inactive", weeksBeforeAutoInactive);
@@ -112,6 +116,9 @@ public class LeagueData {
 	public JsonObject getJson() {
 		JsonObject data = new JsonObject();
 		data.addProperty("name", name);
+		data.addProperty("seasonStart", seasonStart);
+		data.addProperty("seasonEnd", seasonEnd);
+		data.addProperty("seasonId", seasonId);
 		data.addProperty("max sets a week", maxSetsPerWeek);
 		data.addProperty("weeks before auto inactive", weeksBeforeAutoInactive);
 		data.addProperty("weeks before set expires", weeksBeforeSetExpires);
@@ -173,10 +180,25 @@ public class LeagueData {
 		return backup;
 	}
 	
+	private JsonObject getOldSeasonJson() {
+		JsonObject backup = new JsonObject();
+		backup.addProperty("seasonStart", seasonStart);
+		backup.addProperty("seasonEnd", seasonEnd);
+		backup.add("users", getUsersBackupJson());
+		backup.add("sets", getSetsOldSeasonJson());
+		return backup;
+	}
+	
 	private JsonArray getUsersBackupJson() {
 		JsonArray us = new JsonArray();
 		for (UserData u : users) us.add(u.getBackupJson());
 		return us;
+	}
+	
+	private JsonArray getSetsOldSeasonJson() {
+		JsonArray ss = new JsonArray();
+		for (SetData s : sets) if (s.isProcessed()) ss.add(s.getJson());
+		return ss;
 	}
 	
 	/**
@@ -191,6 +213,45 @@ public class LeagueData {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	/**
+	 * @return the start date of the current season
+	 */
+	public String getSeasonStart() {
+		return seasonStart;
+	}
+	
+	/**
+	 * @return the end date of the current season
+	 */
+	public String getSeasonEnd() {
+		return seasonEnd;
+	}
+	
+	/**
+	 * @return the id of the current season
+	 */
+	public int getSeasonId() {
+		return seasonId;
+	}
+	
+	/**
+	 * @param end set the end date of the current season. set as null if season never ends
+	 * @return if it was a valid date
+	 */
+	public boolean setSeasonEnd(String end) {
+		if (end == null || end.isEmpty()) {
+			seasonEnd = "";
+			return true;
+		}
+		if (UtilCalendar.getDate(end) == null) return false;
+		seasonEnd = end;
+		return true;
+	}
+	
+	public boolean willSeasonEnd() {
+		return !getSeasonEnd().isEmpty();
 	}
 	
 	/**
@@ -433,6 +494,16 @@ public class LeagueData {
 	}
 	
 	/**
+	 * resets all user scores to the default score and makes all users inactive
+	 */
+	private void resetAllUsers() {
+		for (UserData ud : users) {
+			ud.setScore(getDefaultScore());
+			ud.setActive(false);
+		}
+	}
+	
+	/**
 	 * @return list of all users league data 
 	 */
 	public List<UserData> getActiveUsers() {
@@ -451,11 +522,22 @@ public class LeagueData {
 			if (sets.get(i).isComplete()) continue;
 			int weekDiff = UtilCalendar.getWeekDiffByWeekDayFromNow(
 					sets.get(i).getCreatedDate(), dayOfWeek); 
-			System.out.println("SET "+sets.get(i)+" weekDiff = "+weekDiff+" > "+weeksBeforeSetExpires);
+			//System.out.println("SET "+sets.get(i)+" weekDiff = "+weekDiff+" > "+weeksBeforeSetExpires);
 			if (weeksBeforeSetExpires == -1 || weekDiff <= weeksBeforeSetExpires) continue;
 			removeSet(sets.get(i).getId(), pairsChannel);
 			//System.out.println("removed");
 		}
+	}
+	
+	private int removeUnprocessedSets(Guild guild) {
+		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, getChannelId("pairings"));
+		if (pairsChannel == null) return 0;
+		int success = 0;
+		for (int i = 0; i < sets.size(); ++i) {
+			SetData set = sets.get(i--);
+			if (!set.isProcessed() && removeSet(set.getId(), pairsChannel)) ++success;
+		}
+		return success;
 	}
 	
 	/**
@@ -1006,11 +1088,11 @@ public class LeagueData {
 		return true;
 	}
 	
-	public void updateRanks(Guild guild, MessageChannelUnion debugChannel) {
-		backup(guild, debugChannel, "pre_updateranks_backup");
+	public void updateRanks(Guild guild, MessageChannelUnion debugChannel, boolean finalized) {
+		if (!finalized) backup(guild, debugChannel, "pre_updateranks_backup");
 		int num = processSets();
 		//display
-		if (num == 0) {
+		if (num == 0 && !finalized) {
 			debugChannel.sendMessage("There were no sets ready to be processed!").queue();
 			return;
 		}
@@ -1019,16 +1101,30 @@ public class LeagueData {
 		List<UserData> users = getActiveUsers();
 		LeagueData.sortByScoreDescend(users);
 		MessageCreateBuilder mcb = new MessageCreateBuilder();
-		mcb.addContent("__**"+UtilCalendar.getCurrentDateString()+" RANKS**__");
+		if (finalized) mcb.addContent("__**END OF SEASON "+getSeasonId()+" RANKS "+UtilCalendar.getCurrentDateString()+"**__");
+		else mcb.addContent("__**Current Season "+getSeasonId()+" Ranks "+UtilCalendar.getCurrentDateString()+"**__");
 		int r = 0, r2 = 0, prevScore = Integer.MAX_VALUE;
 		for (UserData user : users) {
 			++r2;
 			if (user.getScore() < prevScore) r = r2;
-			mcb.addContent("\n**"+r+")** "+getMention(user.getId())+" **"+user.getScore()+"**");
+			if (finalized) {
+				mcb.addContent("\n");
+				if (r == 1) mcb.addContent(":video_game:");
+				else if (r == 2) mcb.addContent(":second_place:");
+				else if (r == 3) mcb.addContent(":third_place:");
+				else mcb.addContent("**"+r+")**");
+				mcb.addContent(" ");
+			} 
+			else mcb.addContent("\n**"+r+")** ");
+			mcb.addContent(getMention(user.getId())+" **"+user.getScore()+"**");
 			prevScore = user.getScore();
 		}
 		MessageCreateData mcd = mcb.build();
 		ranksChannel.sendMessage(mcd).queue();
+	}
+	
+	public void updateRanks(Guild guild, MessageChannelUnion debugChannel) {
+		updateRanks(guild, debugChannel, false);
 	}
 	
 	private String getMention(long id) {
@@ -1047,6 +1143,7 @@ public class LeagueData {
 	}
 	
 	protected void updateRanks(Guild guild) {
+		// TODO check if new season should start
 		if (autoGenPairs) {
 			MessageChannelUnion channel = guild.getChannelById(MessageChannelUnion.class, getChannelId("bot-commands"));
 			updateRanks(guild, channel);
@@ -1060,13 +1157,8 @@ public class LeagueData {
 	 * @return if backup worked
 	 */
 	public boolean backup(Guild guild, MessageChannelUnion debugChannel, String backupName) {
-		TextChannel historyChannel = guild.getChannelById(TextChannel.class, 
-				getChannelId("set-history"));
-		if (historyChannel == null) {
-			debugChannel.sendMessage(Important.getError()+" Can't backup because the backup channel is gone!").queue();
-			return false;
-		}
-		return backup(guild, debugChannel, backupName, historyChannel);
+		return uploadJson(guild, debugChannel, getBackupJson(),
+				guild.getName()+"_"+getName()+"_"+backupName+"_"+UtilCalendar.getCurrentDateTimeString());
 	}
 	
 	/**
@@ -1074,20 +1166,61 @@ public class LeagueData {
 	 * @param debugChannel
 	 * @param backupName
 	 * @param backupChannel
-	 * @return
+	 * @return if backup worked
 	 */
 	public boolean backup(Guild guild, MessageChannelUnion debugChannel, String backupName, TextChannel backupChannel) {
-		JsonObject backup = getBackupJson();
-		String data = GlobalData.getGson().toJson(backup);
-		FileUpload fu = FileUpload.fromData(new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)), 
-				guild.getName()+"_"+getName()+"_"+backupName+"_"+UtilCalendar.getCurrentDateTimeString()+".json");
+		return uploadJson(guild, debugChannel, backupChannel, getBackupJson(),
+				guild.getName()+"_"+getName()+"_"+backupName+"_"+UtilCalendar.getCurrentDateTimeString());
+	}
+	
+	public boolean uploadJson(Guild guild, MessageChannelUnion debugChannel, JsonObject json, String fileName) {
+		TextChannel historyChannel = guild.getChannelById(TextChannel.class, 
+				getChannelId("set-history"));
+		if (historyChannel == null) {
+			debugChannel.sendMessage(Important.getError()+" Can't backup because the backup channel is gone!").queue();
+			return false;
+		}
+		return uploadJson(guild, debugChannel, historyChannel, json, fileName);
+	}
+	
+	public boolean uploadJson(Guild guild, MessageChannelUnion debugChannel, TextChannel backupChannel, JsonObject json, String fileName) {
+		String data = GlobalData.getGson().toJson(json);
+		FileUpload fu = FileUpload.fromData(new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)), fileName+".json");
 		backupChannel.sendFiles(fu).queue();
 		try { fu.close(); } 
 		catch (IOException e) { 
-			debugChannel.sendMessage(Important.getError()+" Can't backup because of an error: "+e.getMessage()).queue();
+			debugChannel.sendMessage(Important.getError()+" An error occured while uploading: "+e.getMessage()).queue();
 			e.printStackTrace(); 
 			return false; 
 		}
+		return true;
+	}
+	
+	/**
+	 * start a new season
+	 * @param guild
+	 * @param debugChannel
+	 * @return if starting new season worked
+	 */
+	public boolean startNewSeason(Guild guild, MessageChannelUnion debugChannel) {
+		// upload backups and announce final stats
+		backup(guild, debugChannel, "pre_newseason_backup"); 
+		updateRanks(guild, debugChannel, true);
+		if (!willSeasonEnd()) setSeasonEnd(UtilCalendar.getCurrentDateString());
+		uploadJson(guild, debugChannel, getOldSeasonJson(),
+				guild.getName()+"_"+getName()+"_SEASON_"+getSeasonId()+"_DATA_"+UtilCalendar.getCurrentDateTimeString());
+		// start new season
+		++seasonId;
+		seasonStart = UtilCalendar.getCurrentDateString();
+		setSeasonEnd(null);
+		resetAllUsers();
+		removeUnprocessedSets(guild);
+		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, getChannelId("pairings"));
+		if (pairsChannel != null) {
+			pairsChannel.sendMessage("__**SEASON "+getSeasonId()+" HAS BEGUN!**__").queue();
+		}
+		sets.clear();
+		GlobalData.saveData();
 		return true;
 	}
 	

@@ -4,11 +4,14 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.IsoFields;
 import java.time.temporal.WeekFields;
 import java.util.Date;
 import java.util.Locale;
+
+import javax.annotation.Nullable;
 
 public class UtilCalendar {
 	
@@ -60,8 +63,13 @@ public class UtilCalendar {
 	/**
 	 * @param dateString format dd-MM-yyyy
 	 */
+	@Nullable
 	public static LocalDate getDate(String dateString) {
-		return LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+		try {
+			return LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+		} catch (DateTimeParseException e) {
+			return null;
+		}
 	}
 	
 	public static int getWeeksInYear(int year) {
