@@ -83,6 +83,7 @@ public class UserData {
 	 * @param setsPerWeek set max number of sets this user could be assigned to each week
 	 */
 	public void setSetsPerWeek(int setsPerWeek) {
+		if (setsPerWeek < 0) setsPerWeek = 0;
 		this.setsPerWeek = setsPerWeek;
 	}
 	

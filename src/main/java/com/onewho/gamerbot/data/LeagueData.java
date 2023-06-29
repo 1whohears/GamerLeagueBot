@@ -664,7 +664,15 @@ public class LeagueData {
 	}
 	
 	public boolean userSetsPerWeek(Guild guild, MessageChannelUnion debugChannel, long id, int setsPerWeek) {
-		
+		UserData userData = getUserDataById(id);
+		if (userData == null) {
+			debugChannel.sendMessage("That player isn't in this league!").queue();
+			return false;
+		}
+		if (setsPerWeek < 0) setsPerWeek = 0;
+		userData.setSetsPerWeek(setsPerWeek);
+		debugChannel.sendMessage("That player has been set to "+setsPerWeek+" Sets Per Week!").queue();
+		return true;
 	}
 	
 	/**

@@ -20,9 +20,8 @@ public class ButtonManager {
 		if (data == null) return;
 		String id = event.getButton().getId();
 		if (id.startsWith("setsaweek-")) {
-			int sets = Integer.parseInt(id.substring("setsaweek-".length(), id.length()));
-			String message = UtilUsers.userSetsAWeek(event.getGuild(), event.getUser(), event.getChannel(), sets);
-			event.reply(message).setEphemeral(true).queue();
+			handleSetsPerWeekButton(event, event.getGuild(), event.getUser(), data, 
+					Integer.parseInt(id.substring("setsaweek-".length(), id.length())));
 			return;
 		}
 		switch (id) {
@@ -42,20 +41,15 @@ public class ButtonManager {
 	}
 	
 	private static void handleJoinButton(ButtonInteractionEvent event, Guild guild, User user, LeagueData data) {
-		event.reply(
-			data.addUser(guild, user))
-				.setEphemeral(true).queue();
+		event.reply(data.addUser(guild, user.getIdLong())).setEphemeral(true).queue();
 	}
 	
 	private static void handleLeaveButton(ButtonInteractionEvent event, Guild guild, User user, LeagueData data) {
-		event.reply(
-			UtilUsers.userQuitLeague(guild, user, event.getChannel()))
-				.setEphemeral(true).queue();
+		event.reply(UtilUsers.userQuitLeague(guild, user, event.getChannel())).setEphemeral(true).queue();
 	}
 	
-	private static void handleSetsPerWeekButton(ButtonInteractionEvent event) {
-		
-		GlobalData.saveData();
+	private static void handleSetsPerWeekButton(ButtonInteractionEvent event, Guild guild, User user, LeagueData data, int sets) {
+		event.reply(UtilUsers.userSetsAWeek(event.getGuild(), event.getUser(), event.getChannel(), sets)).setEphemeral(true).queue();
 	}
 	
 	private static void handleReportVerifyButton(ButtonInteractionEvent event) {

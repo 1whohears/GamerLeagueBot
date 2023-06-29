@@ -92,8 +92,15 @@ public class ManageUser extends LeagueCommand {
 					event.getChannel().sendMessage(Important.getError()+" "+params[2]+" is not a valid ping!").queue();
 					return false;
 				}
-				// TODO sets per week sub command
-				event.getChannel().sendMessage(Important.getError()+" This command doesn't do anything yet!").queue();
+				int sets;
+				try {
+					sets = Integer.parseInt(params[3]);
+				} catch (NumberFormatException e) {
+					event.getChannel().sendMessage(Important.getError()+" "+params[3]+" is not a number!").queue();
+					return false;
+				}
+				if (!ldata.userSetsPerWeek(event.getGuild(), event.getChannel(), pingId, sets)) return false;
+				GlobalData.saveData();
 				return true;
 			}
 		});
