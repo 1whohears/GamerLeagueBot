@@ -41,7 +41,7 @@ public class ButtonManager {
 	}
 	
 	private static void handleJoinButton(ButtonInteractionEvent event, Guild guild, User user, LeagueData data) {
-		event.reply(data.addUser(guild, user.getIdLong())).setEphemeral(true).queue();
+		event.reply(data.addUser(guild, user.getIdLong(), false)).setEphemeral(true).queue();
 	}
 	
 	private static void handleLeaveButton(ButtonInteractionEvent event, Guild guild, User user, LeagueData data) {

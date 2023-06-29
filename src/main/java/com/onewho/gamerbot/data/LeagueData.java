@@ -602,10 +602,10 @@ public class LeagueData {
 	
 	// TODO these should throw exceptions to send error messages idiot
 	
-	public String addUser(Guild guild, long id) {
+	public String addUser(Guild guild, long id, boolean ignoreLock) {
 		UserData userData = getUserDataById(id);
 		if (userData == null) userData = createUser(id);
-		if (userData.isLocked()) 
+		if (!ignoreLock && userData.isLocked()) 
 			return "You are not allowed to join this league because a TO locked you out!";
 		Member m = guild.getMemberById(id);
 		if (m == null) 

@@ -66,8 +66,12 @@ public class ManageUser extends LeagueCommand {
 		addSubCommand(new SubCommand("join") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
-				// TODO join sub command
-				event.getChannel().sendMessage(Important.getError()+" This command doesn't do anything yet!").queue();
+				long pingId = getIdFromMention(params[2]);
+				if (pingId == -1) {
+					event.getChannel().sendMessage(Important.getError()+" "+params[2]+" is not a valid ping!").queue();
+					return false;
+				}
+				event.getChannel().sendMessage(ldata.addUser(event.getGuild(), pingId, true));
 				return true;
 			}
 		});
