@@ -1210,6 +1210,8 @@ public class LeagueData {
 		if (!willSeasonEnd()) setSeasonEnd(UtilCalendar.getCurrentDateString());
 		uploadJson(guild, debugChannel, getOldSeasonJson(),
 				guild.getName()+"_"+getName()+"_SEASON_"+getSeasonId()+"_DATA_"+UtilCalendar.getCurrentDateTimeString());
+		debugChannel.sendMessage("This Season's data has been uploaded to the #set-history channel."
+				+ " Please save it on a hard drive and bury it incase of apocolypse.").queue();
 		// start new season
 		++seasonId;
 		seasonStart = UtilCalendar.getCurrentDateString();
