@@ -1144,7 +1144,7 @@ public class LeagueData {
 	
 	protected void updateRanks(Guild guild) {
 		// TODO check if new season should start
-		if (autoGenPairs) {
+		if (autoUpdateRanks) {
 			MessageChannelUnion channel = guild.getChannelById(MessageChannelUnion.class, getChannelId("bot-commands"));
 			updateRanks(guild, channel);
 		}
