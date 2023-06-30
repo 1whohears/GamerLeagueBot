@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1143,10 +1144,10 @@ public class LeagueData {
 	}
 	
 	protected void updateRanks(Guild guild) {
-		// TODO check if new season should start
 		if (autoUpdateRanks) {
 			MessageChannelUnion channel = guild.getChannelById(MessageChannelUnion.class, getChannelId("bot-commands"));
-			updateRanks(guild, channel);
+			if (shouldStartNewSeason()) startNewSeason(guild, channel);
+			else updateRanks(guild, channel);
 		}
 	}
 	
@@ -1222,6 +1223,13 @@ public class LeagueData {
 		sets.clear();
 		GlobalData.saveData();
 		return true;
+	}
+	
+	public boolean shouldStartNewSeason() {
+		if (!willSeasonEnd()) return false;
+		LocalDate now = UtilCalendar.getCurrentDate();
+		LocalDate end = UtilCalendar.getDate(getSeasonEnd());
+		return !UtilCalendar.isOlder(now, end);
 	}
 	
 }
