@@ -37,6 +37,7 @@ public class CommandParser {
 		commands.add(new Report());
 		commands.add(new ReportAdmin());
 		commands.add(new ManageUser());
+		commands.add(new LeagueInfo());
 		commands.add(new Challenge());
 		commands.add(new CancelChallenge());
 		commands.add(new CreateSet());
@@ -46,9 +47,10 @@ public class CommandParser {
 		commands.add(new CreateLeague());
 		commands.add(new RenameLeague());
 		commands.add(new RemoveLeague());
-		//commands.add(new Test());
+		//commands.add(new Test()); // for testing
 		//commands.add(new Reload()); // for testing
 		//commands.add(new RefreshSet()); // for testing
+		commands.add(new NewSeason());
 	}
 	
 	private static List<ICommand> userCommands;

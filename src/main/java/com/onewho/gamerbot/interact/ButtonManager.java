@@ -1,6 +1,7 @@
 package com.onewho.gamerbot.interact;
 
 import com.onewho.gamerbot.data.GlobalData;
+import com.onewho.gamerbot.data.GuildData;
 import com.onewho.gamerbot.data.LeagueData;
 import com.onewho.gamerbot.data.ReportResult;
 import com.onewho.gamerbot.data.SetData;
@@ -54,8 +55,12 @@ public class ButtonManager {
 	
 	private static void handleReportVerifyButton(ButtonInteractionEvent event) {
 		int setId = getSetId(event);
-		SetData set = GlobalData.getGuildDataById(event.getGuild().getIdLong())
-				.getLeagueByChannel(event.getChannel()).getSetDataById(setId);
+		Guild guild = event.getGuild();
+		GuildData gdata = GlobalData.getGuildDataById(guild.getIdLong());
+		if (gdata == null) return;
+		LeagueData ldata = gdata.getLeagueByChannel(event.getChannel());
+		if (ldata == null) return;
+		SetData set = ldata.getSetDataById(setId);
 		long id1 = -1, id2 = -1;
 		int s1 = -1, s2 = -1;
 		if (set.isP1confirm()) {
@@ -73,13 +78,14 @@ public class ButtonManager {
 			event.reply("You can't press this button!").setEphemeral(true).queue();
 			return;
 		}
-		ReportResult result = set.report(id1, id2, s1, s2, UtilCalendar.getCurrentDateString());
+		String currentDate = UtilCalendar.getCurrentDateString();
+		ReportResult result = set.report(id1, id2, s1, s2, currentDate);
 		if (result == ReportResult.AlreadyVerified) {
 			event.reply("You already verified this set!").setEphemeral(true).queue();
 			return;
 		}
+		ldata.getUserDataById(id1).setLastActive(currentDate);
 		event.reply("The set has been verified!").queue();
-		Guild guild = event.getGuild();
 		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, 
 				GlobalData.getGuildDataById(guild.getIdLong())
 					.getLeagueByChannel(event.getChannel()).getChannelId("pairings"));
@@ -89,8 +95,11 @@ public class ButtonManager {
 	
 	private static void handleReportDisputeButton(ButtonInteractionEvent event) {
 		int setId = getSetId(event);
-		SetData set = GlobalData.getGuildDataById(event.getGuild().getIdLong())
-				.getLeagueByChannel(event.getChannel()).getSetDataById(setId);
+		GuildData gdata = GlobalData.getGuildDataById(event.getGuild().getIdLong());
+		if (gdata == null) return;
+		LeagueData ldata = gdata.getLeagueByChannel(event.getChannel());
+		if (ldata == null) return;
+		SetData set = ldata.getSetDataById(setId);
 		if (set.isComplete()) {
 			event.reply("This set has already been verified!"
 					+ " If you still dispute the results then contact an admin!").setEphemeral(true).queue();

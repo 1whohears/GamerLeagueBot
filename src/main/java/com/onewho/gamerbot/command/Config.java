@@ -30,7 +30,7 @@ public class Config extends LeagueCommand {
 		return "`"+BotMain.PREFIX+getCommandString()+" [setting] [value]`"
 				+ " Settings: `max-sets-per-week`, `weeks-before-auto-inactive`, `weeks-before-set-expires`,"
 				+ " `weeks-until-set-repeat`, `default-score`, `K` (elo K constant), `auto-gen-pairs`, `auto-update-ranks`,"
-				+ " `challenges-per-week`, `season-end`";
+				+ " `challenges-per-week`, `season-end`, `season-start`";
 	}
 	
 	public Config() {
@@ -172,6 +172,16 @@ public class Config extends LeagueCommand {
 				if (end.equals("none")) end = "";
 				if (ldata.setSeasonEnd(end)) event.getChannel().sendMessage("`"+params[1]+"` set to `"+end+"`").queue();
 				else event.getChannel().sendMessage(Important.getError(end+" is not in `dd-mm-yyyy` format!")).queue();
+				GlobalData.saveData();
+				return true;
+			}
+		});
+		addSubCommand(new SubCommand("season-start") {
+			@Override
+			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
+				String start = params[2];
+				if (ldata.setSeasonStart(start)) event.getChannel().sendMessage("`"+params[1]+"` set to `"+start+"`").queue();
+				else event.getChannel().sendMessage(Important.getError(start+" is not in `dd-mm-yyyy` format!")).queue();
 				GlobalData.saveData();
 				return true;
 			}

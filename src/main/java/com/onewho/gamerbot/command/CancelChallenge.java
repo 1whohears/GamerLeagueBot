@@ -23,7 +23,7 @@ public class CancelChallenge extends LeagueCommand {
 
 	@Override
 	public String getHelp() {
-		return "`"+BotMain.PREFIX+getCommandString()+" [set id]' cancel a challenge";
+		return "`"+BotMain.PREFIX+getCommandString()+" [set id]` cancel a challenge";
 	}
 
 	@Override

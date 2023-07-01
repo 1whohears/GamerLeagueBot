@@ -4,12 +4,10 @@ import java.awt.Color;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -73,8 +71,8 @@ public class LeagueData {
 	 */
 	protected LeagueData(JsonObject data) {
 		name = ParseData.getString(data, "name", name);
-		seasonStart = ParseData.getString(data, "seasonStart", UtilCalendar.getCurrentDateString());
-		seasonEnd = ParseData.getString(data, "seasonEnd", seasonEnd);
+		seasonStart = ParseData.getString(data, "season start", UtilCalendar.getCurrentDateString());
+		seasonEnd = ParseData.getString(data, "season end", seasonEnd);
 		seasonId = ParseData.getInt(data, "season id", seasonId);
 		
 		maxSetsPerWeek = ParseData.getInt(data, "max sets a week", maxSetsPerWeek);
@@ -117,9 +115,9 @@ public class LeagueData {
 	public JsonObject getJson() {
 		JsonObject data = new JsonObject();
 		data.addProperty("name", name);
-		data.addProperty("seasonStart", seasonStart);
-		data.addProperty("seasonEnd", seasonEnd);
-		data.addProperty("seasonId", seasonId);
+		data.addProperty("season start", seasonStart);
+		data.addProperty("season end", seasonEnd);
+		data.addProperty("season id", seasonId);
 		data.addProperty("max sets a week", maxSetsPerWeek);
 		data.addProperty("weeks before auto inactive", weeksBeforeAutoInactive);
 		data.addProperty("weeks before set expires", weeksBeforeSetExpires);
@@ -183,8 +181,9 @@ public class LeagueData {
 	
 	private JsonObject getOldSeasonJson() {
 		JsonObject backup = new JsonObject();
-		backup.addProperty("seasonStart", seasonStart);
-		backup.addProperty("seasonEnd", seasonEnd);
+		backup.addProperty("season id", seasonId);
+		backup.addProperty("season start", seasonStart);
+		backup.addProperty("season end", seasonEnd);
 		backup.add("users", getUsersBackupJson());
 		backup.add("sets", getSetsOldSeasonJson());
 		return backup;
@@ -248,6 +247,19 @@ public class LeagueData {
 		}
 		if (UtilCalendar.getDate(end) == null) return false;
 		seasonEnd = end;
+		return true;
+	}
+	
+	/**
+	 * @param start set the start date of the current season
+	 * @return if it was a valid date
+	 */
+	public boolean setSeasonStart(String start) {
+		if (start == null || start.isEmpty()) {
+			return false;
+		}
+		if (UtilCalendar.getDate(start) == null) return false;
+		seasonStart = start;
 		return true;
 	}
 	
@@ -494,6 +506,10 @@ public class LeagueData {
 		K = k;
 	}
 	
+	public int getNumberOfCachedSets() {
+		return sets.size();
+	}
+	
 	/**
 	 * resets all user scores to the default score and makes all users inactive
 	 */
@@ -534,8 +550,11 @@ public class LeagueData {
 		if (pairsChannel == null) return 0;
 		int success = 0;
 		for (int i = 0; i < sets.size(); ++i) {
-			SetData set = sets.get(i--);
-			if (!set.isProcessed() && removeSet(set.getId(), pairsChannel)) ++success;
+			SetData set = sets.get(i);
+			if (!set.isProcessed() && removeSet(set.getId(), pairsChannel)) {
+				++success;
+				--i;
+			}
 		}
 		return success;
 	}
@@ -722,7 +741,7 @@ public class LeagueData {
 			return "User with ID "+id+" isn't in this server or doesn't exist!";
 		guild.addRoleToMember(m, guild.getRoleById(getLeagueRoleId())).queue();
 		userData.setActive(true);
-		userData.setLastActive(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
+		userData.setLastActive(UtilCalendar.getCurrentDateString());
 		GlobalData.saveData();
 		return "You have joined the Gamer League! Please select how many sets you want to do per week!"
 				+ " Use $help in #bot-commands for more info!";
