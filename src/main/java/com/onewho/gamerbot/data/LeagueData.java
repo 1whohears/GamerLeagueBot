@@ -500,7 +500,6 @@ public class LeagueData {
 	private void resetAllUsers() {
 		for (UserData ud : users) {
 			ud.setScore(getDefaultScore());
-			ud.setActive(false);
 		}
 	}
 	

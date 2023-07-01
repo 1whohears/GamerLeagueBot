@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.onewho.gamerbot.BotMain;
+import com.onewho.gamerbot.data.Important;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
@@ -23,7 +24,7 @@ public class CommandParser {
 				return;
 			}
 		}
-		event.getChannel().sendMessage("That command doesn't exist! Try `"+BotMain.PREFIX+"help`!").queue();
+		event.getChannel().sendMessage(Important.getError("That command doesn't exist! Try `"+BotMain.PREFIX+"help`!")).queue();
 	}
 	
 	public static void loadCommands() {
