@@ -30,7 +30,7 @@ public class Config extends LeagueCommand {
 		return "`"+BotMain.PREFIX+getCommandString()+" [setting] [value]`"
 				+ " Settings: `max-sets-per-week`, `weeks-before-auto-inactive`, `weeks-before-set-expires`,"
 				+ " `weeks-until-set-repeat`, `default-score`, `K` (elo K constant), `auto-gen-pairs`, `auto-update-ranks`,"
-				+ " `challenges-per-week`";
+				+ " `challenges-per-week`, `season-end`";
 	}
 	
 	public Config() {
@@ -165,6 +165,7 @@ public class Config extends LeagueCommand {
 				return true;
 			}
 		});
+		addSubCommand(new SubCommand("season-end") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 				String end = params[2];
