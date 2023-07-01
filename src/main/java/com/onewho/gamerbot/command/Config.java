@@ -165,6 +165,15 @@ public class Config extends LeagueCommand {
 				return true;
 			}
 		});
+			@Override
+			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
+				String end = params[2];
+				if (ldata.setSeasonEnd(end)) event.getChannel().sendMessage("`"+params[1]+"` set to `"+end+"`").queue();
+				else event.getChannel().sendMessage(Important.getError(end+" is not in `dd-mm-yyyy` format!")).queue();
+				GlobalData.saveData();
+				return true;
+			}
+		});
 	}
 
 	@Override
