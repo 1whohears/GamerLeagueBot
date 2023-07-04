@@ -529,6 +529,17 @@ public class LeagueData {
 	}
 	
 	/**
+	 * @return all users that have completed a set this season
+	 */
+	public List<UserData> getActiveUsersThisSeason() {
+		List<UserData> active = new ArrayList<UserData>();
+		for (UserData user : users)
+			if (!UtilCalendar.isOlder(user.getLastActive(), getSeasonStart())) 
+				active.add(user);
+		return active;
+	}
+	
+	/**
 	 * remove incomplete sets based on weeks before auto expire
 	 * @param pairsChannel the pairs channel of this league
 	 */
@@ -1117,7 +1128,7 @@ public class LeagueData {
 		}
 		debugChannel.sendMessage("Processed "+num+" sets! Ranks and backups are being updated!").queue();
 		TextChannel ranksChannel = guild.getChannelById(TextChannel.class, getChannelId("ranks"));
-		List<UserData> users = getActiveUsers();
+		List<UserData> users = getActiveUsersThisSeason();
 		LeagueData.sortByScoreDescend(users);
 		MessageCreateBuilder mcb = new MessageCreateBuilder();
 		if (finalized) mcb.addContent("__**END OF SEASON "+getSeasonId()+" RANKS "+UtilCalendar.getCurrentDateString()+"**__");

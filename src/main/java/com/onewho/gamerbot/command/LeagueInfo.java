@@ -22,7 +22,7 @@ public class LeagueInfo extends LeagueCommand {
 
 	@Override
 	public String getHelp() {
-		return "`"+BotMain.PREFIX+getCommandString()+"' get info about league for debugging";
+		return "`"+BotMain.PREFIX+getCommandString()+"` get info about league for debugging";
 	}
 
 	@Override

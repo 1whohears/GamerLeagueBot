@@ -22,7 +22,7 @@ public class Challenge extends LeagueCommand {
 
 	@Override
 	public String getHelp() {
-		return "`"+BotMain.PREFIX+getCommandString()+" [p2 ping]' request to challenge this player";
+		return "`"+BotMain.PREFIX+getCommandString()+" [p2 ping]` request to challenge this player";
 	}
 
 	@Override
