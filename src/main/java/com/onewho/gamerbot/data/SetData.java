@@ -2,6 +2,7 @@ package com.onewho.gamerbot.data;
 
 import com.google.gson.JsonObject;
 
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
@@ -269,10 +270,12 @@ public class SetData {
 	 * @param channel the channel this set should be displayed in
 	 */
 	public void displaySet(TextChannel channel) {
-		String p1Name = "", p2Name = "", date = "";
-		if (this.isComplete()) {
-			p1Name = "*"+channel.getGuild().getMemberById(getP1Id()).getEffectiveName()+"*";
-			p2Name = "*"+channel.getGuild().getMemberById(getP2Id()).getEffectiveName()+"*";
+		String p1Name = "not_in_server", p2Name = "not_in_server", date = "";
+		if (isComplete()) {
+			Member m1 = channel.getGuild().getMemberById(getP1Id());
+			Member m2 = channel.getGuild().getMemberById(getP2Id());
+			if (m1 != null) p1Name = "*"+m1.getEffectiveName()+"*";
+			if (m2 != null) p2Name = "*"+m2.getEffectiveName()+"*";
 			date = completed;
 		} else {
 			p1Name = "<@"+getP1Id()+">";

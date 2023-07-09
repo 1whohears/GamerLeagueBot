@@ -534,7 +534,7 @@ public class LeagueData {
 	public List<UserData> getActiveUsersThisSeason() {
 		List<UserData> active = new ArrayList<UserData>();
 		for (UserData user : users)
-			if (!UtilCalendar.isOlder(user.getLastActive(), getSeasonStart())) 
+			if (user.isActive() && !UtilCalendar.isOlder(user.getLastActive(), getSeasonStart())) 
 				active.add(user);
 		return active;
 	}
@@ -595,18 +595,23 @@ public class LeagueData {
 	/**
 	 * @return a list of active/available user data
 	 */
-	public List<UserData> getAvailableSortedUsers() {
+	public List<UserData> getAvailableSortedUsers(Guild guild) {
 		//System.out.println("GETTING AVAILABLE USERS");
 		List<UserData> available = new ArrayList<UserData>();
 		for (int i = 0; i < users.size(); ++i) {
-			if (!users.get(i).isActive()) continue;
-			if (users.get(i).getSetsPerWeek() < 1) continue;
-			int weekDiff = UtilCalendar.getWeekDiffByWeekDayFromNow(
-					users.get(i).getLastActive(), dayOfWeek);
+			UserData user = users.get(i);
+			if (!user.isActive()) continue;
+			if (user.getSetsPerWeek() < 1) continue;
+			int weekDiff = UtilCalendar.getWeekDiffByWeekDayFromNow(user.getLastActive(), dayOfWeek);
 			//System.out.println("last active week diff = "+weekDiff+" <= "+weeksBeforeAutoInactive);
 			if (weeksBeforeAutoInactive != -1 && weekDiff > weeksBeforeAutoInactive) {
-				users.get(i).setSetsPerWeek(0);
+				user.setActive(false);
+				user.setSetsPerWeek(0);
 				continue;
+			}
+			if (guild.getMemberById(user.getId()) == null) {
+				user.setActive(false);
+				user.setSetsPerWeek(0);
 			}
 			//System.out.println("added user "+users.get(i));
 			available.add(users.get(i));
@@ -1040,7 +1045,7 @@ public class LeagueData {
 			return;
 		}
 		removeOldSets(pairsChannel);
-		List<UserData> activeUsers = getAvailableSortedUsers();
+		List<UserData> activeUsers = getAvailableSortedUsers(guild);
 		List<SetData> newSets = new ArrayList<SetData>();
 		boolean createdSet = true;
 		while (createdSet) {
