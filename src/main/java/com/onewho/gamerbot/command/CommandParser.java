@@ -49,7 +49,7 @@ public class CommandParser {
 		commands.add(new RemoveLeague());
 		//commands.add(new Test()); // for testing
 		//commands.add(new Reload()); // for testing
-		//commands.add(new RefreshSet()); // for testing
+		commands.add(new RefreshSet()); // for testing
 		commands.add(new NewSeason());
 	}
 	

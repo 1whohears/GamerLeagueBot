@@ -36,6 +36,13 @@ public interface ICommand {
 		return SubCommandResult.SUCCESS;
 	}
 	
+	/**
+	 * @return if command is not listed help command
+	 */
+	default boolean isHidden() {
+		return false;
+	}
+	
 	default boolean addSubCommand(SubCommand sub) {
 		if (subCommands.containsKey(sub.param)) return false;
 		subCommands.put(sub.param, sub);

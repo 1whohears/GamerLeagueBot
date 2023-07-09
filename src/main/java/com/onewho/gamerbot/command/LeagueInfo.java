@@ -32,6 +32,7 @@ public class LeagueInfo extends LeagueCommand {
 
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
+		// TODO display set data sub command
 		if (params.length != 1) {
 			event.getChannel().sendMessage(Important.getError()+" DO: "+getHelp()).queue();
 			return false;
