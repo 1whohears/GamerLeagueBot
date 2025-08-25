@@ -31,13 +31,13 @@ public class SetData {
 		p2Id = ParseData.getLong(data, "p2Id", p2Id);
 		p1s = ParseData.getInt(data, "p1s", p1s);
 		p2s = ParseData.getInt(data, "p2s", p2s);
-		p1c = ParseData.getBoolean(data, "p1c", p1c);
-		p2c = ParseData.getBoolean(data, "p2c", p2c);
+		p1c = ParseData.getBoolean(data, "p1c", false);
+		p2c = ParseData.getBoolean(data, "p2c", false);
 		created = ParseData.getString(data, "created", created);
 		completed = ParseData.getString(data, "completed", completed);
 		messageId = ParseData.getLong(data, "messageId", messageId);
-		processed = ParseData.getBoolean(data, "processed", processed);
-		challenge = ParseData.getBoolean(data, "challenge", challenge);
+		processed = ParseData.getBoolean(data, "processed", false);
+		challenge = ParseData.getBoolean(data, "challenge", false);
 	}
 	
 	protected SetData(int id, long p1Id, long p2Id, String created) {

@@ -1,6 +1,7 @@
 package com.onewho.gamerbot.util;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 
 /** 
  * Code stolen from Rajat Mishra 
@@ -17,13 +18,13 @@ public class UtilKClosest {
 	 * @return
 	 */
 	@Nullable
-	public static int[] getKClosestIndexArray(int a[], int index, int k) {
-		if (a == null || a.length < 1|| index >= a.length || index < 0) return null;
+	public static int[] getKClosestIndexArray(int[] a, int index, int k) {
+		if (a == null || index >= a.length || index < 0) return null;
 		if (k > a.length-1) k = a.length-1;
 		
 		int base = a[index];
 		int[] b = new int[k];
-		for (int i = 0; i < b.length; ++i) b[i] = -1;
+        Arrays.fill(b, -1);
 		
 		for (int i = 0; i < b.length; ++i) {
 			int min_diff = Integer.MAX_VALUE;
@@ -42,7 +43,7 @@ public class UtilKClosest {
 	}
 	
 	private static boolean contains(int[] a, int b) {
-		for (int i = 0; i < a.length; ++i) if (a[i] == b) return true;
+        for (int j : a) if (j == b) return true;
 		return false;
 	}
 	
@@ -57,7 +58,7 @@ public class UtilKClosest {
        which elements are smaller than or equal to x and after 
        which greater than x)*/
 	@Deprecated
-    private static int findCrossOver(int arr[], int low, int high, int x) 
+    private static int findCrossOver(int[] arr, int low, int high, int x)
     { 
         // Base cases 
         if (arr[high] <= x) // x is greater than all 

@@ -15,7 +15,7 @@ public class GuildData {
 	
 	private long id = -1;
 	
-	List<LeagueData> leagues = new ArrayList<LeagueData>();
+	private final List<LeagueData> leagues = new ArrayList<LeagueData>();
 	
 	/**
 	 * construct this GuildData instance using data from disk
@@ -23,7 +23,6 @@ public class GuildData {
 	 */
 	protected GuildData(JsonObject data) {
 		id = ParseData.getLong(data, "id", id);
-		leagues.clear();
 		JsonArray ls = ParseData.getJsonArray(data, "leagues");
 		for (int i = 0; i < ls.size(); ++i) leagues.add(new LeagueData(ls.get(i).getAsJsonObject()));
 	}

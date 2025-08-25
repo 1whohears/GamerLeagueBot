@@ -4,8 +4,10 @@ public class UtilDebug {
 	
 	public static void printIntArray(String bug, int[] a) {
 		bug += " =";
-		for (int i = 0; i < a.length; ++i) bug += " " + a[i]; 
-		System.out.println(bug);
+        StringBuilder bugBuilder = new StringBuilder(bug);
+        for (int j : a) bugBuilder.append(" ").append(j);
+        bug = bugBuilder.toString();
+        System.out.println(bug);
 	}
 	
 }

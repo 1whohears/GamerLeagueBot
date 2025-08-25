@@ -16,7 +16,7 @@ public class UserData {
 	
 	protected UserData(JsonObject data) {
 		id = ParseData.getLong(data, "id", -1);
-		active = ParseData.getBoolean(data, "active", active);
+		active = ParseData.getBoolean(data, "active", false);
 		setsPerWeek = ParseData.getInt(data, "sets per week", setsPerWeek);
 		lastActive = ParseData.getString(data, "last active", lastActive); // DO NOT USE setLastActive HERE!
 		setScore(ParseData.getInt(data, "score", score));

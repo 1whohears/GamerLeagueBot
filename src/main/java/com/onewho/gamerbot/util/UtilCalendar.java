@@ -153,7 +153,8 @@ public class UtilCalendar {
 	}
 	
 	/**
-	 * @param dateString format dd-MM-yyyy
+	 * @param d1 format dd-MM-yyyy
+     * @param d2 format dd-MM-yyyy
 	 */
 	public static boolean isNewer(String d1, String d2) {
 		return isNewer(getDate(d1), getDate(d2));
@@ -162,10 +163,11 @@ public class UtilCalendar {
 	public static boolean isOlder(LocalDate d1, LocalDate d2) {
 		return d1.isBefore(d2);
 	}
-	
-	/**
-	 * @param dateString format dd-MM-yyyy
-	 */
+
+    /**
+     * @param d1 format dd-MM-yyyy
+     * @param d2 format dd-MM-yyyy
+     */
 	public static boolean isOlder(String d1, String d2) {
 		return isOlder(getDate(d1), getDate(d2));
 	}

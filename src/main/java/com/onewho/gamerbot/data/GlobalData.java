@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 
@@ -18,7 +19,7 @@ import com.google.gson.JsonObject;
 public class GlobalData {
 	
 	private static Gson gson = null;
-	private static String dataFileName = "data.json";
+	private static final String dataFileName = "data.json";
 	
 	private static HashMap<Long, GuildData> guilds = new HashMap<>();
 	
@@ -39,11 +40,12 @@ public class GlobalData {
 	public static JsonObject readJsonData() throws IOException {
 		getGson();
 		JsonObject json = new JsonObject();
-		if (!Files.exists(Paths.get(dataFileName))) {
+        Path path = Paths.get(dataFileName);
+        if (!Files.exists(path)) {
 			json.add("guilds", new JsonArray());
 			saveData();
 		} else {
-			Reader reader = Files.newBufferedReader(Paths.get(dataFileName));
+			Reader reader = Files.newBufferedReader(path);
 			json = gson.fromJson(reader, JsonObject.class);
 			reader.close();
 		}

@@ -12,7 +12,9 @@ import com.onewho.gamerbot.data.GlobalData;
 public class TokenReader {
 	
 	public static String getJDAToken() throws JsonSyntaxException, JsonIOException, IOException {
-		return GlobalData.getGson().fromJson(Files.newBufferedReader(Paths.get("token.json")), JsonObject.class).get("token").getAsString();
+		return GlobalData.getGson().fromJson(
+                Files.newBufferedReader(Paths.get("token.json")), JsonObject.class
+        ).get("token").getAsString();
 	}
 	
 }

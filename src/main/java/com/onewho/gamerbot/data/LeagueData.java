@@ -36,6 +36,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
+import org.jetbrains.annotations.NotNull;
 
 public class LeagueData {
 	
@@ -56,8 +57,8 @@ public class LeagueData {
 	public boolean autoGenPairs = false;
 	public boolean autoUpdateRanks = false;
 	
-	private List<UserData> users = new ArrayList<UserData>();
-	private List<SetData> sets = new ArrayList<SetData>();
+	private final List<UserData> users = new ArrayList<UserData>();
+	private final List<SetData> sets = new ArrayList<SetData>();
 	
 	private long leagueRoleId = -1;
 	private long toRoleId = -1;
@@ -83,10 +84,9 @@ public class LeagueData {
 		defaultScore = ParseData.getInt(data, "default score", defaultScore);
 		K = ParseData.getDouble(data, "K", K);
 		
-		autoGenPairs = ParseData.getBoolean(data, "auto gen pairs", autoGenPairs);
-		autoUpdateRanks = ParseData.getBoolean(data, "auto update ranks", autoUpdateRanks);
-		
-		users.clear();
+		autoGenPairs = ParseData.getBoolean(data, "auto gen pairs", false);
+		autoUpdateRanks = ParseData.getBoolean(data, "auto update ranks", false);
+
 		JsonArray us = ParseData.getJsonArray(data, "users");
 		for (int i = 0; i < us.size(); ++i) users.add(new UserData(us.get(i).getAsJsonObject()));
 		sets.clear();
@@ -149,7 +149,7 @@ public class LeagueData {
 		for (int i = 0; i < us.size(); ++i) {
 			long id = us.get(i).getAsJsonObject().get("id").getAsLong();
 			UserData user = getUserDataById(id);
-			if (user == null) createUser(id);
+			if (user == null) user = createUser(id);
 			user.readBackup(us.get(i).getAsJsonObject());
 		}
 		sets.clear();
@@ -304,7 +304,7 @@ public class LeagueData {
 	 * @return a user's league data or null if that user isn't in this league
 	 */
 	public UserData getUserDataById(long id) {
-		for (int i = 0; i < users.size(); ++i) if (users.get(i).getId() == id) return users.get(i);
+        for (UserData user : users) if (user.getId() == id) return user;
 		return null;
 	}
 	
@@ -326,7 +326,7 @@ public class LeagueData {
 	 */
 	@Nullable
 	public SetData getSetDataById(int id) {
-		for (int i = 0; i < sets.size(); ++i) if (sets.get(i).getId() == id) return sets.get(i);
+        for (SetData set : sets) if (set.getId() == id) return set;
 		return null;
 	}
 	
@@ -545,15 +545,15 @@ public class LeagueData {
 	 */
 	private void removeOldSets(TextChannel pairsChannel) {
 		//System.out.println("REMOVING OLD SETS");
-		for (int i = 0; i < sets.size(); ++i) {
-			if (sets.get(i).isComplete()) continue;
-			int weekDiff = UtilCalendar.getWeekDiffByWeekDayFromNow(
-					sets.get(i).getCreatedDate(), dayOfWeek); 
-			//System.out.println("SET "+sets.get(i)+" weekDiff = "+weekDiff+" > "+weeksBeforeSetExpires);
-			if (weeksBeforeSetExpires == -1 || weekDiff <= weeksBeforeSetExpires) continue;
-			removeSet(sets.get(i).getId(), pairsChannel);
-			//System.out.println("removed");
-		}
+        for (SetData set : sets) {
+            if (set.isComplete()) continue;
+            int weekDiff = UtilCalendar.getWeekDiffByWeekDayFromNow(
+                    set.getCreatedDate(), dayOfWeek);
+            //System.out.println("SET "+sets.get(i)+" weekDiff = "+weekDiff+" > "+weeksBeforeSetExpires);
+            if (weeksBeforeSetExpires == -1 || weekDiff <= weeksBeforeSetExpires) continue;
+            removeSet(set.getId(), pairsChannel);
+            //System.out.println("removed");
+        }
 	}
 	
 	private int removeUnprocessedSets(Guild guild) {
@@ -581,7 +581,7 @@ public class LeagueData {
 		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, getChannelId("pairings"));
 		if (pairsChannel == null) return 0;
 		int success = 0;
-		for (int i = 0; i < ids.length; ++i) if (removeSet(ids[i], pairsChannel)) ++success;
+        for (int id : ids) if (removeSet(id, pairsChannel)) ++success;
 		return success;
 	}
 	
@@ -598,24 +598,23 @@ public class LeagueData {
 	public List<UserData> getAvailableSortedUsers(Guild guild) {
 		//System.out.println("GETTING AVAILABLE USERS");
 		List<UserData> available = new ArrayList<UserData>();
-		for (int i = 0; i < users.size(); ++i) {
-			UserData user = users.get(i);
-			if (!user.isActive()) continue;
-			if (user.getSetsPerWeek() < 1) continue;
-			int weekDiff = UtilCalendar.getWeekDiffByWeekDayFromNow(user.getLastActive(), dayOfWeek);
-			//System.out.println("last active week diff = "+weekDiff+" <= "+weeksBeforeAutoInactive);
-			if (weeksBeforeAutoInactive != -1 && weekDiff > weeksBeforeAutoInactive) {
-				user.setActive(false);
-				user.setSetsPerWeek(0);
-				continue;
-			}
-			if (guild.getMemberById(user.getId()) == null) {
-				user.setActive(false);
-				user.setSetsPerWeek(0);
-			}
-			//System.out.println("added user "+users.get(i));
-			available.add(users.get(i));
-		}
+        for (UserData user : users) {
+            if (!user.isActive()) continue;
+            if (user.getSetsPerWeek() < 1) continue;
+            int weekDiff = UtilCalendar.getWeekDiffByWeekDayFromNow(user.getLastActive(), dayOfWeek);
+            //System.out.println("last active week diff = "+weekDiff+" <= "+weeksBeforeAutoInactive);
+            if (weeksBeforeAutoInactive != -1 && weekDiff > weeksBeforeAutoInactive) {
+                user.setActive(false);
+                user.setSetsPerWeek(0);
+                continue;
+            }
+            if (guild.getMemberById(user.getId()) == null) {
+                user.setActive(false);
+                user.setSetsPerWeek(0);
+            }
+            //System.out.println("added user "+users.get(i));
+            available.add(user);
+        }
 		sortByScoreDescend(available);
 		return available;
 	}
@@ -653,7 +652,7 @@ public class LeagueData {
 	@Nullable
 	public SetData getNewestSetBetweenUsers(long id1, long id2) {
 		List<SetData> userSets = getSetsBetweenUsers(id1, id2);
-		if (userSets.size() == 0) return null;
+		if (userSets.isEmpty()) return null;
 		int newestIndex = 0;
 		for (int i = 1; i < userSets.size(); ++i) {
 			String d1 = userSets.get(i).getCreatedDate();
@@ -1065,7 +1064,7 @@ public class LeagueData {
 					//System.out.println("user k "+userk);
 					if (hasEnoughSets(userk)) continue;
 					if (willSetRepeat(udata, userk)) continue;
- 					SetData newSet = createSet(id1, id2);
+                    SetData newSet = createSet(id1, id2);
 					if (newSet != null) {
 						//System.out.println("created set "+newSet);
 						newSets.add(newSet);
@@ -1076,7 +1075,7 @@ public class LeagueData {
 			}
 		}
 		for (SetData set : newSets) set.displaySet(pairsChannel);
-		if (newSets.size() > 0) debugChannel.sendMessage("Generated "+newSets.size()+" new Pairings!").queue();
+		if (!newSets.isEmpty()) debugChannel.sendMessage("Generated "+newSets.size()+" new Pairings!").queue();
 		else debugChannel.sendMessage("No new pairings were generated!").queue();
 	}
 	
@@ -1092,7 +1091,7 @@ public class LeagueData {
 			int diff = UtilCalendar.getWeekDiffByWeekDayFromNow(
 					recentSet.getCreatedDate(), dayOfWeek);
 			//System.out.println("recent set week diff "+diff);
-			if (diff < getWeeksUntilSetRepeat()) return true;
+            return diff < getWeeksUntilSetRepeat();
 		}
 		return false;
 	}
@@ -1102,9 +1101,8 @@ public class LeagueData {
 		if (max == -1) return true;
 		else if (max == 0) return false;
 		if (getCurrentChallengesByPlayer(id1).size() >= max) return false;
-		if (getCurrentChallengesByPlayer(id2).size() >= max) return false;
-		return true;
-	}
+        return getCurrentChallengesByPlayer(id2).size() < max;
+    }
 	
 	public boolean createChallenge(Guild guild, MessageChannelUnion debugChannel, long id1, long id2) {
 		if (!canChallenge(id1, id2)) {
@@ -1135,30 +1133,34 @@ public class LeagueData {
 		TextChannel ranksChannel = guild.getChannelById(TextChannel.class, getChannelId("ranks"));
 		List<UserData> users = getActiveUsersThisSeason();
 		LeagueData.sortByScoreDescend(users);
-		MessageCreateBuilder mcb = new MessageCreateBuilder();
-		if (finalized) mcb.addContent("__**END OF SEASON "+getSeasonId()+" RANKS "+UtilCalendar.getCurrentDateString()+"**__");
-		else mcb.addContent("__**Current Season "+getSeasonId()+" Ranks "+UtilCalendar.getCurrentDateString()+"**__");
-		int r = 0, r2 = 0, prevScore = Integer.MAX_VALUE;
-		for (UserData user : users) {
-			++r2;
-			if (user.getScore() < prevScore) r = r2;
-			if (finalized) {
-				mcb.addContent("\n");
-				if (r == 1) mcb.addContent(":video_game:");
-				else if (r == 2) mcb.addContent(":second_place:");
-				else if (r == 3) mcb.addContent(":third_place:");
-				else mcb.addContent("**"+r+")**");
-				mcb.addContent(" ");
-			} 
-			else mcb.addContent("\n**"+r+")** ");
-			mcb.addContent(getMention(user.getId())+" **"+user.getScore()+"**");
-			prevScore = user.getScore();
-		}
-		MessageCreateData mcd = mcb.build();
+        MessageCreateData mcd = createMessage(finalized, users);
 		ranksChannel.sendMessage(mcd).queue();
 	}
-	
-	public void updateRanks(Guild guild, MessageChannelUnion debugChannel) {
+
+    private @NotNull MessageCreateData createMessage(boolean finalized, List<UserData> users) {
+        MessageCreateBuilder mcb = new MessageCreateBuilder();
+        if (finalized) mcb.addContent("__**END OF SEASON "+getSeasonId()+" RANKS "+UtilCalendar.getCurrentDateString()+"**__");
+        else mcb.addContent("__**Current Season "+getSeasonId()+" Ranks "+UtilCalendar.getCurrentDateString()+"**__");
+        int r = 0, r2 = 0, prevScore = Integer.MAX_VALUE;
+        for (UserData user : users) {
+            ++r2;
+            if (user.getScore() < prevScore) r = r2;
+            if (finalized) {
+                mcb.addContent("\n");
+                if (r == 1) mcb.addContent(":video_game:");
+                else if (r == 2) mcb.addContent(":second_place:");
+                else if (r == 3) mcb.addContent(":third_place:");
+                else mcb.addContent("**"+r+")**");
+                mcb.addContent(" ");
+            }
+            else mcb.addContent("\n**"+r+")** ");
+            mcb.addContent(getMention(user.getId())+" **"+user.getScore()+"**");
+            prevScore = user.getScore();
+        }
+        return mcb.build();
+    }
+
+    public void updateRanks(Guild guild, MessageChannelUnion debugChannel) {
 		updateRanks(guild, debugChannel, false);
 	}
 	
