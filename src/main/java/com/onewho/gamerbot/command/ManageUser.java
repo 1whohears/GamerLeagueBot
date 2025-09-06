@@ -109,6 +109,26 @@ public class ManageUser extends LeagueCommand {
 				return true;
 			}
 		});
+        addSubCommand(new SubCommand("override-score") {
+            @Override
+            public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
+                long pingId = getIdFromMention(params[2]);
+                if (pingId == -1) {
+                    event.getChannel().sendMessage(Important.getError()+" "+params[2]+" is not a valid ping!").queue();
+                    return false;
+                }
+                int score;
+                try {
+                    score = Integer.parseInt(params[3]);
+                } catch (NumberFormatException e) {
+                    event.getChannel().sendMessage(Important.getError()+" "+params[3]+" is not a number!").queue();
+                    return false;
+                }
+                if (!ldata.userOverrideScore(event.getGuild(), event.getChannel(), pingId, score)) return false;
+                GlobalData.saveData();
+                return true;
+            }
+        });
 	}
 
 	@Override

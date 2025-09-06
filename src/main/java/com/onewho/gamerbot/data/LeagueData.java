@@ -854,6 +854,17 @@ public class LeagueData {
 		debugChannel.sendMessage("That player has been set to "+setsPerWeek+" Sets Per Week!").queue();
 		return true;
 	}
+
+    public boolean userOverrideScore(Guild guild, MessageChannelUnion debugChannel, long id, int score) {
+        UserData userData = getUserDataById(id);
+        if (userData == null) {
+            debugChannel.sendMessage("That player isn't in this league!").queue();
+            return false;
+        }
+        userData.setScore(score);
+        debugChannel.sendMessage("That player's score has been overridden to "+score).queue();
+        return true;
+    }
 	
 	/**
 	 * setup this league's role/channels so info can be displayed to the user
