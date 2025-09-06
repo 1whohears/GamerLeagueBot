@@ -328,6 +328,14 @@ public class LeagueData {
                 return team;
         return null;
     }
+
+    @Nullable
+    public TeamData createTeam(String name, UserData... users) {
+        if (getTeamByName(name) != null) return null;
+        TeamData team = new TeamData(name, users);
+        teams.add(team);
+        return team;
+    }
 	
 	/**
 	 * add a user to this league by their id
