@@ -8,6 +8,8 @@ import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 
+import java.util.Collection;
+
 public class UtilUsers {
 	
 	public static String userQuitLeague(Guild guild, User user, Channel channel) {
@@ -38,5 +40,11 @@ public class UtilUsers {
 		GlobalData.saveData();
 		return "I will try to give you "+sets+" pairings next week!";
 	}
+
+    public static int getAverageScore(Collection<UserData> users) {
+        int total = 0;
+        for (UserData u : users) total += u.getScore();
+        return total / users.size();
+    }
 	
 }

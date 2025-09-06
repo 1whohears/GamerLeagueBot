@@ -6,12 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.onewho.gamerbot.BotMain;
-import com.onewho.gamerbot.data.GlobalData;
-import com.onewho.gamerbot.data.GuildData;
-import com.onewho.gamerbot.data.Important;
-import com.onewho.gamerbot.data.LeagueData;
-import com.onewho.gamerbot.data.ReportResult;
-import com.onewho.gamerbot.data.SetData;
+import com.onewho.gamerbot.data.*;
 import com.onewho.gamerbot.util.UtilCalendar;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -115,8 +110,8 @@ public class Report extends LeagueCommand {
 		EmbedBuilder jleb = new EmbedBuilder();
 		jleb.setDescription(getMention(opponentId)+" Verify Report?"
 				+ "\n**SET ID ["+set.getId()+"]**"
-				+ "\n**"+set.getP1score()+"** "+getMention(set.getP1Id())
-				+ "\n**"+set.getP2score()+"** "+getMention(set.getP2Id()));
+				+ "\n**"+set.getP1score()+"** "+getMention(set.getContestant1())
+				+ "\n**"+set.getP2score()+"** "+getMention(set.getContestant2()));
 		jleb.setColor(getRandomColor());
 		return jleb.build();
 	}
@@ -138,5 +133,11 @@ public class Report extends LeagueCommand {
 	private String getMention(long id) {
 		return "<@"+id+">";
 	}
+
+    public static String getMention(Contestant c) {
+        String m = "";
+        for (Long id : c.getUserIds()) m += "<@"+id+">";
+        return m;
+    }
 
 }

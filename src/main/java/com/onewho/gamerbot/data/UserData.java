@@ -1,11 +1,13 @@
 package com.onewho.gamerbot.data;
 
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import com.google.gson.JsonObject;
 
-public class UserData {
+public class UserData implements Contestant {
 	
 	private final long id;
 	private boolean active = false;
@@ -36,6 +38,7 @@ public class UserData {
 		data.addProperty("last active", lastActive);
 		data.addProperty("score", score);
 		data.addProperty("locked", locked);
+        data.addProperty("type", getType().name());
 		return data;
 	}
 	
@@ -46,12 +49,32 @@ public class UserData {
 		return data;
 	}
 	
-	protected void readBackup(JsonObject data) {
+	public void readBackup(JsonObject data) {
 		if (data.get("id") == null || data.get("id").getAsLong() != id) return;
 		setScore(ParseData.getInt(data, "score", score));
 	}
-	
-	/**
+
+    @Override
+    public boolean isIndividual() {
+        return true;
+    }
+
+    @Override
+    public boolean isTeam() {
+        return false;
+    }
+
+    @Override
+    public boolean hasUserId(long id) {
+        return id == getId();
+    }
+
+    @Override
+    public Collection<Long> getUserIds() {
+        return List.of(id);
+    }
+
+    /**
 	 * @return this user's id
 	 */
 	public long getId() {
@@ -109,7 +132,12 @@ public class UserData {
 		return id+"/"+active+"/"+setsPerWeek+"/"+score;
 	}
 
-	/**
+    @Override
+    public Type getType() {
+        return Type.INDIVIDUAL;
+    }
+
+    /**
 	 * @return the score of this user
 	 */
 	public int getScore() {
@@ -122,6 +150,10 @@ public class UserData {
 	public void setScore(int score) {
 		this.score = score;
 	}
+
+    public void changeScore(int change) {
+        setScore(getScore() + change);
+    }
 	
 	public boolean isLocked() {
 		return locked;

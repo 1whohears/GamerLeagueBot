@@ -71,14 +71,14 @@ public class ReportAdmin extends LeagueCommand {
 			event.getChannel().sendMessage(Important.getError()+" The set with id "+id+" does not exist!").queue();
 			return false;
 		}
-		String currentData = UtilCalendar.getCurrentDateString();
-		ReportResult result = set.reportAdmin(pingId1, pingId2, s1, s2, currentData);
+		String currentDate = UtilCalendar.getCurrentDateString();
+		ReportResult result = set.reportAdmin(pingId1, pingId2, s1, s2, currentDate);
 		if (result == ReportResult.IDsDontMatch) {
 			event.getChannel().sendMessage(Important.getError()+" This set id does not have those players!").queue();
 			return false;
 		} else if (result == ReportResult.SetVerified) {
-			ldata.getUserDataById(set.getP1Id()).setLastActive(currentData);
-			ldata.getUserDataById(set.getP2Id()).setLastActive(currentData);
+			set.getContestant1().setLastActive(currentDate);
+            set.getContestant2().setLastActive(currentDate);
 			event.getChannel().sendMessage("Admin Override Successful!").queue();
 		} else if (result == ReportResult.AlreadyVerified) {
 			event.getChannel().sendMessage("This set has already been processed"

@@ -5,11 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import javax.annotation.Nullable;
 
@@ -20,14 +16,7 @@ import com.onewho.gamerbot.util.UtilKClosest;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Category;
-import net.dv8tion.jda.api.entities.Channel;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -57,8 +46,9 @@ public class LeagueData {
 	public boolean autoGenPairs = false;
 	public boolean autoUpdateRanks = false;
 	
-	private final List<UserData> users = new ArrayList<UserData>();
-	private final List<SetData> sets = new ArrayList<SetData>();
+	private final List<UserData> users = new ArrayList<>();
+	private final List<SetData> sets = new ArrayList<>();
+    private final List<TeamData> teams = new ArrayList<>();
 	
 	private long leagueRoleId = -1;
 	private long toRoleId = -1;
@@ -91,7 +81,10 @@ public class LeagueData {
 		for (int i = 0; i < us.size(); ++i) users.add(new UserData(us.get(i).getAsJsonObject()));
 		sets.clear();
 		JsonArray ss = ParseData.getJsonArray(data, "sets");
-		for (int i = 0; i < ss.size(); ++i) sets.add(new SetData(ss.get(i).getAsJsonObject()));
+		for (int i = 0; i < ss.size(); ++i) sets.add(new SetData(this, ss.get(i).getAsJsonObject()));
+        teams.clear();
+        JsonArray ts = ParseData.getJsonArray(data, "teams");
+        for (int i = 0; i < ts.size(); ++i) teams.add(new TeamData(this, ts.get(i).getAsJsonObject()));
 		
 		leagueRoleId = ParseData.getLong(data, "league role id", leagueRoleId);
 		toRoleId = ParseData.getLong(data, "to role id", toRoleId);
@@ -129,6 +122,7 @@ public class LeagueData {
 		data.addProperty("auto update ranks", autoUpdateRanks);
 		data.add("users", getUsersJson());
 		data.add("sets", getSetsJson());
+        data.add("teams", getTeamsJson());
 		data.addProperty("league role id", leagueRoleId);
 		data.addProperty("to role id", toRoleId);
 		data.addProperty("league category id", leagueCategoryId);
@@ -154,12 +148,12 @@ public class LeagueData {
 		}
 		sets.clear();
 		JsonArray ss = ParseData.getJsonArray(backup, "sets");
-		for (int i = 0; i < ss.size(); ++i) sets.add(new SetData(ss.get(i).getAsJsonObject()));
+		for (int i = 0; i < ss.size(); ++i) sets.add(new SetData(this, ss.get(i).getAsJsonObject()));
 	}
 	
 	private JsonArray getUsersJson() {
 		JsonArray us = new JsonArray();
-		for (UserData u : users) us.add(u.getJson());
+		for (Contestant u : users) us.add(u.getJson());
 		return us;
 	}
 	
@@ -168,6 +162,12 @@ public class LeagueData {
 		for (SetData s : sets) ss.add(s.getJson());
 		return ss;
 	}
+
+    private JsonArray getTeamsJson() {
+        JsonArray ts = new JsonArray();
+        for (TeamData t : teams) ts.add(t.getJson());
+        return ts;
+    }
 	
 	/**
 	 * @return data needed to recover the current set and user data
@@ -191,7 +191,7 @@ public class LeagueData {
 	
 	private JsonArray getUsersBackupJson() {
 		JsonArray us = new JsonArray();
-		for (UserData u : users) us.add(u.getBackupJson());
+		for (Contestant u : users) us.add(u.getBackupJson());
 		return us;
 	}
 	
@@ -304,9 +304,30 @@ public class LeagueData {
 	 * @return a user's league data or null if that user isn't in this league
 	 */
 	public UserData getUserDataById(long id) {
-        for (UserData user : users) if (user.getId() == id) return user;
+        for (UserData user : users)
+            if (user.getId() == id)
+                return user;
 		return null;
 	}
+
+    @Nullable
+    public Contestant getContestantById(long id) {
+        for (Contestant user : users)
+            if (user.getId() == id)
+                return user;
+        for (Contestant team : teams)
+            if (team.getId() == id)
+                return team;
+        return null;
+    }
+
+    @Nullable
+    public TeamData getTeamByName(String name) {
+        for (TeamData team : teams)
+            if (team.getName().equals(name))
+                return team;
+        return null;
+    }
 	
 	/**
 	 * add a user to this league by their id
@@ -514,11 +535,11 @@ public class LeagueData {
 	 * resets all user scores to the default score and makes all users inactive
 	 */
 	private void resetAllUsers() {
-		for (UserData ud : users) {
+		for (Contestant ud : users) {
 			ud.setScore(getDefaultScore());
 		}
 	}
-	
+
 	/**
 	 * @return list of all users league data 
 	 */
@@ -670,12 +691,27 @@ public class LeagueData {
 	@Nullable
 	public SetData createSet(long id1, long id2) {
 		if (id1 == id2) return null;
-		if (getUserDataById(id1) == null) return null;
-		if (getUserDataById(id2) == null) return null;
-		SetData set = new SetData(getNewSetId(), id1, id2, UtilCalendar.getCurrentDateString());
+        UserData ud1 = getUserDataById(id1);
+        UserData ud2 = getUserDataById(id2);
+		if (ud1 == null) return null;
+		if (ud2 == null) return null;
+		SetData set = new SetData(getNewSetId(), ud1, ud2, UtilCalendar.getCurrentDateString());
 		sets.add(set);
 		return set;
 	}
+
+    @Nullable
+    public SetData createTeamSet(@NotNull String team1Name, @NotNull String team2Name) {
+        if (team1Name.equals(team2Name)) return null;
+        TeamData team1 = getTeamByName(team1Name);
+        TeamData team2 = getTeamByName(team2Name);
+        if (team1 == null) return null;
+        if (team2 == null) return null;
+        if (team1.hasOverlappingMembers(team2)) return null;
+        SetData set = new SetData(getNewSetId(), team1, team2, UtilCalendar.getCurrentDateString());
+        sets.add(set);
+        return set;
+    }
 	
 	private int getNewSetId() {
 		int maxId = -1;

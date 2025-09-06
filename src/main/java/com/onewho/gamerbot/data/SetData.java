@@ -12,9 +12,9 @@ import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 public class SetData {
 	
-	private int id = -1;
-	private long p1Id = -1;
-	private long p2Id = -1;
+	private final int id;
+    private final Contestant c1;
+    private final Contestant c2;
 	private int p1s = 0;
 	private int p2s = 0;
 	private boolean p1c = false;
@@ -25,10 +25,12 @@ public class SetData {
 	private boolean processed = false;
 	private boolean challenge = false;
 	
-	protected SetData(JsonObject data) {
-		id = ParseData.getInt(data, "id", id);
-		p1Id = ParseData.getLong(data, "p1Id", p1Id);
-		p2Id = ParseData.getLong(data, "p2Id", p2Id);
+	protected SetData(LeagueData league, JsonObject data) {
+		this.id = ParseData.getInt(data, "id", -1);
+		long p1Id = ParseData.getLong(data, "p1Id", -1);
+        c1 = league.getContestantById(p1Id);
+		long p2Id = ParseData.getLong(data, "p2Id", -1);
+        c2 = league.getContestantById(p2Id);
 		p1s = ParseData.getInt(data, "p1s", p1s);
 		p2s = ParseData.getInt(data, "p2s", p2s);
 		p1c = ParseData.getBoolean(data, "p1c", false);
@@ -40,18 +42,18 @@ public class SetData {
 		challenge = ParseData.getBoolean(data, "challenge", false);
 	}
 	
-	protected SetData(int id, long p1Id, long p2Id, String created) {
+	protected SetData(int id, Contestant c1, Contestant c2, String created) {
 		this.id = id;
-		this.p1Id = p1Id;
-		this.p2Id = p2Id;
+		this.c1 = c1;
+        this.c2 = c2;
 		this.created = created;
 	}
 	
 	public JsonObject getJson() {
 		JsonObject data = new JsonObject();
 		data.addProperty("id", id);
-		data.addProperty("p1Id", p1Id);
-		data.addProperty("p2Id", p2Id);
+		data.addProperty("p1Id", c1.getId());
+		data.addProperty("p2Id", c2.getId());
 		data.addProperty("p1s", p1s);
 		data.addProperty("p2s", p2s);
 		data.addProperty("p1c", p1c);
@@ -72,17 +74,17 @@ public class SetData {
 	}
 	
 	/**
-	 * @return player 1 user id
+	 * @return contestant 1
 	 */
-	public long getP1Id() {
-		return p1Id;
+	public Contestant getContestant1() {
+		return c1;
 	}
 	
 	/**
-	 * @return player 2 user id
+	 * @return contestant 2
 	 */
-	public long getP2Id() {
-		return p2Id;
+	public Contestant getContestant2() {
+		return c2;
 	}
 	
 	public int getP1score() {
@@ -185,7 +187,7 @@ public class SetData {
 		if (isComplete()) return ReportResult.AlreadyVerified;
 		System.out.println("reporter id = "+reporterId);
 		System.out.println("opponent id = "+opponentId);
-		if (reporterId == p1Id && opponentId == p2Id) {
+		if (c1.hasUserId(reporterId) && c2.hasUserId(opponentId)) {
 			if (p2c) {
 				if (p1s == reporterScore && p2s == opponentScore) {
 					p1c = true;
@@ -198,7 +200,7 @@ public class SetData {
 				p1c = true;
 				return ReportResult.WaitingForOpponent;
 			}
-		} else if (reporterId == p2Id && opponentId == p1Id) {
+		} else if (c2.hasUserId(reporterId) && c1.hasUserId(opponentId)) {
 			if (p1c) {
 				if (p2s == reporterScore && p1s == opponentScore) {
 					p2c = true;
@@ -225,13 +227,13 @@ public class SetData {
 	 */
 	public ReportResult reportAdmin(long id1, long id2, int score1, int score2, String date) {
 		if (isProcessed()) return ReportResult.AlreadyVerified;
-		if (id1 == p1Id && id2 == p2Id) {
+		if (c1.hasUserId(id1) && c2.hasUserId(id2)) {
 			p1c = p2c = true;
 			completed = date;
 			p1s = score1;
 			p2s = score2;
 			return ReportResult.SetVerified;
-		} else if (id1 == p2Id && id2 == p1Id) {
+		} else if (c1.hasUserId(id2) && c2.hasUserId(id1)) {
 			p1c = p2c = true;
 			completed = date;
 			p1s = score2;
@@ -242,7 +244,7 @@ public class SetData {
 	
 	@Override
 	public String toString() {
-		return id+"/"+p1Id+":"+p1s+"/"+p2Id+":"+p2s+"/"+created+"/"+completed;
+		return id+"/"+c1.getId()+":"+p1s+"/"+c2.getId()+":"+p2s+"/"+created+"/"+completed;
 	}
 	
 	/**
@@ -250,7 +252,7 @@ public class SetData {
 	 * @return is this user id the same as p1Id or p2Id
 	 */
 	public boolean hasPlayer(long id) {
-		return id == p1Id || id == p2Id; 
+		return c1.hasUserId(id) || c2.hasUserId(id);
 	}
 	
 	/**
@@ -272,14 +274,32 @@ public class SetData {
 	public void displaySet(TextChannel channel) {
 		String p1Name = "not_in_server", p2Name = "not_in_server", date = "";
 		if (isComplete()) {
-			Member m1 = channel.getGuild().getMemberById(getP1Id());
-			Member m2 = channel.getGuild().getMemberById(getP2Id());
-			if (m1 != null) p1Name = "*"+m1.getEffectiveName()+"*";
-			if (m2 != null) p2Name = "*"+m2.getEffectiveName()+"*";
+            boolean validC1 = false, validC2 = false;
+            for (Long id : c1.getUserIds()) {
+                Member m = channel.getGuild().getMemberById(id);
+                if (m != null) {
+                    if (!validC1) {
+                        p1Name = "";
+                        validC1 = true;
+                    }
+                    p1Name += "*"+m.getEffectiveName()+"*";
+                }
+            }
+            for (Long id : c2.getUserIds()) {
+                Member m = channel.getGuild().getMemberById(id);
+                if (m != null) {
+                    if (!validC2) {
+                        p2Name = "";
+                        validC2 = true;
+                    }
+                    p2Name += "*"+m.getEffectiveName()+"*";
+                }
+            }
 			date = completed;
 		} else {
-			p1Name = "<@"+getP1Id()+">";
-			p2Name = "<@"+getP2Id()+">";
+            p1Name = ""; p2Name = "";
+            for (Long id : c1.getUserIds()) p1Name += "<@"+id+">";
+            for (Long id : c2.getUserIds()) p2Name += "<@"+id+">";
 			date = created;
 		}
 		String challengeMark = "";
@@ -327,11 +347,9 @@ public class SetData {
 	 */
 	public void processSet(LeagueData league) {
 		if (!isComplete() || processed) return;
-		UserData p1 = league.getUserDataById(p1Id);
-		UserData p2 = league.getUserDataById(p2Id);
-		int change = (int)getChangeInScore(p1s, p2s, p1.getScore(), p2.getScore(), league.getK());
-		p1.setScore(p1.getScore() + change);
-		p2.setScore(p2.getScore() - change);
+		int change = (int)getChangeInScore(p1s, p2s, c1.getScore(), c2.getScore(), league.getK());
+		c1.changeScore(change);
+		c2.changeScore(-change);
 		processed = true;
 	}
 	

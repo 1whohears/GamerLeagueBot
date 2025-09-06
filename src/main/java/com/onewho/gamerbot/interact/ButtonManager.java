@@ -1,10 +1,6 @@
 package com.onewho.gamerbot.interact;
 
-import com.onewho.gamerbot.data.GlobalData;
-import com.onewho.gamerbot.data.GuildData;
-import com.onewho.gamerbot.data.LeagueData;
-import com.onewho.gamerbot.data.ReportResult;
-import com.onewho.gamerbot.data.SetData;
+import com.onewho.gamerbot.data.*;
 import com.onewho.gamerbot.util.UtilCalendar;
 import com.onewho.gamerbot.util.UtilUsers;
 
@@ -61,30 +57,35 @@ public class ButtonManager {
 		LeagueData ldata = gdata.getLeagueByChannel(event.getChannel());
 		if (ldata == null) return;
 		SetData set = ldata.getSetDataById(setId);
-		long id1 = -1, id2 = -1;
+		Contestant c1, c2;
 		int s1 = -1, s2 = -1;
 		if (set.isP1confirm()) {
-			id1 = set.getP2Id();
-			id2 = set.getP1Id();
+			c1 = set.getContestant2();
+			c2 = set.getContestant1();
 			s1 = set.getP2score();
 			s2 = set.getP1score();
 		} else if (set.isP2confirm()) {
-			id2 = set.getP2Id();
-			id1 = set.getP1Id();
+			c2 = set.getContestant2();
+			c1 = set.getContestant1();
 			s2 = set.getP2score();
 			s1 = set.getP1score();
-		}
-		if (id1 != event.getUser().getIdLong()) {
+		} else {
+            event.reply("Neither Contestant 1 or 2 have " +
+                    "submitted results to verify!").setEphemeral(true).queue();
+            return;
+        }
+        long presserId = event.getUser().getIdLong();
+		if (!c1.hasUserId(presserId)) {
 			event.reply("You can't press this button!").setEphemeral(true).queue();
 			return;
 		}
 		String currentDate = UtilCalendar.getCurrentDateString();
-		ReportResult result = set.report(id1, id2, s1, s2, currentDate);
+		ReportResult result = set.report(presserId, c2.getUserId(), s1, s2, currentDate);
 		if (result == ReportResult.AlreadyVerified) {
 			event.reply("You already verified this set!").setEphemeral(true).queue();
 			return;
 		}
-		ldata.getUserDataById(id1).setLastActive(currentDate);
+		ldata.getUserDataById(presserId).setLastActive(currentDate);
 		event.reply("The set has been verified!").queue();
 		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, 
 				GlobalData.getGuildDataById(guild.getIdLong())
@@ -105,10 +106,16 @@ public class ButtonManager {
 					+ " If you still dispute the results then contact an admin!").setEphemeral(true).queue();
 			return;
 		}
-		long id1 = -1;
-		if (set.isP1confirm()) id1 = set.getP2Id();
-		else if (set.isP2confirm()) id1 = set.getP1Id();
-		if (id1 != event.getUser().getIdLong()) {
+        Contestant c;
+		if (set.isP1confirm()) c = set.getContestant2();
+		else if (set.isP2confirm()) c = set.getContestant1();
+        else {
+            event.reply("Neither Contestant 1 or 2 have " +
+                    "submitted results to dispute!").setEphemeral(true).queue();
+            return;
+        }
+        long presserId = event.getUser().getIdLong();
+		if (!c.hasUserId(presserId)) {
 			event.reply("You can't press this button!").setEphemeral(true).queue();
 			return;
 		}
