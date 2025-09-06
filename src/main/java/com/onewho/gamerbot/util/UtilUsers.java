@@ -8,7 +8,11 @@ import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class UtilUsers {
 	
@@ -45,6 +49,56 @@ public class UtilUsers {
         int total = 0;
         for (UserData u : users) total += u.getScore();
         return total / users.size();
+    }
+
+    public record Result(UserData[] team1, UserData[] team2) { }
+
+    private static class ResultHolder {
+        Result best = null;
+        double bestDiff = Double.MAX_VALUE;
+    }
+
+    public static Result balanceTeams(UserData[] allUsers) {
+        int n = allUsers.length;
+        int teamSize1 = n / 2;
+        int teamSize2 = n - teamSize1;
+        int totalScore = Arrays.stream(allUsers).mapToInt(UserData::getScore).sum();
+
+        final ResultHolder holder = new ResultHolder();
+
+        List<UserData> chosen = new ArrayList<>();
+        backtrack(allUsers, 0, teamSize1, chosen, totalScore, teamSize1, teamSize2,
+                (team1) -> {
+                    List<UserData> team2 = new ArrayList<>(Arrays.asList(allUsers));
+                    team2.removeAll(team1);
+
+                    double avg1 = team1.stream().mapToInt(UserData::getScore).average().orElse(0);
+                    double avg2 = team2.stream().mapToInt(UserData::getScore).average().orElse(0);
+
+                    double diff = Math.abs(avg1 - avg2);
+                    if (diff < holder.bestDiff) {
+                        holder.bestDiff = diff;
+                        holder.best = new Result(team1.toArray(new UserData[0]), team2.toArray(new UserData[0]));
+                    }
+                });
+
+        return holder.best;
+    }
+
+    private static void backtrack(UserData[] allUsers, int start, int remaining,
+                                  List<UserData> chosen, int totalScore,
+                                  int teamSize1, int teamSize2,
+                                  Consumer<List<UserData>> consumer) {
+        if (remaining == 0) {
+            consumer.accept(new ArrayList<>(chosen));
+            return;
+        }
+        for (int i = start; i <= allUsers.length - remaining; i++) {
+            chosen.add(allUsers[i]);
+            backtrack(allUsers, i + 1, remaining - 1, chosen, totalScore,
+                    teamSize1, teamSize2, consumer);
+            chosen.remove(chosen.size() - 1);
+        }
     }
 	
 }

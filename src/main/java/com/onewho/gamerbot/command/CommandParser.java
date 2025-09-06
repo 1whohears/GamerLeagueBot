@@ -53,6 +53,7 @@ public class CommandParser {
 		commands.add(new NewSeason());
         commands.add(new CreateTeam());
         commands.add(new CreateTeamSet());
+        commands.add(new CreateRandomTeamSet());
 	}
 	
 	private static List<ICommand> userCommands;
