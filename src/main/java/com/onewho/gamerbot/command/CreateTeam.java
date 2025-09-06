@@ -53,7 +53,7 @@ public class CreateTeam extends LeagueCommand {
 
     @Override
     public String getHelp() {
-        return "`"+ BotMain.PREFIX+getCommandString()+" [team_name] [member_ping] [member_ping]...`";
+        return "`"+BotMain.PREFIX+getCommandString()+" [team_name] [member_ping] [member_ping]...`";
     }
 
     @Override
