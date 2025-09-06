@@ -26,3 +26,4 @@ data.json
 token.json
 *.bak
 important.json
+/.idea/
