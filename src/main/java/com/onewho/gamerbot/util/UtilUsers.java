@@ -72,10 +72,10 @@ public class UtilUsers {
                     List<UserData> team2 = new ArrayList<>(Arrays.asList(allUsers));
                     team2.removeAll(team1);
 
-                    double avg1 = team1.stream().mapToInt(UserData::getScore).average().orElse(0);
-                    double avg2 = team2.stream().mapToInt(UserData::getScore).average().orElse(0);
+                    double sum1 = team1.stream().mapToInt(UserData::getScore).sum();
+                    double sum2 = team2.stream().mapToInt(UserData::getScore).sum();
 
-                    double diff = Math.abs(avg1 - avg2);
+                    double diff = Math.abs(sum1 - sum2);
                     if (diff < holder.bestDiff) {
                         holder.bestDiff = diff;
                         holder.best = new Result(team1.toArray(new UserData[0]), team2.toArray(new UserData[0]));
