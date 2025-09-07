@@ -27,6 +27,10 @@ public interface Contestant {
         return getId();
     }
 
+    default String getNamePrefix() {
+        return "";
+    }
+
     static Contestant read(LeagueData league, JsonObject json) {
         String type = ParseData.getString(json, "type", Type.INDIVIDUAL.name());
         if (type.equals(Type.TEAM.name())) return new TeamData(league, json);

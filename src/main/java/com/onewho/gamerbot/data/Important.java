@@ -3,6 +3,7 @@ package com.onewho.gamerbot.data;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Random;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonIOException;
@@ -11,8 +12,10 @@ import com.google.gson.JsonSyntaxException;
 
 public class Important {
 
+    public static final Random RANDOM = new Random();
+
 	public static String getError() {
-		return errors[(int)(Math.random()*errors.length)];
+		return errors[(int)(RANDOM.nextDouble()*errors.length)];
 	}
 	
 	public static String getError(String msg) {

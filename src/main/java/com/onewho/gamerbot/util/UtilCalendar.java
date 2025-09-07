@@ -68,6 +68,7 @@ public class UtilCalendar {
 		try {
 			return LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 		} catch (DateTimeParseException e) {
+            System.out.println("ERROR: COULD NOT PARSE DATE "+dateString);
 			return null;
 		}
 	}

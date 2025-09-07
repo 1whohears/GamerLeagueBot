@@ -27,14 +27,8 @@ public class CreateRandomTeamSet extends LeagueCommand {
             return false;
         }
         UserData[] allUsers = new UserData[params.length-3];
-        for (int i = 3, j = 0; i < allUsers.length; ++i, ++j) {
-            int id;
-            try {
-                id = Integer.parseInt(params[i]);
-            } catch (NumberFormatException e) {
-                event.getChannel().sendMessage(Important.getError()+" "+params[i]+" is not a number!").queue();
-                return false;
-            }
+        for (int i = 3, j = 0; i < params.length; ++i, ++j) {
+            long id = getIdFromMention(params[i]);
             allUsers[j] = ldata.getUserDataById(id);
             if (allUsers[j] == null) {
                 event.getChannel().sendMessage(Important.getError()+" "+params[i]+" is not in this league!").queue();
