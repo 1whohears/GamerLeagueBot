@@ -279,27 +279,27 @@ public class SetData {
                 Member m = channel.getGuild().getMemberById(id);
                 if (m != null) {
                     if (!validC1) {
-                        p1Name = "";
+                        p1Name = c1.getNamePrefix()+" ";
                         validC1 = true;
                     }
-                    p1Name += "*"+m.getEffectiveName()+"*";
+                    p1Name += "*"+m.getEffectiveName()+"* ";
                 }
             }
             for (Long id : c2.getUserIds()) {
                 Member m = channel.getGuild().getMemberById(id);
                 if (m != null) {
                     if (!validC2) {
-                        p2Name = "";
+                        p2Name = c2.getNamePrefix()+" ";
                         validC2 = true;
                     }
-                    p2Name += "*"+m.getEffectiveName()+"*";
+                    p2Name += "*"+m.getEffectiveName()+"* ";
                 }
             }
 			date = completed;
 		} else {
-            p1Name = ""; p2Name = "";
-            for (Long id : c1.getUserIds()) p1Name += "<@"+id+">";
-            for (Long id : c2.getUserIds()) p2Name += "<@"+id+">";
+            p1Name = c1.getNamePrefix()+" "; p2Name = c2.getNamePrefix()+" ";
+            for (Long id : c1.getUserIds()) p1Name += "<@"+id+"> ";
+            for (Long id : c2.getUserIds()) p2Name += "<@"+id+"> ";
 			date = created;
 		}
 		String challengeMark = "";
@@ -307,9 +307,9 @@ public class SetData {
 		MessageCreateData mcd = new MessageCreateBuilder()
 				.addContent("__**ID:"+getId()+challengeMark+"**__ ")
 				.addContent(p1Name)
-				.addContent(" **"+getP1score()+"** ")
+				.addContent("**"+getP1score()+"** ")
 				.addContent(p2Name)
-				.addContent(" **"+getP2score()+"** ")
+				.addContent("**"+getP2score()+"** ")
 				.addContent("__**"+getStatus()+"**__ ")
 				.addContent("__"+date+"__")
 				.build();

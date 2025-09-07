@@ -17,7 +17,7 @@ public class CommandParser {
 		if (commands == null) loadCommands();
 		String text = event.getMessage().getContentRaw();
 		if (text.length() < 2) return;
-		String[] command = text.substring(1, text.length()).split(" ");
+		String[] command = text.substring(1).trim().split("\\s+");
 		for (ICommand c : commands) {
 			if (c.getCommandString().equals(command[0])) {
 				c.runCommand(event, command);
@@ -28,7 +28,7 @@ public class CommandParser {
 	}
 	
 	public static void loadCommands() {
-		commands = new ArrayList<ICommand>();
+		commands = new ArrayList<>();
 		commands.add(new Help());
 		commands.add(new Setup());
 		commands.add(new Config());
@@ -62,7 +62,7 @@ public class CommandParser {
 	
 	public static List<ICommand> getUserCommands() {
 		if (userCommands == null) {
-			userCommands = new ArrayList<ICommand>();
+			userCommands = new ArrayList<>();
 			for (ICommand c : commands) 
 				if (!c.getNeedsTO() && !c.getNeedsAdmin()) 
 					userCommands.add(c);
@@ -72,7 +72,7 @@ public class CommandParser {
 	
 	public static List<ICommand> getTOCommands() {
 		if (toCommands == null) {
-			toCommands = new ArrayList<ICommand>();
+			toCommands = new ArrayList<>();
 			for (ICommand c : commands) 
 				if (c.getNeedsTO() && !c.getNeedsAdmin()) 
 					toCommands.add(c);
@@ -82,7 +82,7 @@ public class CommandParser {
 	
 	public static List<ICommand> getAdminCommands() {
 		if (adminCommands == null) {
-			adminCommands = new ArrayList<ICommand>();
+			adminCommands = new ArrayList<>();
 			for (ICommand c : commands) 
 				if (c.getNeedsAdmin()) 
 					adminCommands.add(c);

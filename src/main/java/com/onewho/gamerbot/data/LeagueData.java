@@ -63,6 +63,7 @@ public class LeagueData {
 	protected LeagueData(JsonObject data) {
 		name = ParseData.getString(data, "name", name);
 		seasonStart = ParseData.getString(data, "season start", UtilCalendar.getCurrentDateString());
+        if (seasonStart.isEmpty()) seasonStart = UtilCalendar.getCurrentDateString();
 		seasonEnd = ParseData.getString(data, "season end", seasonEnd);
 		seasonId = ParseData.getInt(data, "season id", seasonId);
 		
@@ -561,7 +562,7 @@ public class LeagueData {
 	 * @return all users that have completed a set this season
 	 */
 	public List<UserData> getActiveUsersThisSeason() {
-		List<UserData> active = new ArrayList<UserData>();
+		List<UserData> active = new ArrayList<>();
 		for (UserData user : users)
 			if (user.isActive() && !UtilCalendar.isOlder(user.getLastActive(), getSeasonStart())) 
 				active.add(user);

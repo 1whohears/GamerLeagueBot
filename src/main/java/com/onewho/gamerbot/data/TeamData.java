@@ -35,6 +35,7 @@ public class TeamData implements Contestant {
     public JsonObject getJson() {
         JsonObject data = new JsonObject();
         data.addProperty("id", id);
+        data.addProperty("name", name);
         JsonArray idsArray = new JsonArray();
         members.forEach((id, user) -> idsArray.add(id));
         data.add("members", idsArray);
@@ -116,5 +117,10 @@ public class TeamData implements Contestant {
             if (other.members.containsKey(id))
                 return true;
         return false;
+    }
+
+    @Override
+    public String getNamePrefix() {
+        return getName();
     }
 }
