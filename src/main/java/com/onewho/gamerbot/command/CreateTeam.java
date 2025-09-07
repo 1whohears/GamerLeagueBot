@@ -13,10 +13,8 @@ public class CreateTeam extends LeagueCommand {
             return false;
         }
         String teamName = params[1];
-        UserData[] users = new UserData[params.length-1];
-        long senderId = event.getAuthor().getIdLong();
-        users[0] = ldata.getUserDataById(senderId);
-        for (int i = 2, j = 1; i < users.length; ++i, ++j) {
+        UserData[] users = new UserData[params.length-2];
+        for (int i = 2, j = 0; i < params.length; ++i, ++j) {
             long id = getIdFromMention(params[i]);
             users[j] = ldata.getUserDataById(id);
             if (users[j] == null) {
@@ -37,12 +35,12 @@ public class CreateTeam extends LeagueCommand {
 
     @Override
     public boolean getNeedsTO() {
-        return false;
+        return true;
     }
 
     @Override
     public String getCommandString() {
-        return "create-team";
+        return "createteam";
     }
 
     @Override

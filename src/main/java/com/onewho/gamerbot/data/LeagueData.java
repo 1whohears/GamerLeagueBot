@@ -80,12 +80,12 @@ public class LeagueData {
 
 		JsonArray us = ParseData.getJsonArray(data, "users");
 		for (int i = 0; i < us.size(); ++i) users.add(new UserData(us.get(i).getAsJsonObject()));
-		sets.clear();
-		JsonArray ss = ParseData.getJsonArray(data, "sets");
-		for (int i = 0; i < ss.size(); ++i) sets.add(new SetData(this, ss.get(i).getAsJsonObject()));
         teams.clear();
         JsonArray ts = ParseData.getJsonArray(data, "teams");
         for (int i = 0; i < ts.size(); ++i) teams.add(new TeamData(this, ts.get(i).getAsJsonObject()));
+		sets.clear();
+		JsonArray ss = ParseData.getJsonArray(data, "sets");
+		for (int i = 0; i < ss.size(); ++i) sets.add(new SetData(this, ss.get(i).getAsJsonObject()));
 		
 		leagueRoleId = ParseData.getLong(data, "league role id", leagueRoleId);
 		toRoleId = ParseData.getLong(data, "to role id", toRoleId);
@@ -147,6 +147,9 @@ public class LeagueData {
 			if (user == null) user = createUser(id);
 			user.readBackup(us.get(i).getAsJsonObject());
 		}
+        teams.clear();
+        JsonArray ts = ParseData.getJsonArray(backup, "teams");
+        for (int i = 0; i < ts.size(); ++i) teams.add(new TeamData(this, ts.get(i).getAsJsonObject()));
 		sets.clear();
 		JsonArray ss = ParseData.getJsonArray(backup, "sets");
 		for (int i = 0; i < ss.size(); ++i) sets.add(new SetData(this, ss.get(i).getAsJsonObject()));
@@ -177,6 +180,7 @@ public class LeagueData {
 		JsonObject backup = new JsonObject();
 		backup.add("users", getUsersBackupJson());
 		backup.add("sets", getSetsJson());
+        backup.add("teams", getTeamsJson());
 		return backup;
 	}
 	
@@ -187,6 +191,7 @@ public class LeagueData {
 		backup.addProperty("season end", seasonEnd);
 		backup.add("users", getUsersBackupJson());
 		backup.add("sets", getSetsOldSeasonJson());
+        backup.add("teams", getTeamsJson());
 		return backup;
 	}
 	
