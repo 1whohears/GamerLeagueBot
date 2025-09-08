@@ -122,7 +122,7 @@ public class TeamData implements Contestant {
 
     @Override
     public String getNamePrefix() {
-        return getName();
+        return "__"+getName()+"__";
     }
 
     public boolean hasSameMembers(UserData... members) {
