@@ -14,18 +14,7 @@ public class CreateRandomTeamSet extends LeagueCommand {
             event.getChannel().sendMessage(Important.getError()+" DO: "+getHelp()).queue();
             return false;
         }
-        String teamName1 = params[1];
-        String teamName2 = params[2];
-        TeamData team1 = ldata.getTeamByName(teamName1);
-        if (team1 != null) {
-            event.getChannel().sendMessage(Important.getError()+" "+teamName1+" already exists!").queue();
-            return false;
-        }
-        TeamData team2 = ldata.getTeamByName(teamName2);
-        if (team2 != null) {
-            event.getChannel().sendMessage(Important.getError()+" "+teamName2+" already exists!").queue();
-            return false;
-        }
+        // create even teams
         UserData[] allUsers = new UserData[params.length-3];
         for (int i = 3, j = 0; i < params.length; ++i, ++j) {
             long id = getIdFromMention(params[i]);
@@ -36,16 +25,28 @@ public class CreateRandomTeamSet extends LeagueCommand {
             }
         }
         UtilUsers.Result result = UtilUsers.balanceTeams(allUsers);
-        team1 = ldata.createTeam(teamName1, result.team1());
-        team2 = ldata.createTeam(teamName2, result.team2());
+        // create new team names
+        String teamName1 = params[1];
+        String teamName2 = params[2];
+        TeamData team1 = getCreateTeam(teamName1, ldata, result.team1());
         if (team1 == null) {
             event.getChannel().sendMessage(Important.getError()+" "+teamName1+" team failed to create!").queue();
             return false;
         }
+        if (!team1.getName().equals(teamName1)) {
+            event.getChannel().sendMessage("Team "+teamName1+" already exists and is being renamed to "
+                    +team1.getName()).queue();
+        }
+        TeamData team2 = getCreateTeam(teamName2, ldata, result.team2());
         if (team2 == null) {
             event.getChannel().sendMessage(Important.getError()+" "+teamName2+" team failed to create!").queue();
             return false;
         }
+        if (!team2.getName().equals(teamName2)) {
+            event.getChannel().sendMessage("Team "+teamName2+" already exists and is being renamed to "
+                    +team2.getName()).queue();
+        }
+        // create set
         SetData set = ldata.createTeamSet(team1.getName(), team2.getName());
         if (set == null) {
             event.getChannel().sendMessage(Important.getError()
@@ -58,6 +59,26 @@ public class CreateRandomTeamSet extends LeagueCommand {
         set.displaySet(pairsChannel);
         GlobalData.saveData();
         return true;
+    }
+
+    private TeamData getCreateTeam(String teamName, LeagueData ldata, UserData[] members) {
+        TeamData team;
+        String baseName = teamName;
+        int suffix = 1;
+        while (true) {
+            team = ldata.getTeamByName(teamName);
+            if (team == null) return ldata.createTeam(teamName, members);
+            if (team.hasSameMembers(members)) return team;
+            int lastSpace = baseName.lastIndexOf('-');
+            if (lastSpace != -1) {
+                try {
+                    suffix = Integer.parseInt(baseName.substring(lastSpace + 1)) + 1;
+                    baseName = baseName.substring(0, lastSpace);
+                } catch (NumberFormatException ignored) {}
+            }
+            teamName = baseName + "-" + suffix;
+            suffix++;
+        }
     }
 
     @Override
