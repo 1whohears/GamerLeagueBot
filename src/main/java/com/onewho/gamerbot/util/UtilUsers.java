@@ -8,10 +8,7 @@ import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class UtilUsers {
@@ -55,7 +52,7 @@ public class UtilUsers {
 
     private static class ResultHolder {
         Result best = null;
-        double bestDiff = Double.MAX_VALUE;
+        double bestFairness = Double.MAX_VALUE;
     }
 
     public static Result balanceTeams(UserData[] allUsers) {
@@ -63,6 +60,12 @@ public class UtilUsers {
         int teamSize1 = n / 2;
         int teamSize2 = n - teamSize1;
         int totalScore = Arrays.stream(allUsers).mapToInt(UserData::getScore).sum();
+
+        List<UserData> sorted = new ArrayList<>(Arrays.asList(allUsers));
+        sorted.sort(Comparator.comparingInt(UserData::getScore).reversed());
+
+        long top1Id = sorted.get(0).getId();
+        long top2Id = sorted.get(1).getId();
 
         final ResultHolder holder = new ResultHolder();
 
@@ -74,10 +77,15 @@ public class UtilUsers {
 
                     double sum1 = team1.stream().mapToInt(UserData::getScore).sum();
                     double sum2 = team2.stream().mapToInt(UserData::getScore).sum();
+                    double fairness = Math.abs(sum1 - sum2);
 
-                    double diff = Math.abs(sum1 - sum2);
-                    if (diff < holder.bestDiff) {
-                        holder.bestDiff = diff;
+                    if (teamSize1 != teamSize2 && (teamHasBothPlayers(team1, top1Id, top2Id)
+                            || teamHasBothPlayers(team2, top1Id, top2Id))) {
+                        fairness += 1000;
+                    }
+
+                    if (fairness < holder.bestFairness) {
+                        holder.bestFairness = fairness;
                         holder.best = new Result(team1.toArray(new UserData[0]), team2.toArray(new UserData[0]));
                     }
                 });
@@ -99,6 +107,19 @@ public class UtilUsers {
                     teamSize1, teamSize2, consumer);
             chosen.remove(chosen.size() - 1);
         }
+    }
+
+    public static boolean teamHasBothPlayers(List<UserData> team, long p1Id, long p2Id) {
+        boolean hasP1 = false;
+        boolean hasP2 = false;
+
+        for (UserData user : team) {
+            long id = user.getId();
+            if (id == p1Id) hasP1 = true;
+            if (id == p2Id) hasP2 = true;
+        }
+
+        return hasP1 && hasP2;
     }
 	
 }
