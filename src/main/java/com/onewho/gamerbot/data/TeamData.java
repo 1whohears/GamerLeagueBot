@@ -3,7 +3,6 @@ package com.onewho.gamerbot.data;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.onewho.gamerbot.util.UtilUsers;
-import net.dv8tion.jda.api.entities.User;
 
 import java.util.Collection;
 import java.util.HashMap;

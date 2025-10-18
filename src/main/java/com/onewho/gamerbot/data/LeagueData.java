@@ -27,7 +27,7 @@ import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.jetbrains.annotations.NotNull;
 
-public class LeagueData {
+public class LeagueData implements Storable {
 	
 	private String name = "Gamer League";
 	private String seasonStart = "";
@@ -1118,21 +1118,21 @@ public class LeagueData {
 				if (hasEnoughSets(udata)) continue;
 				int[] ksort = LeagueData.getClosestUserIndexsByScore(udata, activeUsers);
 				//UtilDebug.printIntArray("K LOOP index sort", ksort);
-				for (int i = 0; i < ksort.length; ++i) {
-					UserData userk = activeUsers.get(ksort[i]);
-					long id1 = udata.getId(), id2 = userk.getId();
-					if (id1 == id2) continue;
-					//System.out.println("user k "+userk);
-					if (hasEnoughSets(userk)) continue;
-					if (willSetRepeat(udata, userk)) continue;
+                for (int j : ksort) {
+                    UserData userk = activeUsers.get(j);
+                    long id1 = udata.getId(), id2 = userk.getId();
+                    if (id1 == id2) continue;
+                    //System.out.println("user k "+userk);
+                    if (hasEnoughSets(userk)) continue;
+                    if (willSetRepeat(udata, userk)) continue;
                     SetData newSet = createSet(id1, id2);
-					if (newSet != null) {
-						//System.out.println("created set "+newSet);
-						newSets.add(newSet);
-						createdSet = true;
-						break;
-					}
-				}
+                    if (newSet != null) {
+                        //System.out.println("created set "+newSet);
+                        newSets.add(newSet);
+                        createdSet = true;
+                        break;
+                    }
+                }
 			}
 		}
 		for (SetData set : newSets) set.displaySet(pairsChannel);

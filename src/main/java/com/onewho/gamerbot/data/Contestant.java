@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 
 import java.util.Collection;
 
-public interface Contestant {
+public interface Contestant extends Storable {
     enum Type {
         INDIVIDUAL,
         TEAM
@@ -14,9 +14,6 @@ public interface Contestant {
     void changeScore(int change);
     void setScore(int score);
     long getId();
-    JsonObject getJson();
-    JsonObject getBackupJson();
-    void readBackup(JsonObject data);
     boolean isIndividual();
     boolean isTeam();
     boolean hasUserId(long id);
