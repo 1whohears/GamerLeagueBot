@@ -88,7 +88,7 @@ public class CreateRandomTeamSet extends LeagueCommand {
 
     @Override
     public String getCommandString() {
-        return "create-random-team-set";
+        return "createrandomteamset";
     }
 
     @Override

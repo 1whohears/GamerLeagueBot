@@ -46,7 +46,7 @@ public class CreateTeamSet extends LeagueCommand {
 
     @Override
     public String getCommandString() {
-        return "create-team-set";
+        return "createteamset";
     }
 
     @Override
