@@ -1,14 +1,11 @@
 package com.onewho.gamerbot.data;
 
-import java.io.IOException;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Random;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 
 public class Important {
 
@@ -24,12 +21,17 @@ public class Important {
 	
 	private static String[] errors = { "ERROR!" };
 	
-	public static void load() throws JsonSyntaxException, JsonIOException, IOException {
-		JsonObject jsonO = GlobalData.getGson().fromJson(Files.newBufferedReader(Paths.get("important.json")), JsonObject.class);
-		if (jsonO.get("insults") == null) return;
-		JsonArray json = jsonO.get("insults").getAsJsonArray();
-		errors = new String[json.size()];
-		for (int i = 0; i < json.size(); ++i) errors[i] = json.get(i).getAsString();
+	public static void load() {
+        try {
+            JsonObject jsonO = GlobalData.getGson().fromJson(Files.newBufferedReader(Paths.get("important.json")), JsonObject.class);
+            if (jsonO.get("insults") == null) return;
+            JsonArray json = jsonO.get("insults").getAsJsonArray();
+            errors = new String[json.size()];
+            for (int i = 0; i < json.size(); ++i) errors[i] = json.get(i).getAsString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            errors = new String[] {"ERROR!"};
+        }
 	}
 	
 }
