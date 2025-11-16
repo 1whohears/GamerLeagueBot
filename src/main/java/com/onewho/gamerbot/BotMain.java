@@ -21,22 +21,27 @@ public class BotMain {
 	public static char PREFIX = '$';
 	
 	public static void main(String [] arg) {
-		try {
-			Important.load();
-			Scheduler.init();
-			jda = JDABuilder.createDefault(TokenReader.getJDAToken(), 
-					GatewayIntent.GUILD_MEMBERS, 
-					GatewayIntent.GUILD_MESSAGES,
-					GatewayIntent.GUILD_EMOJIS_AND_STICKERS,
-					GatewayIntent.MESSAGE_CONTENT)
-					.setMemberCachePolicy(MemberCachePolicy.ALL)
-					.setChunkingFilter(ChunkingFilter.ALL)
-					.build();
-			jda.addEventListener(new EventListener());
-		} catch (LoginException | IOException e) {
-			e.printStackTrace();
-		}
-		
+		init();
 	}
+
+    public static boolean init() {
+        try {
+            Important.load();
+            Scheduler.init();
+            jda = JDABuilder.createDefault(TokenReader.getJDAToken(),
+                            GatewayIntent.GUILD_MEMBERS,
+                            GatewayIntent.GUILD_MESSAGES,
+                            GatewayIntent.GUILD_EMOJIS_AND_STICKERS,
+                            GatewayIntent.MESSAGE_CONTENT)
+                    .setMemberCachePolicy(MemberCachePolicy.ALL)
+                    .setChunkingFilter(ChunkingFilter.ALL)
+                    .build();
+            jda.addEventListener(new EventListener());
+            return true;
+        } catch (LoginException | IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 	
 }
