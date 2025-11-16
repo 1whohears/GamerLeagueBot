@@ -19,6 +19,7 @@ public interface Contestant extends Storable {
     boolean hasUserId(long id);
     Collection<Long> getUserIds();
     void setLastActive(String date);
+    String getTeamName();
 
     default long getUserId() {
         return getId();

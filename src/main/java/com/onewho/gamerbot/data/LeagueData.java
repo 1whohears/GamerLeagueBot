@@ -49,6 +49,7 @@ public class LeagueData implements Storable {
 	private final List<UserData> users = new ArrayList<>();
 	private final List<SetData> sets = new ArrayList<>();
     private final List<TeamData> teams = new ArrayList<>();
+    private final List<QueueData> queues = new ArrayList<>();
 	
 	private long leagueRoleId = -1;
 	private long toRoleId = -1;
@@ -124,6 +125,7 @@ public class LeagueData implements Storable {
 		data.add("users", getUsersJson());
 		data.add("sets", getSetsJson());
         data.add("teams", getTeamsJson());
+        data.add("queues", getQueuesJson());
 		data.addProperty("league role id", leagueRoleId);
 		data.addProperty("to role id", toRoleId);
 		data.addProperty("league category id", leagueCategoryId);
@@ -153,6 +155,9 @@ public class LeagueData implements Storable {
 		sets.clear();
 		JsonArray ss = ParseData.getJsonArray(backup, "sets");
 		for (int i = 0; i < ss.size(); ++i) sets.add(new SetData(this, ss.get(i).getAsJsonObject()));
+        queues.clear();
+        JsonArray qs = ParseData.getJsonArray(backup, "queues");
+        for (int i = 0; i < qs.size(); ++i) queues.add(new QueueData(qs.get(i).getAsJsonObject()));
 	}
 	
 	private JsonArray getUsersJson() {
@@ -172,6 +177,12 @@ public class LeagueData implements Storable {
         for (TeamData t : teams) ts.add(t.getJson());
         return ts;
     }
+
+    private JsonArray getQueuesJson() {
+        JsonArray qs = new JsonArray();
+        for (QueueData q : queues) qs.add(q.getJson());
+        return qs;
+    }
 	
 	/**
 	 * @return data needed to recover the current set and user data
@@ -181,6 +192,7 @@ public class LeagueData implements Storable {
 		backup.add("users", getUsersBackupJson());
 		backup.add("sets", getSetsJson());
         backup.add("teams", getTeamsJson());
+        backup.add("queues", getQueuesJson());
 		return backup;
 	}
 	
@@ -192,6 +204,7 @@ public class LeagueData implements Storable {
 		backup.add("users", getUsersBackupJson());
 		backup.add("sets", getSetsOldSeasonJson());
         backup.add("teams", getTeamsJson());
+        backup.add("queues", getQueuesJson());
 		return backup;
 	}
 	
@@ -304,11 +317,32 @@ public class LeagueData implements Storable {
 		challengesPerWeek = ch;
 		return challengesPerWeek;
 	}
+
+    @Nullable
+    public QueueData getQueueById(int id) {
+        for (QueueData queue : queues)
+            if (queue.getId() == id)
+                return queue;
+        return null;
+    }
+
+    public QueueData createQueue(@Nullable String closeTime) {
+        QueueData queue = new QueueData(getNewQueueId(), UtilCalendar.getCurrentDateTimeString());
+        if (closeTime != null) queue.setCloseTime(closeTime);
+        return queue;
+    }
+
+    private int getNewQueueId() {
+        int maxId = -1;
+        for (QueueData queue : queues) if (queue.getId() > maxId) maxId = queue.getId();
+        return maxId+1;
+    }
 	
 	/**
 	 * @param id User Id
 	 * @return a user's league data or null if that user isn't in this league
 	 */
+    @Nullable
 	public UserData getUserDataById(long id) {
         for (UserData user : users)
             if (user.getId() == id)
@@ -341,6 +375,19 @@ public class LeagueData implements Storable {
         TeamData team = new TeamData(name, users);
         teams.add(team);
         return team;
+    }
+
+    public static String createTeamName(Guild guild, UserData... users) {
+        String name = "";
+        for (UserData user : users) {
+            Member member = guild.getMemberById(user.getId());
+            if (member != null) {
+                String memName = member.getEffectiveName();
+                if (memName.length() > 4) memName = memName.substring(0, 4);
+                name += memName;
+            }
+        }
+        return name;
     }
 	
 	/**
@@ -736,12 +783,12 @@ public class LeagueData implements Storable {
 	/**
 	 * @param ud sort this list of users by their score descending
 	 */
-	public static void sortByScoreDescend(List<UserData> ud) {
+	public static <C extends Contestant> void sortByScoreDescend(List<C> ud) {
 		for (int i = 0; i < ud.size(); ++i) {
 			int maxIndex = i;
 			for (int j = i+1; j < ud.size(); ++j) 
 				if (ud.get(j).getScore() > ud.get(maxIndex).getScore()) maxIndex = j;
-			UserData temp = ud.get(maxIndex);
+            C temp = ud.get(maxIndex);
 			ud.set(maxIndex, ud.get(i));
 			ud.set(i, temp);
 		}

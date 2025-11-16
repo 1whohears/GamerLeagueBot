@@ -3,7 +3,9 @@ package com.onewho.gamerbot.data;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.onewho.gamerbot.util.UtilCalendar;
+import com.onewho.gamerbot.util.UtilUsers;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,7 +35,86 @@ public class QueueData implements Storable {
     }
 
     public void genPairs(Guild guild, LeagueData league, MessageChannelUnion debugChannel) {
+        debugChannel.sendMessage("Generating Pairs for Queue "+id+" ").queue();
+        TextChannel pairsChannel = guild.getChannelById(TextChannel.class, league.getChannelId("pairings"));
+        if (pairsChannel == null) {
+            debugChannel.sendMessage(Important.getError()+" Queue **"+id+"** Can't generate pairings!"
+                    +" __The pairings channel is gone!__").queue();
+            return;
+        }
+        int numPlayers = members.size();
+        if (numPlayers < teamSize * 2) {
+            debugChannel.sendMessage(Important.getError()+" Queue **"+id+"** Can't generate pairings!"
+                    +" __Not enough players joined the queue!__").queue();
+            return;
+        }
+        List<Contestant> contestants = new ArrayList<>();
+        for (Long id : members) contestants.add(league.getContestantById(id));
+        preferredTeams.forEach((name, ids) -> {
+            UserData[] teamMembers = new UserData[ids.size()];
+            int k = 0;
+            for (Long id : ids) {
+                teamMembers[k++] = league.getUserDataById(id);
+                contestants.removeIf(cnt -> cnt.isIndividual() && cnt.getUserId() == id);
+            }
+            TeamData team = UtilUsers.getCreateTeam(name, league, teamMembers);
+            contestants.add(team);
+        });
+        LeagueData.sortByScoreDescend(contestants);
 
+        Integer[] groupSizes = getGroupSizes(teamSize, numPlayers);
+        int k = 0;
+        List<UserData> groupMembers = null;
+        // TODO temporary logic until one that supports preferred teams. assumes all contestants are individual!
+        for (Contestant contestant : contestants) {
+            if (groupMembers == null) groupMembers = new ArrayList<>();
+            groupMembers.add((UserData) contestant);
+            if (groupMembers.size() == groupSizes[k]) {
+                ++k;
+                UtilUsers.Result result = UtilUsers.balanceTeams(groupMembers.toArray(new UserData[0]));
+                TeamData team1 = UtilUsers.getCreateTeam(guild, league, result.team1());
+                TeamData team2 = UtilUsers.getCreateTeam(guild, league, result.team2());
+                SetData set = league.createTeamSet(team1.getName(), team2.getName());
+                if (set == null) {
+                    debugChannel.sendMessage(Important.getError()+" Queue **"+id+"** Failed to gen pairings!"
+                            +" __Attempted to make "+team1.getName()+" and "+team2.getName()+" fight each other!__")
+                            .queue();
+                    return;
+                }
+                debugChannel.sendMessage("Successfully created set "+set.getId()).queue();
+                set.displaySet(pairsChannel);
+                GlobalData.saveData();
+            }
+        }
+        /*for (Contestant contestant : contestants) {
+            if (team1 == null) {
+                if (contestant.isTeam()) {
+                    team1 = contestant;
+                    // FIXME check if team1.size() < teamSizes[k] and add a random player
+                    k++;
+                    continue;
+                } else {
+                    if (team2Members == null) team2Members = new Contestant[teamSizes[k]];
+
+                }
+            } else {
+
+            }
+        }*/
+    }
+
+    public static Integer[] getGroupSizes(int teamSize, int queueSize) {
+        List<Integer> sizes = new ArrayList<>();
+        int remaining = queueSize;
+        while (remaining > 0) {
+            if (remaining < teamSize * 4) {
+                sizes.add(remaining);
+                break;
+            }
+            sizes.add(teamSize * 2);
+            remaining -= teamSize * 2;
+        }
+        return sizes.toArray(new Integer[0]);
     }
 
     public QueueResult addIndividual(@NotNull UserData user) {

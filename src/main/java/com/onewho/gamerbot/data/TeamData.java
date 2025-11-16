@@ -79,6 +79,11 @@ public class TeamData implements Contestant {
     }
 
     @Override
+    public String getTeamName() {
+        return getName();
+    }
+
+    @Override
     public boolean hasUserId(long id) {
         return members.containsKey(id);
     }

@@ -72,6 +72,10 @@ public class UtilUsers {
         }
     }
 
+    public static TeamData getCreateTeam(Guild guild, LeagueData ldata, UserData... members) {
+        return getCreateTeam(LeagueData.createTeamName(guild, members), ldata, members);
+    }
+
     public record Result(UserData[] team1, UserData[] team2) { }
 
     private static class ResultHolder {
