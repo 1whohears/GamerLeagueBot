@@ -44,7 +44,7 @@ public abstract class LeagueCommand implements ICommand {
 						+ " Please use the `setup` command!").queue();
 				return false;
 			}
-			if (event.getMember().getRoles().contains(toRole)) {
+			if (!event.getMember().getRoles().contains(toRole)) {
 				event.getChannel().sendMessage("That command requires tournament organizer"
 						+ " role to use!").queue();
 				return false;
