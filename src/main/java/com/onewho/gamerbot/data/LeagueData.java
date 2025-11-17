@@ -326,9 +326,11 @@ public class LeagueData implements Storable {
         return null;
     }
 
-    public QueueData createQueue(@Nullable String closeTime) {
+    public QueueData createQueue(int teamSize, @Nullable String closeTime) {
         QueueData queue = new QueueData(getNewQueueId(), UtilCalendar.getCurrentDateTimeString());
+        queue.setTeamSize(teamSize);
         if (closeTime != null) queue.setCloseTime(closeTime);
+        queues.add(queue);
         return queue;
     }
 

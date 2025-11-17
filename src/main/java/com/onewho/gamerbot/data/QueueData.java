@@ -101,6 +101,7 @@ public class QueueData implements Storable {
 
             }
         }*/
+        setCloseTime(UtilCalendar.getCurrentDateTimeString());
     }
 
     public static Integer[] getGroupSizes(int teamSize, int queueSize) {
@@ -154,6 +155,12 @@ public class QueueData implements Storable {
             return b;
         });
         return found.get();
+    }
+
+    public boolean removeFromQueue(long id) {
+        boolean removed = members.remove(id);
+        findClearTeam(id);
+        return removed;
     }
 
     @Override
