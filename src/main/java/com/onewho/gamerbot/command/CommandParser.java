@@ -55,6 +55,8 @@ public class CommandParser {
         commands.add(new CreateTeamSet());
         commands.add(new CreateRandomTeamSet());
         commands.add(new TestPairingsCommand());
+        commands.add(new CreateQueue());
+        commands.add(new ManageQueue());
 	}
 	
 	private static List<ICommand> userCommands;

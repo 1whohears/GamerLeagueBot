@@ -126,8 +126,13 @@ public class UserData implements Contestant {
 		this.lastActive = lastActive;
 		this.active = true;
 	}
-	
-	@Override
+
+    @Override
+    public String getTeamName() {
+        return "";
+    }
+
+    @Override
 	public String toString() {
 		return id+"/"+active+"/"+setsPerWeek+"/"+score;
 	}

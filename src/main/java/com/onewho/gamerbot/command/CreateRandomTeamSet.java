@@ -28,7 +28,7 @@ public class CreateRandomTeamSet extends LeagueCommand {
         // create new team names
         String teamName1 = params[1];
         String teamName2 = params[2];
-        TeamData team1 = getCreateTeam(teamName1, ldata, result.team1());
+        TeamData team1 = UtilUsers.getCreateTeam(teamName1, ldata, result.team1());
         if (team1 == null) {
             event.getChannel().sendMessage(Important.getError()+" "+teamName1+" team failed to create!").queue();
             return false;
@@ -37,7 +37,7 @@ public class CreateRandomTeamSet extends LeagueCommand {
             event.getChannel().sendMessage("Team "+teamName1+" already exists and is being renamed to "
                     +team1.getName()).queue();
         }
-        TeamData team2 = getCreateTeam(teamName2, ldata, result.team2());
+        TeamData team2 = UtilUsers.getCreateTeam(teamName2, ldata, result.team2());
         if (team2 == null) {
             event.getChannel().sendMessage(Important.getError()+" "+teamName2+" team failed to create!").queue();
             return false;
@@ -59,26 +59,6 @@ public class CreateRandomTeamSet extends LeagueCommand {
         set.displaySet(pairsChannel);
         GlobalData.saveData();
         return true;
-    }
-
-    private TeamData getCreateTeam(String teamName, LeagueData ldata, UserData[] members) {
-        TeamData team;
-        String baseName = teamName;
-        int suffix = 1;
-        while (true) {
-            team = ldata.getTeamByName(teamName);
-            if (team == null) return ldata.createTeam(teamName, members);
-            if (team.hasSameMembers(members)) return team;
-            int lastSpace = baseName.lastIndexOf('-');
-            if (lastSpace != -1) {
-                try {
-                    suffix = Integer.parseInt(baseName.substring(lastSpace + 1)) + 1;
-                    baseName = baseName.substring(0, lastSpace);
-                } catch (NumberFormatException ignored) {}
-            }
-            teamName = baseName + "-" + suffix;
-            suffix++;
-        }
     }
 
     @Override

@@ -23,7 +23,8 @@ public class ManageUser extends LeagueCommand {
 	@Override
 	public String getHelp() {
 		return "`"+BotMain.PREFIX+getCommandString()+" [setting] [user ping] (value)`"
-				+ " Settings: `get`, `lock`, `join`, `remove`, `sets-per-week`, `override-score`";
+				+ " Settings: `get`, `lock`, `join`, `remove`, `sets-per-week`, `override-score`" +
+                ", `join-queue`, `quit-queue`";
 	}
 
 	@Override

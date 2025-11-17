@@ -2,6 +2,7 @@ package com.onewho.gamerbot.util;
 
 import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.LeagueData;
+import com.onewho.gamerbot.data.TeamData;
 import com.onewho.gamerbot.data.UserData;
 
 import net.dv8tion.jda.api.entities.Channel;
@@ -46,6 +47,30 @@ public class UtilUsers {
         int total = 0;
         for (UserData u : users) total += u.getScore();
         return total / users.size();
+    }
+
+    public static TeamData getCreateTeam(String teamName, LeagueData ldata, UserData... members) {
+        TeamData team;
+        String baseName = teamName;
+        int suffix = 1;
+        while (true) {
+            team = ldata.getTeamByName(teamName);
+            if (team == null) return ldata.createTeam(teamName, members);
+            if (team.hasSameMembers(members)) return team;
+            int lastSpace = baseName.lastIndexOf('-');
+            if (lastSpace != -1) {
+                try {
+                    suffix = Integer.parseInt(baseName.substring(lastSpace + 1)) + 1;
+                    baseName = baseName.substring(0, lastSpace);
+                } catch (NumberFormatException ignored) {}
+            }
+            teamName = baseName + "-" + suffix;
+            suffix++;
+        }
+    }
+
+    public static TeamData getCreateTeam(Guild guild, LeagueData ldata, UserData... members) {
+        return getCreateTeam(LeagueData.createTeamName(guild, members), ldata, members);
     }
 
     public record Result(UserData[] team1, UserData[] team2) { }
