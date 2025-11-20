@@ -28,6 +28,7 @@ public class BotMain {
         try {
             Important.load();
             Scheduler.init();
+            ApiManager.init();
             jda = JDABuilder.createDefault(TokenReader.getJDAToken(),
                             GatewayIntent.GUILD_MEMBERS,
                             GatewayIntent.GUILD_MESSAGES,
