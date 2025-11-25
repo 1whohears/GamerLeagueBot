@@ -122,7 +122,8 @@ public class ApiManager {
                 return getGson().toJson(Map.of("error", msg.get()));
             }
 
-            return getTeamSetResult(set, team1Name, team2Name, msg.get(), league);
+            return getTeamSetResult(set, set.getContestant1().getTeamName(),
+                    set.getContestant2().getTeamName(), msg.get(), league);
         });
 
         // create a set using the teams already in game
