@@ -364,6 +364,14 @@ public class LeagueData implements Storable {
     }
 
     @Nullable
+    public UserData getUserByExtraData(String key, String value) {
+        for (UserData user : users)
+            if (user.getExtraData().has(key) && user.getExtraData().get(key).getAsString().equals(value))
+                return user;
+        return null;
+    }
+
+    @Nullable
     public TeamData getTeamByName(String name) {
         for (TeamData team : teams)
             if (team.getName().equals(name))

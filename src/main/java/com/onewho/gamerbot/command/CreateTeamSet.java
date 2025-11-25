@@ -2,8 +2,11 @@ package com.onewho.gamerbot.command;
 
 import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.*;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+
+import java.util.function.Consumer;
 
 public class CreateTeamSet extends LeagueCommand {
 
@@ -25,18 +28,22 @@ public class CreateTeamSet extends LeagueCommand {
             event.getChannel().sendMessage(Important.getError()+" "+teamName2+" doesn't exists!").queue();
             return false;
         }
+        return run(team1, team2, event.getGuild(), ldata,
+                msg -> event.getChannel().sendMessage(msg).queue()) != null;
+    }
+
+    public static SetData run(TeamData team1, TeamData team2, Guild guild,
+                              LeagueData ldata, Consumer<String> debugConsumer) {
         SetData set = ldata.createTeamSet(team1.getName(), team2.getName());
         if (set == null) {
-            event.getChannel().sendMessage(Important.getError()
-                    +" You can't make someone fight themself!").queue();
-            return false;
+            debugConsumer.accept(Important.getError()+" You can't make someone fight themself!");
+            return null;
         }
-        event.getChannel().sendMessage("Successfully created set "+set.getId()).queue();
-        TextChannel pairsChannel = event.getGuild().getChannelById(TextChannel.class,
-                ldata.getChannelId("pairings"));
+        debugConsumer.accept("Successfully created set "+set.getId());
+        TextChannel pairsChannel = guild.getChannelById(TextChannel.class, ldata.getChannelId("pairings"));
         set.displaySet(pairsChannel);
         GlobalData.saveData();
-        return true;
+        return set;
     }
 
     @Override

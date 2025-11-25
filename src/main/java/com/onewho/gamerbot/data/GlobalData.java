@@ -21,7 +21,7 @@ public class GlobalData {
 	private static Gson gson = null;
 	private static final String dataFileName = "data.json";
 	
-	private static HashMap<Long, GuildData> guilds = new HashMap<>();
+	private static final HashMap<Long, GuildData> guilds = new HashMap<>();
 	
 	public static Gson getGson() {
 		if (gson == null) {

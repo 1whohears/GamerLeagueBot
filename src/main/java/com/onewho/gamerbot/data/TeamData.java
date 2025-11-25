@@ -73,6 +73,10 @@ public class TeamData implements Contestant {
         return members.keySet();
     }
 
+    public Collection<UserData> getUsers() {
+        return members.values();
+    }
+
     @Override
     public void setLastActive(String date) {
         members.forEach((id, user) -> user.setLastActive(date));

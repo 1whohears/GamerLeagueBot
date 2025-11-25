@@ -125,11 +125,11 @@ public class GuildData {
 	}
 	
 	protected void genScheduledPairsForAllLeagues() {
-		for (LeagueData l : leagues) l.genScheduledPairs(BotMain.jda.getGuildById(id));
+		for (LeagueData l : leagues) l.genScheduledPairs(BotMain.JDA.getGuildById(id));
 	}
 	
 	protected void updateRanksForAllLeagues() {
-		for (LeagueData l : leagues) l.updateRanks(BotMain.jda.getGuildById(id));
+		for (LeagueData l : leagues) l.updateRanks(BotMain.JDA.getGuildById(id));
 	}
 	
 }

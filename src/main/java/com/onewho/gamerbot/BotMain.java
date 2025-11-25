@@ -16,7 +16,7 @@ import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
 public class BotMain {
 	
-	public static JDA jda;
+	public static JDA JDA;
 	
 	public static char PREFIX = '$';
 	
@@ -29,7 +29,7 @@ public class BotMain {
             Important.load();
             Scheduler.init();
             ApiManager.init();
-            jda = JDABuilder.createDefault(TokenReader.getJDAToken(),
+            JDA = JDABuilder.createDefault(TokenReader.getJDAToken(),
                             GatewayIntent.GUILD_MEMBERS,
                             GatewayIntent.GUILD_MESSAGES,
                             GatewayIntent.GUILD_EMOJIS_AND_STICKERS,
@@ -37,7 +37,7 @@ public class BotMain {
                     .setMemberCachePolicy(MemberCachePolicy.ALL)
                     .setChunkingFilter(ChunkingFilter.ALL)
                     .build();
-            jda.addEventListener(new EventListener());
+            JDA.addEventListener(new EventListener());
             return true;
         } catch (LoginException | IOException e) {
             e.printStackTrace();

@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gson.JsonObject;
+import org.jetbrains.annotations.NotNull;
 
 public class UserData implements Contestant {
 	
@@ -15,6 +16,7 @@ public class UserData implements Contestant {
 	private String lastActive = "";
 	private int score = 0;
 	private boolean locked = false;
+    private JsonObject extraData;
 	
 	protected UserData(JsonObject data) {
 		id = ParseData.getLong(data, "id", -1);
@@ -23,11 +25,13 @@ public class UserData implements Contestant {
 		lastActive = ParseData.getString(data, "last active", lastActive); // DO NOT USE setLastActive HERE!
 		setScore(ParseData.getInt(data, "score", score));
 		locked = ParseData.getBoolean(data, "locked", locked);
+        extraData = ParseData.getJsonObject(data, "extra_data");
 	}
 	
 	protected UserData(long id) {
 		this.id = id;
 		this.setLastActive(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
+        this.extraData = new JsonObject();
 	}
 	
 	public JsonObject getJson() {
@@ -39,6 +43,7 @@ public class UserData implements Contestant {
 		data.addProperty("score", score);
 		data.addProperty("locked", locked);
         data.addProperty("type", getType().name());
+        data.add("extra_data", extraData);
 		return data;
 	}
 	
@@ -46,12 +51,14 @@ public class UserData implements Contestant {
 		JsonObject data = new JsonObject();
 		data.addProperty("id", id);
 		data.addProperty("score", score);
+        data.add("extra_data", extraData);
 		return data;
 	}
 	
 	public void readBackup(JsonObject data) {
 		if (data.get("id") == null || data.get("id").getAsLong() != id) return;
 		setScore(ParseData.getInt(data, "score", score));
+        extraData = ParseData.getJsonObject(data, "extra_data");
 	}
 
     @Override
@@ -171,5 +178,10 @@ public class UserData implements Contestant {
 	public void unlockUser() {
 		locked = false;
 	}
+
+    @NotNull
+    public JsonObject getExtraData() {
+        return extraData;
+    }
 	
 }
