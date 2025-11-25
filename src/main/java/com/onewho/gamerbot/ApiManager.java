@@ -225,6 +225,7 @@ public class ApiManager {
             JsonObject j = new JsonObject();
             j.addProperty("id", user.getId());
             j.addProperty("mcUUID", user.getExtraData().get("mcUUID").getAsString());
+            members.add(j);
         }
         json.add("members", members);
         return json;
