@@ -24,6 +24,7 @@ gradle-app.setting
 build
 data.json
 token.json
+apikeys.json
 *.bak
 important.json
 /.idea/

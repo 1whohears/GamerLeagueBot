@@ -11,6 +11,8 @@ import net.dv8tion.jda.api.entities.Member;
 import spark.Request;
 import spark.Response;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -20,12 +22,14 @@ import static spark.Spark.*;
 
 public class ApiManager {
 
-    public static void init() {
+    private static String[] keys;
+
+    public static void init() throws IOException {
+        keys = TokenReader.getAPIKeys();
+
         port(8080);
 
         before((req, res) -> res.type("application/json"));
-
-        get("/ping", (req, res) -> getGson().toJson(Map.of("status", "ok")));
 
         // chack if a league exists.
         get("/league/ping", (LeagueDataRoute) (req, res, guild, league) -> {
@@ -37,13 +41,13 @@ public class ApiManager {
             String mcUUIDStr = req.queryParams("mcUUID");
             if (mcUUIDStr == null) {
                 res.status(400);
-                return getGson().toJson(Map.of("error", "Missing Parameters"));
+                return getGson().toJson(Map.of("error", "mcUUID not defined"));
             }
 
             String discordUsername = req.queryParams("discordUsername");
             if (discordUsername == null) {
                 res.status(400);
-                return getGson().toJson(Map.of("error", "Missing Parameters"));
+                return getGson().toJson(Map.of("error", "discordUsername not defined"));
             }
 
             List<Member> memberList = guild.getMembersByName(discordUsername, false);
@@ -81,19 +85,19 @@ public class ApiManager {
             String team1Name = req.queryParams("team1Name");
             if (team1Name == null) {
                 res.status(400);
-                return getGson().toJson(Map.of("error", "Missing Parameters"));
+                return getGson().toJson(Map.of("error", "team1Name not defined"));
             }
 
             String team2Name = req.queryParams("team2Name");
             if (team2Name == null) {
                 res.status(400);
-                return getGson().toJson(Map.of("error", "Missing Parameters"));
+                return getGson().toJson(Map.of("error", "team2Name not defined"));
             }
 
             String mcUUIDListStr = req.queryParams("mcUUIDList");
             if (mcUUIDListStr == null) {
                 res.status(400);
-                return getGson().toJson(Map.of("error", "Missing Parameters"));
+                return getGson().toJson(Map.of("error", "mcUUIDList not defined"));
             }
 
             String[] mcUUIDList = parseUUIDList(mcUUIDListStr);
@@ -131,25 +135,25 @@ public class ApiManager {
             String team1Name = req.queryParams("team1Name");
             if (team1Name == null) {
                 res.status(400);
-                return getGson().toJson(Map.of("error", "Missing Parameters"));
+                return getGson().toJson(Map.of("error", "team1Name not defined"));
             }
 
             String team2Name = req.queryParams("team2Name");
             if (team2Name == null) {
                 res.status(400);
-                return getGson().toJson(Map.of("error", "Missing Parameters"));
+                return getGson().toJson(Map.of("error", "team2Name not defined"));
             }
 
             String team1MCUUIDListStr = req.queryParams("team1MCUUIDList");
             if (team1MCUUIDListStr == null) {
                 res.status(400);
-                return getGson().toJson(Map.of("error", "Missing Parameters"));
+                return getGson().toJson(Map.of("error", "team1MCUUIDList not defined"));
             }
 
             String team2MCUUIDListStr = req.queryParams("team2MCUUIDList");
             if (team2MCUUIDListStr == null) {
                 res.status(400);
-                return getGson().toJson(Map.of("error", "Missing Parameters"));
+                return getGson().toJson(Map.of("error", "team2MCUUIDList not defined"));
             }
 
             String[] team1MCUUIDList = parseUUIDList(team1MCUUIDListStr);
@@ -238,12 +242,21 @@ public class ApiManager {
 
     public interface LeagueDataRoute extends spark.Route {
         default Object handle(Request req, Response res) throws Exception {
+            String apikey = req.queryParams("apikey");
+            if (apikey == null || !Arrays.stream(keys).allMatch(apikey::equals)) {
+                res.status(400);
+                return getGson().toJson(Map.of(
+                        "league_exists", false,
+                        "error", "Invalid API Key"
+                ));
+            }
+
             String guildIdStr = req.queryParams("guildId");
             if (guildIdStr == null) {
                 res.status(400);
                 return getGson().toJson(Map.of(
                         "league_exists", false,
-                        "error", "Missing Parameters"
+                        "error", "guildId not defined"
                 ));
             }
             long guildId;
@@ -253,7 +266,7 @@ public class ApiManager {
                 res.status(400);
                 return getGson().toJson(Map.of(
                         "league_exists", false,
-                        "error", "Not a number"
+                        "error", guildIdStr+" is not a number"
                 ));
             }
 
@@ -262,7 +275,7 @@ public class ApiManager {
                 res.status(400);
                 return getGson().toJson(Map.of(
                         "league_exists", false,
-                        "error", "Missing parameters"
+                        "error", "leagueName not defined"
                 ));
             }
 
