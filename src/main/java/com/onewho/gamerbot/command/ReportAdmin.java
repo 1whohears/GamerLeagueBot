@@ -9,8 +9,12 @@ import com.onewho.gamerbot.data.ReportResult;
 import com.onewho.gamerbot.data.SetData;
 import com.onewho.gamerbot.util.UtilCalendar;
 
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Consumer;
 
 public class ReportAdmin extends LeagueCommand {
 	
@@ -66,32 +70,38 @@ public class ReportAdmin extends LeagueCommand {
 			event.getChannel().sendMessage(Important.getError()+" "+params[4]+" is not a mention!").queue();
 			return false;
 		}
-		SetData set = ldata.getSetDataById(id);
-		if (set == null) {
-			event.getChannel().sendMessage(Important.getError()+" The set with id "+id+" does not exist!").queue();
-			return false;
-		}
-		String currentDate = UtilCalendar.getCurrentDateString();
-		ReportResult result = set.reportAdmin(pingId1, pingId2, s1, s2, currentDate);
-		if (result == ReportResult.IDsDontMatch) {
-			event.getChannel().sendMessage(Important.getError()+" This set id does not have those players!").queue();
-			return false;
-		} else if (result == ReportResult.SetVerified) {
-			set.getContestant1().setLastActive(currentDate);
-            set.getContestant2().setLastActive(currentDate);
-			event.getChannel().sendMessage("Admin Override Successful!").queue();
-		} else if (result == ReportResult.AlreadyVerified) {
-			event.getChannel().sendMessage("This set has already been processed"
-					+ " and the scores have been updated. You must use a backup of this"
-					+ " server's league data to go back before these sets were processed!").queue();
-			return true;
-		}
-		//display new sets
-		TextChannel pairsChannel = event.getGuild().getChannelById(TextChannel.class, 
-				ldata.getChannelId("pairings"));
-		set.displaySet(pairsChannel);
-		GlobalData.saveData();
-		return true;
+		return run(event.getGuild(), ldata, msg -> event.getChannel().sendMessage(msg).queue(),
+                id, pingId1, pingId2, s1, s2) != null;
 	}
+
+    @Nullable
+    public static SetData run(Guild guild, LeagueData ldata, Consumer<String> debugConsumer, int setId,
+                              long playerId1, long playerId2, int score1, int score2) {
+        SetData set = ldata.getSetDataById(setId);
+        if (set == null) {
+            debugConsumer.accept(Important.getError()+" The set with id "+setId+" does not exist!");
+            return null;
+        }
+        String currentDate = UtilCalendar.getCurrentDateString();
+        ReportResult result = set.reportAdmin(playerId1, playerId2, score1, score2, currentDate);
+        if (result == ReportResult.IDsDontMatch) {
+            debugConsumer.accept(Important.getError()+" This set id does not have those players!");
+            return set;
+        } else if (result == ReportResult.SetVerified) {
+            set.getContestant1().setLastActive(currentDate);
+            set.getContestant2().setLastActive(currentDate);
+            debugConsumer.accept("Admin Override Successful!");
+        } else if (result == ReportResult.AlreadyVerified) {
+            debugConsumer.accept("This set has already been processed"
+                    + " and the scores have been updated. You must use a backup of this"
+                    + " server's league data to go back before these sets were processed!");
+            return set;
+        }
+        //display new sets
+        TextChannel pairsChannel = guild.getChannelById(TextChannel.class, ldata.getChannelId("pairings"));
+        set.displaySet(pairsChannel);
+        GlobalData.saveData();
+        return set;
+    }
 	
 }

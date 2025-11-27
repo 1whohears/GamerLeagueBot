@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.onewho.gamerbot.command.CreateRandomTeamSet;
 import com.onewho.gamerbot.command.CreateTeamSet;
+import com.onewho.gamerbot.command.ReportAdmin;
 import com.onewho.gamerbot.data.*;
 import com.onewho.gamerbot.util.UtilUsers;
 import net.dv8tion.jda.api.entities.Guild;
@@ -206,6 +207,90 @@ public class ApiManager {
 
             return getTeamSetResult(set, team1.getName(), team2.getName(), msg.get(), league);
         });
+
+        // report admin command hook
+        get("/league/reportadmin", (LeagueDataRoute) (req, res, guild, league) -> {
+            String setIdStr = req.queryParams("setId");
+            if (setIdStr == null) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", "setId not defined"));
+            }
+            int setId;
+            try {
+                setId = Integer.parseInt(setIdStr);
+            } catch (NumberFormatException e) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", setIdStr+" is not a number"));
+            }
+
+            String player1UUID = req.queryParams("player1UUID");
+            if (player1UUID == null) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", "player1UUID not defined"));
+            }
+
+            String player2UUID = req.queryParams("player2UUID");
+            if (player2UUID == null) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", "player2UUID not defined"));
+            }
+
+            String player1ScoreStr = req.queryParams("player1Score");
+            if (player1ScoreStr == null) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", "player1Score not defined"));
+            }
+            int player1Score;
+            try {
+                player1Score = Integer.parseInt(player1ScoreStr);
+            } catch (NumberFormatException e) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", player1ScoreStr+" is not a number"));
+            }
+
+            String player2ScoreStr = req.queryParams("player2Score");
+            if (player2ScoreStr == null) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", "player2Score not defined"));
+            }
+            int player2Score;
+            try {
+                player2Score = Integer.parseInt(player2ScoreStr);
+            } catch (NumberFormatException e) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", player2ScoreStr+" is not a number"));
+            }
+
+            UserData player1 = league.getUserByExtraData("mcUUID", player1UUID);
+            if (player1 == null) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", "Player 1 does not have a linked discord account"));
+            }
+
+            UserData player2 = league.getUserByExtraData("mcUUID", player2UUID);
+            if (player2 == null) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", "Player 2 does not have a linked discord account"));
+            }
+
+            AtomicReference<String> msg = new AtomicReference<>("");
+            SetData set = ReportAdmin.run(guild, league, msg::set, setId,
+                    player1.getId(), player2.getId(), player1Score, player2Score);
+            if (set == null) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", msg.get()));
+            }
+
+            String result = "Set "+set.getId()+" successfully reported.";
+            if (!msg.get().isEmpty()) result = msg.get();
+            return getGson().toJson(Map.of("result", result));
+        });
+
+        // create queue
+
+        // join queue
+
+        // leave queue
 
         notFound((req, res) -> getGson().toJson(Map.of("error", "Not found")));
     }
