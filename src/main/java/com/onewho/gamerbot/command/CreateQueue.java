@@ -3,9 +3,12 @@ package com.onewho.gamerbot.command;
 import com.onewho.gamerbot.BotMain;
 import com.onewho.gamerbot.data.*;
 import com.onewho.gamerbot.util.UtilCalendar;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
+import javax.annotation.Nullable;
 import java.time.LocalDate;
+import java.util.function.Consumer;
 
 public class CreateQueue extends LeagueCommand {
 	
@@ -52,12 +55,17 @@ public class CreateQueue extends LeagueCommand {
                 return false;
             }
         }
+		return run(ldata, msg -> event.getChannel().sendMessage(msg).queue(), teamSize, endTime) != null;
+	}
+
+    public static QueueData run(LeagueData ldata, Consumer<String> debugConsumer,
+                                int teamSize, @Nullable String endTime) {
         QueueData queue = ldata.createQueue(teamSize, endTime);
-		GlobalData.saveData();
+        GlobalData.saveData();
         String message = "Successfully created queue "+queue.getId()+"!";
         if (endTime != null) message += " Will close at "+endTime+"!";
-        event.getChannel().sendMessage(message).queue();
-		return true;
-	}
+        debugConsumer.accept(message);
+        return queue;
+    }
 
 }
