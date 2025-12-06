@@ -265,6 +265,12 @@ public class ApiManager {
                 return getGson().toJson(Map.of("error", player2ScoreStr+" is not a number"));
             }
 
+            String updateRanksStr = req.queryParams("updateRanks");
+            boolean updateRanks = false;
+            if (updateRanksStr != null) {
+                updateRanks = Boolean.parseBoolean(updateRanksStr);
+            }
+
             UserData player1 = league.getUserByExtraData("mcUUID", player1UUID);
             if (player1 == null) {
                 res.status(400);
@@ -285,6 +291,12 @@ public class ApiManager {
                 return getGson().toJson(Map.of("error", msg.get()));
             }
 
+            if (updateRanks) {
+                MessageChannelUnion channel = guild.getChannelById(MessageChannelUnion.class,
+                        league.getChannelId("bot-commands"));
+                league.updateRanks(guild, channel);
+                GlobalData.saveData();
+            }
             String result = "Set "+set.getId()+" successfully reported.";
             if (!msg.get().isEmpty()) result = msg.get();
             return getGson().toJson(Map.of("result", result));
@@ -292,8 +304,10 @@ public class ApiManager {
 
         // update ranks
         get("/league/updateranks", (LeagueDataRoute) (req, res, guild, league) -> {
-            MessageChannelUnion channel = guild.getChannelById(MessageChannelUnion.class, league.getChannelId("bot-commands"));
+            MessageChannelUnion channel = guild.getChannelById(MessageChannelUnion.class,
+                    league.getChannelId("bot-commands"));
             league.updateRanks(guild, channel);
+            GlobalData.saveData();
             return getGson().toJson(Map.of("result", "Updated ranks!"));
         });
 
