@@ -11,6 +11,7 @@ import com.onewho.gamerbot.util.UtilCalendar;
 import com.onewho.gamerbot.util.UtilUsers;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import spark.Request;
 import spark.Response;
 
@@ -287,6 +288,13 @@ public class ApiManager {
             String result = "Set "+set.getId()+" successfully reported.";
             if (!msg.get().isEmpty()) result = msg.get();
             return getGson().toJson(Map.of("result", result));
+        });
+
+        // update ranks
+        get("/league/updateranks", (LeagueDataRoute) (req, res, guild, league) -> {
+            MessageChannelUnion channel = guild.getChannelById(MessageChannelUnion.class, league.getChannelId("bot-commands"));
+            league.updateRanks(guild, channel);
+            return getGson().toJson(Map.of("result", "Updated ranks!"));
         });
 
         // create queue
