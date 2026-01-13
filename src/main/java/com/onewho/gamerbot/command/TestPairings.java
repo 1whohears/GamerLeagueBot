@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.util.List;
 
-public class TestPairingsCommand extends LeagueCommand {
+public class TestPairings extends LeagueCommand {
 
     @Override
     public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {

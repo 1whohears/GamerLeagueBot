@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.security.auth.login.LoginException;
 
+import com.onewho.gamerbot.net.NetApiManager;
 import com.onewho.gamerbot.data.Important;
 import com.onewho.gamerbot.event.EventListener;
 import com.onewho.gamerbot.schedule.Scheduler;
@@ -28,7 +29,7 @@ public class BotMain {
         try {
             Important.load();
             Scheduler.init();
-            ApiManager.init();
+            NetApiManager.init();
             JDA = JDABuilder.createDefault(TokenReader.getJDAToken(),
                             GatewayIntent.GUILD_MEMBERS,
                             GatewayIntent.GUILD_MESSAGES,
