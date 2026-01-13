@@ -1,10 +1,10 @@
 package com.onewho.gamerbot.net;
 
+import com.google.gson.JsonObject;
 import com.onewho.gamerbot.data.GlobalData;
 import com.onewho.gamerbot.data.UserData;
-import net.dv8tion.jda.api.entities.Member;
+import com.onewho.gamerbot.util.UtilCalendar;
 
-import java.util.List;
 import java.util.Map;
 
 import static com.onewho.gamerbot.data.GlobalData.getGson;
@@ -21,37 +21,34 @@ public class LinkAccountRequests {
                 return getGson().toJson(Map.of("error", "mcUUID not defined"));
             }
 
-            String discordUsername = req.queryParams("discordUsername");
-            if (discordUsername == null) {
+            String linkCode = req.queryParams("linkCode");
+            if (linkCode == null) {
                 res.status(400);
-                return getGson().toJson(Map.of("error", "discordUsername not defined"));
+                return getGson().toJson(Map.of("error", "linkCode not defined"));
             }
 
-            List<Member> memberList = guild.getMembersByName(discordUsername, false);
-            if (memberList.isEmpty()) {
+            UserData user = league.getUserByExtraData("linkCode", linkCode);
+            if (user == null) {
                 res.status(400);
-                return getGson().toJson(Map.of("error", "There is no user with that username"));
-            } else if (memberList.size() > 1) {
-                res.status(400);
-                return getGson().toJson(Map.of("error", "More than one user has that name???"));
-            }
-            Member member = memberList.get(0);
-
-            UserData userData = league.getUserDataById(member.getIdLong());
-            if (userData == null) {
-                String error = league.addUser(guild, member.getIdLong(), false);
-                if (!error.contains("You have joined the Gamer League!")) {
-                    res.status(400);
-                    return getGson().toJson(Map.of("error", error));
-                }
-                userData = league.getUserDataById(member.getIdLong());
-                if (userData == null) {
-                    res.status(400);
-                    return getGson().toJson(Map.of("error", "Somehow failed to create new user data"));
-                }
+                return getGson().toJson(Map.of("error", "The Link Code is either Expired or Incorrect. " +
+                        "Generate a new one by using the $linkdiscord command in the discord server."));
             }
 
-            userData.getExtraData().addProperty("mcUUID", mcUUIDStr);
+            JsonObject userData = user.getExtraData();
+            if (!userData.has("linkCodeCreateTime")) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", "The Link Code is either Expired or Incorrect. " +
+                        "Generate a new one by using the $linkdiscord command in the discord server."));
+            }
+            String linkCodeCreateTime = userData.get("linkCodeCreateTime").getAsString();
+            if (!UtilCalendar.isWithin60Seconds(linkCodeCreateTime)) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", "The Link Code is either Expired or Incorrect. " +
+                        "Generate a new one by using the $linkdiscord command in the discord server."));
+            }
+
+            user.getExtraData().addProperty("mcUUID", mcUUIDStr);
+            user.getExtraData().addProperty("linkCode", "");
             GlobalData.saveData();
 
             return getGson().toJson(Map.of("result", "Successfully linked minecraft account with discord account!"));

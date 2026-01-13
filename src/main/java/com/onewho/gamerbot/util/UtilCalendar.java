@@ -1,8 +1,7 @@
 package com.onewho.gamerbot.util;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
@@ -172,5 +171,12 @@ public class UtilCalendar {
 	public static boolean isOlder(String d1, String d2) {
 		return isOlder(getDate(d1), getDate(d2));
 	}
-	
+
+    public static boolean isWithin60Seconds(String createdTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ssZ");
+        OffsetDateTime created = OffsetDateTime.parse(createdTime, formatter);
+        Instant now = Instant.now();
+        long secondsBetween = Math.abs(Duration.between(created.toInstant(), now).getSeconds());
+        return secondsBetween <= 60;
+    }
 }
