@@ -1,9 +1,6 @@
 package com.onewho.gamerbot.util;
 
-import com.onewho.gamerbot.data.GlobalData;
-import com.onewho.gamerbot.data.LeagueData;
-import com.onewho.gamerbot.data.TeamData;
-import com.onewho.gamerbot.data.UserData;
+import com.onewho.gamerbot.data.*;
 
 import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Guild;
@@ -80,7 +77,29 @@ public class UtilUsers {
         double bestFairness = Double.MAX_VALUE;
     }
 
+    public static Result balanceTeams(Collection<Contestant> allContestants, Collection<Set<Long>> preferredTeams) {
+        int n = 0;
+        for (Contestant c : allContestants) n += c.getTeamSize();
+        UserData[] allUsers = new UserData[n];
+        int i = 0;
+        for (Contestant c : allContestants) {
+            if (c.isIndividual()) {
+                allUsers[i++] = (UserData) c;
+            } else if (c.isTeam()) {
+                TeamData td = (TeamData) c;
+                for (UserData ud : td.getUsers()) allUsers[i++] = ud;
+            } else {
+                System.out.println("Somehow a contestant is not a team or individual???");
+            }
+        }
+        return balanceTeams(allUsers, preferredTeams);
+    }
+
     public static Result balanceTeams(UserData[] allUsers) {
+        return balanceTeams(allUsers, new ArrayList<>());
+    }
+
+    public static Result balanceTeams(UserData[] allUsers, Collection<Set<Long>> preferredTeams) {
         int n = allUsers.length;
         int teamSize1 = n / 2;
         int teamSize2 = n - teamSize1;
@@ -108,6 +127,9 @@ public class UtilUsers {
                             || teamHasBothPlayers(team2, top1Id, top2Id))) {
                         fairness += 1000;
                     }
+                    if (missingPreferredTeams(team1, team2, preferredTeams)) {
+                        fairness += 1000;
+                    }
 
                     if (fairness < holder.bestFairness) {
                         holder.bestFairness = fairness;
@@ -132,6 +154,28 @@ public class UtilUsers {
                     teamSize1, teamSize2, consumer);
             chosen.remove(chosen.size() - 1);
         }
+    }
+
+    private static boolean missingPreferredTeams(List<UserData> team1, List<UserData> team2,
+                                            Collection<Set<Long>> preferredTeams) {
+        for (Set<Long> preferredTeam : preferredTeams) {
+            if (!(hasPreferredTeam(team1, preferredTeam) || hasPreferredTeam(team2, preferredTeam))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean hasPreferredTeam(List<UserData> team, Set<Long> preferredTeam) {
+        int k = 0;
+        for (UserData user : team) {
+            for (Long id : preferredTeam) {
+                if (user.getUserId() == id) {
+                    k++;
+                }
+            }
+        }
+        return k >= preferredTeam.size();
     }
 
     public static boolean teamHasBothPlayers(List<UserData> team, long p1Id, long p2Id) {

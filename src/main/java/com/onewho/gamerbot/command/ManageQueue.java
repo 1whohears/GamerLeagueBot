@@ -28,7 +28,7 @@ public class ManageQueue extends LeagueCommand {
 	}
 
 	public ManageQueue() {
-		addSubCommand(new SubCommand("gen-pairs") {
+		addSubCommand(new SubCommand("create-set") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
                 int id;
@@ -43,7 +43,7 @@ public class ManageQueue extends LeagueCommand {
                     event.getChannel().sendMessage(Important.getError()+" there is no queue with id "+id+"!").queue();
                     return false;
                 }
-                queue.genPairs(event.getGuild(), ldata, event.getChannel());
+                queue.createSet(event.getGuild(), ldata, msg -> event.getChannel().sendMessage(msg).queue());
 				GlobalData.saveData();
 				return true;
 			}

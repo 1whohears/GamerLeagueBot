@@ -179,4 +179,19 @@ public class UtilCalendar {
         long secondsBetween = Math.abs(Duration.between(created.toInstant(), now).getSeconds());
         return secondsBetween <= 60;
     }
+
+	public static boolean isAfterSeconds(String startTime, int seconds) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ssZ");
+		OffsetDateTime created = OffsetDateTime.parse(startTime, formatter);
+		Instant now = Instant.now();
+		long secondsBetween = Math.abs(Duration.between(created.toInstant(), now).getSeconds());
+		return secondsBetween > seconds;
+	}
+
+	public static boolean isOlderTime(String time1, String time2) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ssZ");
+		OffsetDateTime odt1 = OffsetDateTime.parse(time1, formatter);
+		OffsetDateTime odt2 = OffsetDateTime.parse(time2, formatter);
+		return odt1.isBefore(odt2);
+	}
 }

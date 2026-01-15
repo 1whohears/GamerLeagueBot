@@ -8,18 +8,29 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public class QueueData implements Storable {
 
     private final int id;
     @NotNull private final String startTime;
-    @NotNull private String closeTime = "";
-    private int teamSize = 2;
-    private final Set<Long> members = new HashSet<>();
-    private final Map<String, Set<Long>> preferredTeams = new HashMap<>();
+    @NotNull private final Map<Long,QueueMember> members = new HashMap<>();
+    @NotNull private final Map<String,Set<Long>> preferredTeams = new HashMap<>();
+
+    private boolean resolved;
+    private String recentJoinTime = "";
+
+    private int minPlayers; // TODO minPlayers | default value and override command
+    private int teamSize; // TODO teamSize | default value and override command
+    private boolean allowLargerTeams; // TODO allowLargerTeams | default value and override command
+    private boolean allowOddNum; // TODO allowOddNum | default value and override command
+    private int timeoutTime; // TODO timeoutTime | default value and override command
+    private int subRequestTime; // TODO subRequestTime | default value and override command
+    private int pregameTime; // TODO pregameTime | default value and override command
 
     protected QueueData(int id, @NotNull String startTime) {
         this.id = id;
@@ -29,108 +40,122 @@ public class QueueData implements Storable {
     protected QueueData(@NotNull JsonObject data) {
         id = ParseData.getInt(data, "id", -1);
         startTime = ParseData.getString(data, "startTime", "");
-        closeTime = ParseData.getString(data, "closeTime", "");
-        teamSize = ParseData.getInt(data, "teamSize", teamSize);
+        minPlayers = ParseData.getInt(data, "minPlayers", 2);
+        teamSize = ParseData.getInt(data, "teamSize", 2);
+        allowLargerTeams = ParseData.getBoolean(data, "allowLargerTeams", false);
+        allowOddNum = ParseData.getBoolean(data, "allowOddNum", false);
+        timeoutTime = ParseData.getInt(data, "timeoutTime", 2);
+        subRequestTime = ParseData.getInt(data, "subRequestTime", 2);
+        pregameTime = ParseData.getInt(data, "pregameTime", 2);
+        resolved = ParseData.getBoolean(data, "resolved", false);
         readMembers(data);
     }
 
-    public void genPairs(Guild guild, LeagueData league, MessageChannelUnion debugChannel) {
-        debugChannel.sendMessage("Generating Pairs for Queue "+id+" ").queue();
+    public void createSet(Guild guild, LeagueData league, Consumer<String> debug) {
+        debug.accept("Generating Pairs for Queue "+id+" ");
         TextChannel pairsChannel = guild.getChannelById(TextChannel.class, league.getChannelId("pairings"));
         if (pairsChannel == null) {
-            debugChannel.sendMessage(Important.getError()+" Queue **"+id+"** Can't generate pairings!"
-                    +" __The pairings channel is gone!__").queue();
+            debug.accept(Important.getError()+" Queue **"+id+"** Can't generate pairings!"
+                    +" __The pairings channel is gone!__");
             return;
         }
         int numPlayers = members.size();
-        if (numPlayers < teamSize * 2) {
-            debugChannel.sendMessage(Important.getError()+" Queue **"+id+"** Can't generate pairings!"
-                    +" __Not enough players joined the queue!__").queue();
+        if (numPlayers < getMinPlayers()) {
+            debug.accept(Important.getError()+" Queue **"+id+"** Can't generate pairings!"
+                    +" __Not enough players joined the queue!__" +
+                    " **Need "+(getMinPlayers() - numPlayers)+" More!**");
             return;
         }
-        List<Contestant> contestants = new ArrayList<>();
-        for (Long id : members) contestants.add(league.getContestantById(id));
-        preferredTeams.forEach((name, ids) -> {
-            UserData[] teamMembers = new UserData[ids.size()];
-            int k = 0;
-            for (Long id : ids) {
-                teamMembers[k++] = league.getUserDataById(id);
-                contestants.removeIf(cnt -> cnt.isIndividual() && cnt.getUserId() == id);
-            }
-            TeamData team = UtilUsers.getCreateTeam(name, league, teamMembers);
-            contestants.add(team);
-        });
-        LeagueData.sortByScoreDescend(contestants);
-
-        Integer[] groupSizes = getGroupSizes(teamSize, numPlayers);
-        int k = 0;
-        List<UserData> groupMembers = null;
-        // TODO temporary logic until one that supports preferred teams. assumes all contestants are individual!
-        for (Contestant contestant : contestants) {
-            if (groupMembers == null) groupMembers = new ArrayList<>();
-            groupMembers.add((UserData) contestant);
-            if (groupMembers.size() == groupSizes[k]) {
-                ++k;
-                UtilUsers.Result result = UtilUsers.balanceTeams(groupMembers.toArray(new UserData[0]));
-                TeamData team1 = UtilUsers.getCreateTeam(guild, league, result.team1());
-                TeamData team2 = UtilUsers.getCreateTeam(guild, league, result.team2());
-                SetData set = league.createTeamSet(team1.getName(), team2.getName());
-                if (set == null) {
-                    debugChannel.sendMessage(Important.getError()+" Queue **"+id+"** Failed to gen pairings!"
-                            +" __Attempted to make "+team1.getName()+" and "+team2.getName()+" fight each other!__")
-                            .queue();
-                    return;
-                }
-                debugChannel.sendMessage("Successfully created set "+set.getId()).queue();
-                set.displaySet(pairsChannel);
-                GlobalData.saveData();
-            }
+        List<Contestant> contestants = getFilteredContestants(league);
+        if (contestants.size() < getMinPlayers()) {
+            debug.accept(Important.getError()+" Queue **"+id+"** Can't generate a pair!"
+                    +" __Not enough players are checked in!__" +
+                    " **Need "+(getMinPlayers() - contestants.size())+" More!**");
+            return;
         }
-        /*for (Contestant contestant : contestants) {
-            if (team1 == null) {
-                if (contestant.isTeam()) {
-                    team1 = contestant;
-                    // FIXME check if team1.size() < teamSizes[k] and add a random player
-                    k++;
-                    continue;
-                } else {
-                    if (team2Members == null) team2Members = new Contestant[teamSizes[k]];
 
-                }
-            } else {
-
-            }
-        }*/
-        setCloseTime(UtilCalendar.getCurrentDateTimeString());
+        UtilUsers.Result result = UtilUsers.balanceTeams(contestants, preferredTeams.values());
+        TeamData team1 = UtilUsers.getCreateTeam(guild, league, result.team1());
+        TeamData team2 = UtilUsers.getCreateTeam(guild, league, result.team2());
+        SetData set = league.createTeamSet(team1.getName(), team2.getName());
+        if (set == null) {
+            debug.accept(Important.getError()+" Queue **"+id+"** Failed to gen pairings!"
+                            +" __Attempted to make "+team1.getName()+" and "+team2.getName()+" fight each other!__");
+            return;
+        }
+        debug.accept("Successfully created set "+set.getId());
+        set.displaySet(pairsChannel);
+        resolved = true;
+        GlobalData.saveData();
+        // TODO create a queues channel that updates and displays the current available queues
+        // TODO ping all players in the queue that it is time to lock in
     }
 
-    public static Integer[] getGroupSizes(int teamSize, int queueSize) {
-        List<Integer> sizes = new ArrayList<>();
-        int remaining = queueSize;
-        while (remaining > 0) {
-            if (remaining < teamSize * 4) {
-                sizes.add(remaining);
-                break;
+    protected void filterContestants(List<Contestant> contestants) {
+        contestants.removeIf(contestant -> {
+            QueueMember member = getQueueMemberData(contestant.getUserId());
+            return member == null || !member.isCheckedIn();
+        });
+        if (!isAllowLargerTeams()) {
+            while (contestants.size() > getTeamSize() * 2) {
+                contestants.remove(contestants.size()-1);
             }
-            sizes.add(teamSize * 2);
-            remaining -= teamSize * 2;
         }
-        return sizes.toArray(new Integer[0]);
+        if (!isAllowOddNum() && contestants.size() % 2 != 0) {
+            contestants.remove(contestants.size()-1);
+        }
+    }
+
+    public List<Contestant> getSortedMembers(LeagueData league) {
+        List<QueueMember> queueMembers = new ArrayList<>(members.values());
+        sortQueueMembers(queueMembers);
+        List<Contestant> contestants = new ArrayList<>();
+        for (QueueMember member : queueMembers)
+            contestants.add(league.getContestantById(member.getId()));
+        return contestants;
+    }
+
+    public List<Contestant> getFilteredContestants(LeagueData league) {
+        List<Contestant> contestants = getSortedMembers(league);
+        filterContestants(contestants);
+        return contestants;
+    }
+
+    public static void sortQueueMembers(List<QueueMember> qm) {
+        for (int i = 0; i < qm.size(); ++i) {
+            int maxIndex = i;
+            for (int j = i+1; j < qm.size(); ++j) {
+                QueueMember test = qm.get(j);
+                QueueMember max = qm.get(maxIndex);
+                boolean testChkdIn = test.isCheckedIn();
+                boolean maxChkdIn = max.isCheckedIn();
+                if (testChkdIn && !maxChkdIn
+                        || testChkdIn && UtilCalendar.isOlderTime(test.getCheckInTime(), max.getCheckInTime())
+                        || !testChkdIn && !maxChkdIn && UtilCalendar.isOlderTime(test.getJoinTime(), max.getJoinTime())
+                ) {
+                    maxIndex = j;
+                }
+            }
+            QueueMember temp = qm.get(maxIndex);
+            qm.set(maxIndex, qm.get(i));
+            qm.set(i, temp);
+        }
     }
 
     public QueueResult addIndividual(@NotNull UserData user) {
-        if (isAutoPairAtClose() && UtilCalendar.isNewer(UtilCalendar.getCurrentDateTimeString(), getCloseTime()))
+        if (isClosed())
             return QueueResult.CLOSED;
         long id = user.getId();
-        if (members.contains(id)) return QueueResult.ALREADY_JOINED;
-        members.add(id);
+        if (members.containsKey(id))
+            return QueueResult.ALREADY_JOINED;
+        addMember(user);
         return QueueResult.SUCCESS;
     }
 
     public QueueResult addPreferredTeam(@NotNull String name, @NotNull UserData... users) {
-        if (users.length != getTeamSize())
+        if (users.length > getTeamSize())
             return QueueResult.WRONG_TEAM_SIZE;
-        if (isAutoPairAtClose() && UtilCalendar.isNewer(UtilCalendar.getCurrentDateTimeString(), getCloseTime()))
+        if (isClosed())
             return QueueResult.CLOSED;
         Set<Long> teamMembers = new HashSet<>();
         boolean teamAlreadyExisted = false;
@@ -139,12 +164,18 @@ public class QueueData implements Storable {
             if (findClearTeam(id))
                 teamAlreadyExisted = true;
             teamMembers.add(id);
-            members.add(id);
+            addMember(user);
         }
         preferredTeams.put(name, teamMembers);
         if (teamAlreadyExisted)
             return QueueResult.CHANGED_TEAM;
         return QueueResult.SUCCESS;
+    }
+
+    private void addMember(UserData user) {
+        String currentTime = UtilCalendar.getCurrentDateTimeString();
+        members.put(user.getId(), new QueueMember(user.getId(), currentTime));
+        recentJoinTime = currentTime;
     }
 
     private boolean findClearTeam(Long id) {
@@ -158,9 +189,9 @@ public class QueueData implements Storable {
     }
 
     public boolean removeFromQueue(long id) {
-        boolean removed = members.remove(id);
+        QueueMember member = members.remove(id);
         findClearTeam(id);
-        return removed;
+        return member != null;
     }
 
     @Override
@@ -168,9 +199,17 @@ public class QueueData implements Storable {
         JsonObject data = new JsonObject();
         data.addProperty("id", id);
         data.addProperty("startTime", startTime);
-        data.addProperty("closeTime", closeTime);
+        data.addProperty("minPlayers", minPlayers);
         data.addProperty("teamSize", teamSize);
-        addLongSet(data, "members", members);
+        data.addProperty("allowLargerTeams", allowLargerTeams);
+        data.addProperty("allowOddNum", allowOddNum);
+        data.addProperty("timeoutTime", timeoutTime);
+        data.addProperty("subRequestTime", subRequestTime);
+        data.addProperty("pregameTime", pregameTime);
+        data.addProperty("resolved", resolved);
+        JsonArray members = new JsonArray();
+        this.members.forEach((id, qm) -> members.add(qm.getData()));
+        data.add("members", members);
         JsonArray teams = new JsonArray();
         preferredTeams.forEach((name, ids) -> {
             JsonObject team = new JsonObject();
@@ -186,8 +225,10 @@ public class QueueData implements Storable {
         this.members.clear();
         this.preferredTeams.clear();
         JsonArray members = ParseData.getJsonArray(data, "members");
-        for (int i = 0; i < members.size(); ++i)
-            this.members.add(members.get(i).getAsLong());
+        for (int i = 0; i < members.size(); ++i) {
+            QueueMember qm = new QueueMember(members.get(i).getAsJsonObject());
+            this.members.put(qm.getId(), qm);
+        }
         JsonArray teams = ParseData.getJsonArray(data, "preferredTeams");
         for (int i = 0; i < teams.size(); ++i) {
             JsonObject team = teams.get(i).getAsJsonObject();
@@ -213,8 +254,6 @@ public class QueueData implements Storable {
 
     @Override
     public void readBackup(JsonObject data) {
-        closeTime = ParseData.getString(data, "closeTime", "");
-        teamSize = ParseData.getInt(data, "teamSize", teamSize);
         readMembers(data);
     }
 
@@ -227,25 +266,110 @@ public class QueueData implements Storable {
         return startTime;
     }
 
-    @NotNull
-    public String getCloseTime() {
-        return closeTime;
-    }
-
-    public void setCloseTime(@NotNull String closeTime) {
-        this.closeTime = closeTime;
-    }
-
-    public boolean isAutoPairAtClose() {
-        return !closeTime.isEmpty();
-    }
-
     public int getTeamSize() {
         return teamSize;
     }
 
     public void setTeamSize(int teamSize) {
+        if (teamSize < 1) teamSize = 1;
         if (teamSize != this.teamSize) preferredTeams.clear();
         this.teamSize = teamSize;
+    }
+
+    public boolean isClosed() {
+        if (resolved) return true;
+        if (members.isEmpty()) return UtilCalendar.isAfterSeconds(getStartTime(), timeoutTime);
+        return UtilCalendar.isAfterSeconds(recentJoinTime, timeoutTime);
+    }
+
+    @Nullable
+    public QueueMember getQueueMemberData(long id) {
+        return members.get(id);
+    }
+
+    public static class QueueMember {
+        private final long id;
+        private final String joinTime;
+        private String checkInTime = "";
+        public QueueMember(long id, String joinTime) {
+            this.id = id;
+            this.joinTime = joinTime;
+        }
+        public QueueMember(JsonObject data) {
+            this.id = ParseData.getLong(data, "id", 0);
+            this.joinTime = ParseData.getString(data, "joinTime", "");
+            this.checkInTime = ParseData.getString(data, "checkInTime", "");
+        }
+        public JsonObject getData() {
+            JsonObject data = new JsonObject();
+            data.addProperty("id", id);
+            data.addProperty("joinTime", joinTime);
+            data.addProperty("checkInTime", checkInTime);
+            return data;
+        }
+        public long getId() {
+            return id;
+        }
+        public String getJoinTime() {
+            return joinTime;
+        }
+        public boolean isCheckedIn() {
+            return !checkInTime.isEmpty();
+        }
+        public void setCheckedIn(boolean checkedIn) {
+            if (checkedIn) checkInTime = UtilCalendar.getCurrentDateTimeString();
+            else checkInTime = "";
+        }
+        public String getCheckInTime() {
+            return checkInTime;
+        }
+    }
+
+    public int getMinPlayers() {
+        return minPlayers;
+    }
+
+    public void setMinPlayers(int minPlayers) {
+        this.minPlayers = minPlayers;
+    }
+
+    public boolean isAllowLargerTeams() {
+        return allowLargerTeams;
+    }
+
+    public void setAllowLargerTeams(boolean allowLargerTeams) {
+        this.allowLargerTeams = allowLargerTeams;
+    }
+
+    public boolean isAllowOddNum() {
+        return allowOddNum;
+    }
+
+    public void setAllowOddNum(boolean allowOddNum) {
+        this.allowOddNum = allowOddNum;
+    }
+
+    public int getTimeoutTime() {
+        return timeoutTime;
+    }
+
+    public void setTimeoutTime(int timeoutTime) {
+        this.timeoutTime = timeoutTime;
+    }
+
+    public int getSubRequestTime() {
+        return subRequestTime;
+    }
+
+    public void setSubRequestTime(int subRequestTime) {
+        this.subRequestTime = subRequestTime;
+    }
+
+    public int getPregameTime() {
+        return pregameTime;
+    }
+
+    public void setPregameTime(int pregameTime) {
+        this.pregameTime = pregameTime;
     }
 }

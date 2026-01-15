@@ -71,7 +71,12 @@ public class UserData implements Contestant {
         return false;
     }
 
-    @Override
+	@Override
+	public int getTeamSize() {
+		return 1;
+	}
+
+	@Override
     public boolean hasUserId(long id) {
         return id == getId();
     }

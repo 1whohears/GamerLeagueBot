@@ -326,10 +326,8 @@ public class LeagueData implements Storable {
         return null;
     }
 
-    public QueueData createQueue(int teamSize, @Nullable String closeTime) {
+    public QueueData createQueue() {
         QueueData queue = new QueueData(getNewQueueId(), UtilCalendar.getCurrentDateTimeString());
-        queue.setTeamSize(teamSize);
-        if (closeTime != null) queue.setCloseTime(closeTime);
         queues.add(queue);
         return queue;
     }
@@ -796,8 +794,11 @@ public class LeagueData implements Storable {
 	public static <C extends Contestant> void sortByScoreDescend(List<C> ud) {
 		for (int i = 0; i < ud.size(); ++i) {
 			int maxIndex = i;
-			for (int j = i+1; j < ud.size(); ++j) 
-				if (ud.get(j).getScore() > ud.get(maxIndex).getScore()) maxIndex = j;
+			for (int j = i+1; j < ud.size(); ++j) {
+				if (ud.get(j).getScore() > ud.get(maxIndex).getScore()) {
+					maxIndex = j;
+				}
+			}
             C temp = ud.get(maxIndex);
 			ud.set(maxIndex, ud.get(i));
 			ud.set(i, temp);

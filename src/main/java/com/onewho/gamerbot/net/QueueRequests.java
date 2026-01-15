@@ -1,12 +1,9 @@
 package com.onewho.gamerbot.net;
 
 import com.onewho.gamerbot.command.CreateQueue;
-import com.onewho.gamerbot.data.Important;
 import com.onewho.gamerbot.data.QueueData;
 import com.onewho.gamerbot.data.UserData;
-import com.onewho.gamerbot.util.UtilCalendar;
 
-import java.time.LocalDate;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -16,8 +13,18 @@ import static spark.Spark.get;
 public class QueueRequests {
 
     public static void init() {
-        // create queue
+        // TODO create queue
         get("/league/queue/create", (LeagueDataRoute) (req, res, guild, league) -> {
+            // the following parameters should be optional and if not defined use the defaults defined in league data
+
+            // minPlayers
+            // teamSize
+            // allowLargerTeams
+            // allowOddNum
+            // timeoutTime
+            // subRequestTime
+            // pregameTime
+
             String teamSizeStr = req.queryParams("teamSize");
             if (teamSizeStr == null) {
                 res.status(400);
@@ -31,21 +38,13 @@ public class QueueRequests {
                 return getGson().toJson(Map.of("error", teamSizeStr+"is not a number"));
             }
 
-            String endTime = req.queryParams("endTime");
-            LocalDate endDate = UtilCalendar.getDate(endTime);
-            if (endTime != null && endDate == null) {
-                res.status(400);
-                return getGson().toJson(Map.of("error", Important.getError()+" "+endTime
-                        +" is not a valid time format! DO: dd-MM-yyyy HH-mm"));
-            }
-
             AtomicReference<String> msg = new AtomicReference<>("");
-            QueueData queue = CreateQueue.run(league, msg::set, teamSize, endTime);
+            QueueData queue = CreateQueue.run(league, msg::set);
 
             return getGson().toJson(Map.of("result", msg.get(), "queue", queue.getJson()));
         });
 
-        // join queue
+        // TODO join queue
         get("/league/queue/join", (LeagueDataRoute) (req, res, guild, league) -> {
             String mcUUIDStr = req.queryParams("mcUUID");
             if (mcUUIDStr == null) {
@@ -76,7 +75,7 @@ public class QueueRequests {
             return getGson().toJson(Map.of("result", "bruh"));
         });
 
-        // leave queue
+        // TODO leave queue
         get("/league/queue/leave", (LeagueDataRoute) (req, res, guild, league) -> {
             String mcUUIDStr = req.queryParams("mcUUID");
             if (mcUUIDStr == null) {
@@ -107,8 +106,8 @@ public class QueueRequests {
             return getGson().toJson(Map.of("result", "bruh"));
         });
 
-        // resolve queue
-        get("/league/queue/resolve", (LeagueDataRoute) (req, res, guild, league) -> {
+        // TODO check queue state
+        get("/league/queue/state", (LeagueDataRoute) (req, res, guild, league) -> {
             String queueIdStr = req.queryParams("queueId");
             if (queueIdStr == null) {
                 res.status(400);

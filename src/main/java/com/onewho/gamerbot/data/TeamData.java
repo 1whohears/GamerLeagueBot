@@ -64,6 +64,11 @@ public class TeamData implements Contestant {
     }
 
     @Override
+    public int getTeamSize() {
+        return members.size();
+    }
+
+    @Override
     public long getUserId() {
         return members.keySet().stream().findFirst().orElse(-1L);
     }
