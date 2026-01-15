@@ -64,18 +64,29 @@ public class QueueData implements Storable {
         if (isClosed()) return;
         List<QueueMember> sorted = new ArrayList<>(members.values());
         sortQueueMembers(sorted);
-        //List<QueueMember> filteredQueueMembers = new ArrayList<>(sorted);
-        //filterQueueMembers(filteredQueueMembers);
+		if (pregameStartTime.isEmpty()) {
+			List<QueueMember> filteredQueueMembers = new ArrayList<>(sorted);
+        	filterQueueMembers(filteredQueueMembers);
+			if (filteredQueueMembers.size() >= minPlayers) {
+				pregameStartTime = UtilCalendar.getCurrentDateTimeString();
+			}
+		}
+		MessageCreateBuilder mcb = new MessageCreateBuilder();
         for (int i = 0; i < sorted.size(); ++i) {
             QueueMember member = sorted.get(i);
-            
+            UserData user = league.getUserDataById(member.getId());
+			
         }
+		TextChannel queueChannel = guild.getChannelById(TextChannel.class, league.getChannelId("queues"));
+        if (queueChannel == null) {
+            debug.accept(Important.getError()+" Queue **"+id+"** Can't display!"
+                    +" __The queues channel is gone!__");
+            return;
+        }
+		displayQueue(queueChannel, mcb.build());
     }
 
-    public void displayQueue(TextChannel channel) {
-        MessageCreateData mcd = new MessageCreateBuilder()
-				.addContent("")
-				.build();
+    private void displayQueue(TextChannel channel, MessageCreateData mcd) {
 		if (messageId == -1) messageId = channel.sendMessage(mcd).complete().getIdLong();
 		else {
 			MessageEditData med = new MessageEditBuilder().applyCreateData(mcd).build();
