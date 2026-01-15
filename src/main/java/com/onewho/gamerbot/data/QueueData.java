@@ -31,6 +31,8 @@ public class QueueData implements Storable {
     private int timeoutTime; // TODO timeoutTime | default value and override command
     private int subRequestTime; // TODO subRequestTime | default value and override command
     private int pregameTime; // TODO pregameTime | default value and override command
+    private boolean resetTimeoutOnJoin; // TODO resetTimeoutOnJoin | default value and override command
+    private boolean ifEnoughPlayersAutoStart; // TODO ifEnoughPlayersAutoStart | default value and override command
 
     protected QueueData(int id, @NotNull String startTime) {
         this.id = id;
@@ -47,11 +49,18 @@ public class QueueData implements Storable {
         timeoutTime = ParseData.getInt(data, "timeoutTime", 2);
         subRequestTime = ParseData.getInt(data, "subRequestTime", 2);
         pregameTime = ParseData.getInt(data, "pregameTime", 2);
+        resetTimeoutOnJoin = ParseData.getBoolean(data, "resetTimeoutOnJoin", true);
+        ifEnoughPlayersAutoStart = ParseData.getBoolean(data, "ifEnoughPlayersAutoStart", true);
         resolved = ParseData.getBoolean(data, "resolved", false);
+        recentJoinTime = ParseData.getString(data, "recentJoinTime", "");
         readMembers(data);
     }
 
     public void createSet(Guild guild, LeagueData league, Consumer<String> debug) {
+        if (isClosed()) {
+            debug.accept(Important.getError()+" Queue "+id+" cannot make pairs because it is Closed!");
+            return;
+        }
         debug.accept("Generating Pairs for Queue "+id+" ");
         TextChannel pairsChannel = guild.getChannelById(TextChannel.class, league.getChannelId("pairings"));
         if (pairsChannel == null) {
@@ -206,7 +215,10 @@ public class QueueData implements Storable {
         data.addProperty("timeoutTime", timeoutTime);
         data.addProperty("subRequestTime", subRequestTime);
         data.addProperty("pregameTime", pregameTime);
+        data.addProperty("resetTimeoutOnJoin", resetTimeoutOnJoin);
+        data.addProperty("ifEnoughPlayersAutoStart", ifEnoughPlayersAutoStart);
         data.addProperty("resolved", resolved);
+        data.addProperty("recentJoinTime", recentJoinTime);
         JsonArray members = new JsonArray();
         this.members.forEach((id, qm) -> members.add(qm.getData()));
         data.add("members", members);
@@ -278,7 +290,7 @@ public class QueueData implements Storable {
 
     public boolean isClosed() {
         if (resolved) return true;
-        if (members.isEmpty()) return UtilCalendar.isAfterSeconds(getStartTime(), timeoutTime);
+        if (members.isEmpty() || !isResetTimeoutOnJoin()) return UtilCalendar.isAfterSeconds(getStartTime(), timeoutTime);
         return UtilCalendar.isAfterSeconds(recentJoinTime, timeoutTime);
     }
 
@@ -371,5 +383,21 @@ public class QueueData implements Storable {
 
     public void setPregameTime(int pregameTime) {
         this.pregameTime = pregameTime;
+    }
+
+    public boolean isResetTimeoutOnJoin() {
+        return resetTimeoutOnJoin;
+    }
+
+    public void setResetTimeoutOnJoin(boolean resetTimeoutOnJoin) {
+        this.resetTimeoutOnJoin = resetTimeoutOnJoin;
+    }
+
+    public boolean isEnoughPlayersAutoStart() {
+        return ifEnoughPlayersAutoStart;
+    }
+
+    public void setEnoughPlayersAutoStart(boolean ifEnoughPlayersAutoStart) {
+        this.ifEnoughPlayersAutoStart = ifEnoughPlayersAutoStart;
     }
 }
