@@ -24,6 +24,8 @@ public class QueueRequests {
             // timeoutTime
             // subRequestTime
             // pregameTime
+            // resetTimeoutOnJoin
+            // ifEnoughPlayersAutoStart
 
             String teamSizeStr = req.queryParams("teamSize");
             if (teamSizeStr == null) {
@@ -69,8 +71,13 @@ public class QueueRequests {
                 res.status(400);
                 return getGson().toJson(Map.of("error", queueIdStr+"is not a number"));
             }
+            QueueData queue = league.getQueueById(queueId);
+            if (queue == null) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", "Queue with ID "+queueId+" does not exist."));
+            }
 
-
+            
 
             return getGson().toJson(Map.of("result", "bruh"));
         });
@@ -100,13 +107,18 @@ public class QueueRequests {
                 res.status(400);
                 return getGson().toJson(Map.of("error", queueIdStr+"is not a number"));
             }
+            QueueData queue = league.getQueueById(queueId);
+            if (queue == null) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", "Queue with ID "+queueId+" does not exist."));
+            }
 
-
+            
 
             return getGson().toJson(Map.of("result", "bruh"));
         });
 
-        // TODO check queue state
+        // check queue state
         get("/league/queue/state", (LeagueDataRoute) (req, res, guild, league) -> {
             String queueIdStr = req.queryParams("queueId");
             if (queueIdStr == null) {
@@ -121,9 +133,13 @@ public class QueueRequests {
                 return getGson().toJson(Map.of("error", queueIdStr+"is not a number"));
             }
 
+            QueueData queue = league.getQueueById(queueId);
+            if (queue == null) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", "Queue with ID "+queueId+" does not exist."));
+            }
 
-
-            return getGson().toJson(Map.of("result", "bruh"));
+            return getGson().toJson(Map.of("result", "Success", "queue", queue.getJson()));
         });
     }
 
