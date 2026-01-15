@@ -23,6 +23,8 @@ public class QueueData implements Storable {
 
     private boolean resolved;
     private String recentJoinTime = "";
+    private String pregameStartTime = "";
+    private long messageId = -1;
 
     private int minPlayers; // TODO minPlayers | default value and override command
     private int teamSize; // TODO teamSize | default value and override command
@@ -53,7 +55,42 @@ public class QueueData implements Storable {
         ifEnoughPlayersAutoStart = ParseData.getBoolean(data, "ifEnoughPlayersAutoStart", true);
         resolved = ParseData.getBoolean(data, "resolved", false);
         recentJoinTime = ParseData.getString(data, "recentJoinTime", "");
+        pregameStartTime = ParseData.getString(data, "pregameStartTime", "");
+        messageId = ParseData.getLong(data, "messageId", messageId);
         readMembers(data);
+    }
+
+    public void update(Guild guild, LeagueData league, Consumer<String> debug) {
+        if (isClosed()) return;
+        List<QueueMember> sorted = new ArrayList<>(members.values());
+        sortQueueMembers(sorted);
+        //List<QueueMember> filteredQueueMembers = new ArrayList<>(sorted);
+        //filterQueueMembers(filteredQueueMembers);
+        for (int i = 0; i < sorted.size(); ++i) {
+            QueueMember member = sorted.get(i);
+            
+        }
+    }
+
+    public void displayQueue(TextChannel channel) {
+        MessageCreateData mcd = new MessageCreateBuilder()
+				.addContent("")
+				.build();
+		if (messageId == -1) messageId = channel.sendMessage(mcd).complete().getIdLong();
+		else {
+			MessageEditData med = new MessageEditBuilder().applyCreateData(mcd).build();
+			try {
+				channel.editMessageById(messageId, med).complete();
+			} catch (ErrorResponseException e) {
+				switch (e.getErrorResponse()) {
+				case UNKNOWN_MESSAGE:
+					messageId = channel.sendMessage(mcd).complete().getIdLong();
+					return;
+				default:
+					return;
+				}
+			} 
+		}
     }
 
     public void createSet(Guild guild, LeagueData league, Consumer<String> debug) {
@@ -112,6 +149,18 @@ public class QueueData implements Storable {
         }
         if (!isAllowOddNum() && contestants.size() % 2 != 0) {
             contestants.remove(contestants.size()-1);
+        }
+    }
+
+    public void filterQueueMembers(List<QueueMember> queueMembers) {
+        queueMembers.removeIf(member -> !member.isCheckedIn());
+        if (!isAllowLargerTeams()) {
+            while (queueMembers.size() > getTeamSize() * 2) {
+                queueMembers.remove(queueMembers.size()-1);
+            }
+        }
+        if (!isAllowOddNum() && queueMembers.size() % 2 != 0) {
+            queueMembers.remove(queueMembers.size()-1);
         }
     }
 
@@ -219,6 +268,8 @@ public class QueueData implements Storable {
         data.addProperty("ifEnoughPlayersAutoStart", ifEnoughPlayersAutoStart);
         data.addProperty("resolved", resolved);
         data.addProperty("recentJoinTime", recentJoinTime);
+        data.addProperty("pregameStartTime", pregameStartTime);
+        data.addProperty("messageId", messageId);
         JsonArray members = new JsonArray();
         this.members.forEach((id, qm) -> members.add(qm.getData()));
         data.add("members", members);
@@ -290,6 +341,7 @@ public class QueueData implements Storable {
 
     public boolean isClosed() {
         if (resolved) return true;
+        if (!getPregameStartTime().isEmpty()) return UtilCalendar.isAfterSeconds(getPregameStartTime(), pregameTime);
         if (members.isEmpty() || !isResetTimeoutOnJoin()) return UtilCalendar.isAfterSeconds(getStartTime(), timeoutTime);
         return UtilCalendar.isAfterSeconds(recentJoinTime, timeoutTime);
     }
@@ -399,5 +451,9 @@ public class QueueData implements Storable {
 
     public void setEnoughPlayersAutoStart(boolean ifEnoughPlayersAutoStart) {
         this.ifEnoughPlayersAutoStart = ifEnoughPlayersAutoStart;
+    }
+
+    public void getPregameStartTime() {
+        return pregameStartTime;
     }
 }
