@@ -69,37 +69,50 @@ public class QueueData implements Storable {
     public void update(Guild guild, LeagueData league, Consumer<String> debug) {
         if (!isDirty) return;
         if (isClosed()) return;
-        List<QueueMember> sorted = new ArrayList<>(members.values());
-        sortQueueMembers(sorted);
 		if (pregameStartTime.isEmpty()) {
-			/*List<QueueMember> filteredQueueMembers = new ArrayList<>(sorted);
-        	filterQueueMembers(filteredQueueMembers);
-			if (filteredQueueMembers.size() >= minPlayers) {
-				pregameStartTime = UtilCalendar.getCurrentDateTimeString();
-			}*/
-            if (sorted.size() >= minPlayers && isEnoughPlayersAutoStart()) {
+            if (members.size() >= minPlayers && isEnoughPlayersAutoStart()) {
                 pregameStartTime = UtilCalendar.getCurrentDateTimeString();
             }
 		}
+		List<QueueMember> sorted = new ArrayList<>(members.values());
+        sortQueueMembers(sorted);
+		//List<QueueMember> filteredQueueMembers = new ArrayList<>(sorted);
+        //filterQueueMembers(filteredQueueMembers);
 		MessageCreateBuilder mcb = new MessageCreateBuilder();
         String queueState = "";
         String nextQueueState = "";
         String nextStateTime = "";
         mcb.addContent("__**ID:"+getId()+" | "+queueState+" -> "+nextQueueState+" "+nextStateTime+"**__");
-        boolean hasCheckedIn = false, hasNotCheckedIn = false, hasWaitingList = false;
-        for (int i = 0; i < sorted.size(); ++i) {
-            QueueMember member = sorted.get(i);
-            if (!hasCheckedIn && member.isCheckedIn()) {
-                mcb.addContent("**Checked In**");
-                hasCheckedIn = true;
-            } else if (!hasNotCheckedIn && !member.isCheckedIn()) {
-                mcb.addContent("**Not Checked In**");
-                hasNotCheckedIn = true;
-            }
-            Member m = guild.getMemberById(member.getId());
-            if (m != null) mcb.addContent(m.getEffectiveName());
-            else mcb.addContent(member.getId()+"");
-        }
+		int maxPlayers = allowLargerTeams ? teamSize * 2 : 200;
+		for (int i = 0; i < sorted.size(); ++i) {
+			QueueMember member = sorted.get(i);
+			if (!isPreGame()) {
+				if (i < maxPlayers) {
+					member.setQueueState(PlayerQueueState.PRIORITY);
+				} else {
+					member.setQueueState(PlayerQueueState.OVERFLOW);
+				}
+				if (!isAllowOddNum() && (i == sorted.size()-1) && i % 2 != 0) {
+					member.setQueueState(PlayerQueueState.OVERFLOW);
+				}
+			} else {
+				if (member.isCheckedIn()) {
+					if (i < maxPlayers) {
+						
+					} else {
+						
+					}
+				} else {
+					
+				}
+			}
+		}
+		boolean hasCheckedIn = false;
+		int displayedPlayers = 0;
+		for (int i = 0; i < sorted.size(); ++i) {
+			QueueMember member = sorted.get(i);
+			
+		}
 		TextChannel queueChannel = guild.getChannelById(TextChannel.class, league.getChannelId("queues"));
         if (queueChannel == null) {
             debug.accept(Important.getError()+" Queue **"+id+"** Can't display!"
@@ -109,6 +122,12 @@ public class QueueData implements Storable {
 		displayQueue(queueChannel, mcb.build());
         isDirty = false;
     }
+
+	private String getName(QueueMemeber member, Guild guild) {
+		Member m = guild.getMemberById(member.getId());
+		if (m != null) return m.getEffectiveName();
+    	else return member.getId()+""
+	}
 
     public void startPreGame(Consumer<String> debug) {
         if (isClosed()) {
@@ -400,6 +419,7 @@ public class QueueData implements Storable {
         private final long id;
         private final String joinTime;
         private String checkInTime = "";
+		private PlayerQueueState queueState = PlayerQueueState.NONE;
         public QueueMember(long id, String joinTime) {
             this.id = id;
             this.joinTime = joinTime;
@@ -414,6 +434,7 @@ public class QueueData implements Storable {
             data.addProperty("id", id);
             data.addProperty("joinTime", joinTime);
             data.addProperty("checkInTime", checkInTime);
+			data.addProperty("queueState", queueState.name());
             return data;
         }
         public long getId() {
@@ -432,7 +453,27 @@ public class QueueData implements Storable {
         public String getCheckInTime() {
             return checkInTime;
         }
+		@Override
+		public boolean equals(Object other) {
+			if (other instanceof QueueMember qm) return this.id == qm.id;
+			return false;
+		}
+		public PlayerQueueState getQueueState() {
+			return queueState;
+		}
+		protected void setQueueState(PlayerQueueState state) {
+			queueState = state;
+		}
     }
+
+	public static enum PlayerQueueState {
+		CHECKED_IN,
+		CHECKED_IN_SUB,
+		NOT_CHECKED_IN,
+		PRIORITY,
+		OVERFLOW,
+		NONE
+	}
 
     public int getMinPlayers() {
         return minPlayers;
@@ -509,4 +550,8 @@ public class QueueData implements Storable {
     public String getPregameStartTime() {
         return pregameStartTime;
     }
+
+	public String isPreGame() {
+		return !getPregameStartTime().isEmpty();
+	}
 }
