@@ -5,8 +5,13 @@ import com.google.gson.JsonObject;
 import com.onewho.gamerbot.util.UtilCalendar;
 import com.onewho.gamerbot.util.UtilUsers;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,6 +27,7 @@ public class QueueData implements Storable {
     @NotNull private final Map<String,Set<Long>> preferredTeams = new HashMap<>();
 
     private boolean resolved;
+    private boolean isDirty = true;
     private String recentJoinTime = "";
     private String pregameStartTime = "";
     private long messageId = -1;
@@ -61,21 +67,38 @@ public class QueueData implements Storable {
     }
 
     public void update(Guild guild, LeagueData league, Consumer<String> debug) {
+        if (!isDirty) return;
         if (isClosed()) return;
         List<QueueMember> sorted = new ArrayList<>(members.values());
         sortQueueMembers(sorted);
 		if (pregameStartTime.isEmpty()) {
-			List<QueueMember> filteredQueueMembers = new ArrayList<>(sorted);
+			/*List<QueueMember> filteredQueueMembers = new ArrayList<>(sorted);
         	filterQueueMembers(filteredQueueMembers);
 			if (filteredQueueMembers.size() >= minPlayers) {
 				pregameStartTime = UtilCalendar.getCurrentDateTimeString();
-			}
+			}*/
+            if (sorted.size() >= minPlayers && isEnoughPlayersAutoStart()) {
+                pregameStartTime = UtilCalendar.getCurrentDateTimeString();
+            }
 		}
 		MessageCreateBuilder mcb = new MessageCreateBuilder();
+        String queueState = "";
+        String nextQueueState = "";
+        String nextStateTime = "";
+        mcb.addContent("__**ID:"+getId()+" | "+queueState+" -> "+nextQueueState+" "+nextStateTime+"**__");
+        boolean hasCheckedIn = false, hasNotCheckedIn = false, hasWaitingList = false;
         for (int i = 0; i < sorted.size(); ++i) {
             QueueMember member = sorted.get(i);
-            UserData user = league.getUserDataById(member.getId());
-			
+            if (!hasCheckedIn && member.isCheckedIn()) {
+                mcb.addContent("**Checked In**");
+                hasCheckedIn = true;
+            } else if (!hasNotCheckedIn && !member.isCheckedIn()) {
+                mcb.addContent("**Not Checked In**");
+                hasNotCheckedIn = true;
+            }
+            Member m = guild.getMemberById(member.getId());
+            if (m != null) mcb.addContent(m.getEffectiveName());
+            else mcb.addContent(member.getId()+"");
         }
 		TextChannel queueChannel = guild.getChannelById(TextChannel.class, league.getChannelId("queues"));
         if (queueChannel == null) {
@@ -84,6 +107,16 @@ public class QueueData implements Storable {
             return;
         }
 		displayQueue(queueChannel, mcb.build());
+        isDirty = false;
+    }
+
+    public void startPreGame(Consumer<String> debug) {
+        if (isClosed()) {
+            debug.accept("Cannot start the pregame of this queue because it is closed.");
+            return;
+        }
+        pregameStartTime = UtilCalendar.getCurrentDateTimeString();
+        isDirty = true;
     }
 
     private void displayQueue(TextChannel channel, MessageCreateData mcd) {
@@ -143,6 +176,7 @@ public class QueueData implements Storable {
         debug.accept("Successfully created set "+set.getId());
         set.displaySet(pairsChannel);
         resolved = true;
+        isDirty = true;
         GlobalData.saveData();
         // TODO create a queues channel that updates and displays the current available queues
         // TODO ping all players in the queue that it is time to lock in
@@ -218,6 +252,7 @@ public class QueueData implements Storable {
         if (members.containsKey(id))
             return QueueResult.ALREADY_JOINED;
         addMember(user);
+        isDirty = true;
         return QueueResult.SUCCESS;
     }
 
@@ -236,6 +271,7 @@ public class QueueData implements Storable {
             addMember(user);
         }
         preferredTeams.put(name, teamMembers);
+        isDirty = true;
         if (teamAlreadyExisted)
             return QueueResult.CHANGED_TEAM;
         return QueueResult.SUCCESS;
@@ -260,6 +296,7 @@ public class QueueData implements Storable {
     public boolean removeFromQueue(long id) {
         QueueMember member = members.remove(id);
         findClearTeam(id);
+        isDirty = true;
         return member != null;
     }
 
@@ -348,6 +385,7 @@ public class QueueData implements Storable {
         if (teamSize < 1) teamSize = 1;
         if (teamSize != this.teamSize) preferredTeams.clear();
         this.teamSize = teamSize;
+        isDirty = true;
     }
 
     public boolean isClosed() {
@@ -406,6 +444,7 @@ public class QueueData implements Storable {
 
     public void setMinPlayers(int minPlayers) {
         this.minPlayers = minPlayers;
+        isDirty = true;
     }
 
     public boolean isAllowLargerTeams() {
@@ -414,6 +453,7 @@ public class QueueData implements Storable {
 
     public void setAllowLargerTeams(boolean allowLargerTeams) {
         this.allowLargerTeams = allowLargerTeams;
+        isDirty = true;
     }
 
     public boolean isAllowOddNum() {
@@ -422,6 +462,7 @@ public class QueueData implements Storable {
 
     public void setAllowOddNum(boolean allowOddNum) {
         this.allowOddNum = allowOddNum;
+        isDirty = true;
     }
 
     public int getTimeoutTime() {
@@ -430,6 +471,7 @@ public class QueueData implements Storable {
 
     public void setTimeoutTime(int timeoutTime) {
         this.timeoutTime = timeoutTime;
+        isDirty = true;
     }
 
     public int getSubRequestTime() {
@@ -438,6 +480,7 @@ public class QueueData implements Storable {
 
     public void setSubRequestTime(int subRequestTime) {
         this.subRequestTime = subRequestTime;
+        isDirty = true;
     }
 
     public int getPregameTime() {
@@ -446,6 +489,7 @@ public class QueueData implements Storable {
 
     public void setPregameTime(int pregameTime) {
         this.pregameTime = pregameTime;
+        isDirty = true;
     }
 
     public boolean isResetTimeoutOnJoin() {
@@ -454,6 +498,7 @@ public class QueueData implements Storable {
 
     public void setResetTimeoutOnJoin(boolean resetTimeoutOnJoin) {
         this.resetTimeoutOnJoin = resetTimeoutOnJoin;
+        isDirty = true;
     }
 
     public boolean isEnoughPlayersAutoStart() {
@@ -462,9 +507,10 @@ public class QueueData implements Storable {
 
     public void setEnoughPlayersAutoStart(boolean ifEnoughPlayersAutoStart) {
         this.ifEnoughPlayersAutoStart = ifEnoughPlayersAutoStart;
+        isDirty = true;
     }
 
-    public void getPregameStartTime() {
+    public String getPregameStartTime() {
         return pregameStartTime;
     }
 }
