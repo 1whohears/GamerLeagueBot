@@ -76,16 +76,17 @@ public class QueueData implements Storable {
 		}
 		List<QueueMember> sorted = new ArrayList<>(members.values());
         sortQueueMembers(sorted);
-		//List<QueueMember> filteredQueueMembers = new ArrayList<>(sorted);
-        //filterQueueMembers(filteredQueueMembers);
+		List<QueueMember> filteredQueueMembers = new ArrayList<>(sorted);
+        filterQueueMembers(filteredQueueMembers);
 		MessageCreateBuilder mcb = new MessageCreateBuilder();
         String queueState = "";
         String nextQueueState = "";
         String nextStateTime = "";
         mcb.addContent("__**ID:"+getId()+" | "+queueState+" -> "+nextQueueState+" "+nextStateTime+"**__");
-		int maxPlayers = allowLargerTeams ? teamSize * 2 : 200;
+		int maxPlayers = allowLargerTeams ? 200 : teamSize * 2;
 		for (int i = 0; i < sorted.size(); ++i) {
 			QueueMember member = sorted.get(i);
+			String time;
 			if (!isPreGame()) {
 				if (i < maxPlayers) {
 					member.setQueueState(PlayerQueueState.PRIORITY);
@@ -98,20 +99,22 @@ public class QueueData implements Storable {
 			} else {
 				if (member.isCheckedIn()) {
 					if (i < maxPlayers) {
-						
+						member.setQueueState(PlayerQueueState.CHECKED_IN);
 					} else {
-						
+						member.setQueueState(PlayerQueueState.CHECKED_IN_SUB);
+					}
+					if (!isAllowOddNum() && (i == sorted.filteredQueueMembers()-1) && i % 2 != 0) {
+						member.setQueueState(PlayerQueueState.CHECKED_IN_SUB);
 					}
 				} else {
-					
+					if (i < maxPlayers) {
+						member.setQueueState(PlayerQueueState.NOT_CHECKED_IN);
+					} else {
+						member.setQueueState(PlayerQueueState.NOT_CHECKED_IN_SUB);
+					}
 				}
 			}
-		}
-		boolean hasCheckedIn = false;
-		int displayedPlayers = 0;
-		for (int i = 0; i < sorted.size(); ++i) {
-			QueueMember member = sorted.get(i);
-			
+			mcb.addContent(member.getQueueStatusEmoji()+" "+getName(member, guild)+" "+member.getJoinTime());
 		}
 		TextChannel queueChannel = guild.getChannelById(TextChannel.class, league.getChannelId("queues"));
         if (queueChannel == null) {
@@ -463,6 +466,17 @@ public class QueueData implements Storable {
 		}
 		protected void setQueueState(PlayerQueueState state) {
 			queueState = state;
+		}
+		public String getQueueStatusEmoji() {
+			switch(queueState) {
+				case CHECKED_IN: return ":white_check_mark:";
+				case CHECKED_IN_SUB: return ":ballot_box_with_check:";
+				case NOT_CHECKED_IN: return "::";
+				case NOT_CHECKED_IN_SUB: return "::";
+				case PRIORITY: return "::";
+				case OVERFLOW: return "::";
+				case NONE: return "::";
+			}
 		}
     }
 
