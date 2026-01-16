@@ -176,7 +176,6 @@ public class QueueData implements Storable {
         debug.accept("Successfully created set "+set.getId());
         set.displaySet(pairsChannel);
         resolved = true;
-        isDirty = true;
         GlobalData.saveData();
         // TODO create a queues channel that updates and displays the current available queues
         // TODO ping all players in the queue that it is time to lock in
@@ -252,7 +251,6 @@ public class QueueData implements Storable {
         if (members.containsKey(id))
             return QueueResult.ALREADY_JOINED;
         addMember(user);
-        isDirty = true;
         return QueueResult.SUCCESS;
     }
 
@@ -271,7 +269,6 @@ public class QueueData implements Storable {
             addMember(user);
         }
         preferredTeams.put(name, teamMembers);
-        isDirty = true;
         if (teamAlreadyExisted)
             return QueueResult.CHANGED_TEAM;
         return QueueResult.SUCCESS;
@@ -296,7 +293,6 @@ public class QueueData implements Storable {
     public boolean removeFromQueue(long id) {
         QueueMember member = members.remove(id);
         findClearTeam(id);
-        isDirty = true;
         return member != null;
     }
 
