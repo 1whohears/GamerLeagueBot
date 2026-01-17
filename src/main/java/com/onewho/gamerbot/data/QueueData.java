@@ -67,13 +67,13 @@ public class QueueData implements Storable {
     }
 
     public void update(Guild guild, LeagueData league, Consumer<String> debug) {
-        if (!isDirty) return;
-        if (isClosed()) return;
+		if (isClosed()) return;
 		if (pregameStartTime.isEmpty()) {
             if (members.size() >= minPlayers && isEnoughPlayersAutoStart()) {
                 startPreGame(debug);
             }
 		}
+        if (!isDirty) return;
 		List<QueueMember> sorted = new ArrayList<>(members.values());
         sortQueueMembers(sorted);
 		List<QueueMember> filteredQueueMembers = new ArrayList<>(sorted);
@@ -84,6 +84,7 @@ public class QueueData implements Storable {
         String nextStateTime = "";
         mcb.addContent("__**ID:"+getId()+" | "+queueState+" -> "+nextQueueState+" "+nextStateTime+"**__");
 		int maxPlayers = allowLargerTeams ? 200 : teamSize * 2;
+		Set<QueueStatus> displayedStatuses = new HashSet<>();
 		for (int i = 0; i < sorted.size(); ++i) {
 			QueueMember member = sorted.get(i);
 			String time;
@@ -116,6 +117,11 @@ public class QueueData implements Storable {
 					}
                     time = member.getJoinTime();
 				}
+			}
+			QueueStatus status = member.getQueueStatus();
+			if (!displayedStatuses.contains(status)) {
+				mcb.addContent(member.getQueueStatusEmoji()+" = **"+status.name()+"**");
+				displayedStatuses.add(status);
 			}
 			mcb.addContent(member.getQueueStatusEmoji()+" "+getName(member, guild)+" "+time);
 		}
