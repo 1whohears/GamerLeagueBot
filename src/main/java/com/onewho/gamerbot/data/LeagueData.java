@@ -979,6 +979,7 @@ public class LeagueData implements Storable {
 		setupChannel("set-history", leagueCategory, guild);
 		setupChannel("ranks", leagueCategory, guild);
 		setupChannel("pairings", leagueCategory, guild);
+		setupChannel("queues", leagueCategory, guild);
 		// SPECIAL PERMS
 		Collection<Permission> viewPerm = new ArrayList<Permission>();
 		viewPerm.add(Permission.VIEW_CHANNEL);

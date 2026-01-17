@@ -71,7 +71,7 @@ public class QueueData implements Storable {
         if (isClosed()) return;
 		if (pregameStartTime.isEmpty()) {
             if (members.size() >= minPlayers && isEnoughPlayersAutoStart()) {
-                pregameStartTime = UtilCalendar.getCurrentDateTimeString();
+                startPreGame(debug);
             }
 		}
 		List<QueueMember> sorted = new ArrayList<>(members.values());
@@ -89,32 +89,35 @@ public class QueueData implements Storable {
 			String time;
 			if (!isPreGame()) {
 				if (i < maxPlayers) {
-					member.setQueueState(PlayerQueueState.PRIORITY);
+					member.setQueueStatus(QueueStatus.PRIORITY);
 				} else {
-					member.setQueueState(PlayerQueueState.OVERFLOW);
+					member.setQueueStatus(QueueStatus.OVERFLOW);
 				}
 				if (!isAllowOddNum() && (i == sorted.size()-1) && i % 2 != 0) {
-					member.setQueueState(PlayerQueueState.OVERFLOW);
+					member.setQueueStatus(QueueStatus.OVERFLOW);
 				}
+                time = member.getJoinTime();
 			} else {
 				if (member.isCheckedIn()) {
 					if (i < maxPlayers) {
-						member.setQueueState(PlayerQueueState.CHECKED_IN);
+						member.setQueueStatus(QueueStatus.CHECKED_IN);
 					} else {
-						member.setQueueState(PlayerQueueState.CHECKED_IN_SUB);
+						member.setQueueStatus(QueueStatus.CHECKED_IN_SUB);
 					}
-					if (!isAllowOddNum() && (i == sorted.filteredQueueMembers()-1) && i % 2 != 0) {
-						member.setQueueState(PlayerQueueState.CHECKED_IN_SUB);
+					if (!isAllowOddNum() && (i == filteredQueueMembers.size()-1) && i % 2 != 0) {
+						member.setQueueStatus(QueueStatus.CHECKED_IN_SUB);
 					}
+                    time = member.getCheckInTime();
 				} else {
 					if (i < maxPlayers) {
-						member.setQueueState(PlayerQueueState.NOT_CHECKED_IN);
+						member.setQueueStatus(QueueStatus.NOT_CHECKED_IN);
 					} else {
-						member.setQueueState(PlayerQueueState.NOT_CHECKED_IN_SUB);
+						member.setQueueStatus(QueueStatus.NOT_CHECKED_IN_SUB);
 					}
+                    time = member.getJoinTime();
 				}
 			}
-			mcb.addContent(member.getQueueStatusEmoji()+" "+getName(member, guild)+" "+member.getJoinTime());
+			mcb.addContent(member.getQueueStatusEmoji()+" "+getName(member, guild)+" "+time);
 		}
 		TextChannel queueChannel = guild.getChannelById(TextChannel.class, league.getChannelId("queues"));
         if (queueChannel == null) {
@@ -126,10 +129,10 @@ public class QueueData implements Storable {
         isDirty = false;
     }
 
-	private String getName(QueueMemeber member, Guild guild) {
+	private String getName(QueueMember member, Guild guild) {
 		Member m = guild.getMemberById(member.getId());
 		if (m != null) return m.getEffectiveName();
-    	else return member.getId()+""
+    	else return member.getId()+"";
 	}
 
     public void startPreGame(Consumer<String> debug) {
@@ -422,7 +425,7 @@ public class QueueData implements Storable {
         private final long id;
         private final String joinTime;
         private String checkInTime = "";
-		private PlayerQueueState queueState = PlayerQueueState.NONE;
+		private QueueStatus queueStatus = QueueStatus.NONE;
         public QueueMember(long id, String joinTime) {
             this.id = id;
             this.joinTime = joinTime;
@@ -437,7 +440,7 @@ public class QueueData implements Storable {
             data.addProperty("id", id);
             data.addProperty("joinTime", joinTime);
             data.addProperty("checkInTime", checkInTime);
-			data.addProperty("queueState", queueState.name());
+			data.addProperty("queueStatus", queueStatus.name());
             return data;
         }
         public long getId() {
@@ -461,29 +464,30 @@ public class QueueData implements Storable {
 			if (other instanceof QueueMember qm) return this.id == qm.id;
 			return false;
 		}
-		public PlayerQueueState getQueueState() {
-			return queueState;
+		public QueueStatus getQueueStatus() {
+			return queueStatus;
 		}
-		protected void setQueueState(PlayerQueueState state) {
-			queueState = state;
+		protected void setQueueStatus(QueueStatus state) {
+			queueStatus = state;
 		}
 		public String getQueueStatusEmoji() {
-			switch(queueState) {
-				case CHECKED_IN: return ":white_check_mark:";
-				case CHECKED_IN_SUB: return ":ballot_box_with_check:";
-				case NOT_CHECKED_IN: return "::";
-				case NOT_CHECKED_IN_SUB: return "::";
-				case PRIORITY: return "::";
-				case OVERFLOW: return "::";
-				case NONE: return "::";
-			}
+            return switch (queueStatus) {
+                case CHECKED_IN -> ":white_check_mark:";
+                case CHECKED_IN_SUB -> ":ballot_box_with_check:";
+                case NOT_CHECKED_IN -> ":negative_squared_cross_mark:";
+                case NOT_CHECKED_IN_SUB -> ":x:";
+                case PRIORITY -> ":arrow_up:";
+                case OVERFLOW -> ":arrow_down:";
+                case NONE -> ":question:";
+            };
 		}
     }
 
-	public static enum PlayerQueueState {
+	public enum QueueStatus {
 		CHECKED_IN,
 		CHECKED_IN_SUB,
 		NOT_CHECKED_IN,
+        NOT_CHECKED_IN_SUB,
 		PRIORITY,
 		OVERFLOW,
 		NONE
@@ -565,7 +569,7 @@ public class QueueData implements Storable {
         return pregameStartTime;
     }
 
-	public String isPreGame() {
+	public boolean isPreGame() {
 		return !getPregameStartTime().isEmpty();
 	}
 }
