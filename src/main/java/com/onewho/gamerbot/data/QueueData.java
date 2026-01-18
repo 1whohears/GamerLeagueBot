@@ -28,6 +28,7 @@ public class QueueData implements Storable {
 
     private boolean resolved;
     private boolean isDirty = true;
+    private QueueState queueState = QueueState.NONE;
     private String recentJoinTime = "";
     private String pregameStartTime = "";
     private long messageId = -1;
@@ -66,9 +67,57 @@ public class QueueData implements Storable {
         readMembers(data);
     }
 
+    private void updateQueueState() {
+        if (resolved) {
+            queueState = QueueState.CLOSED;
+            return;
+        }
+        if (queueState == QueueState.FINAL_PREGAME_TICK) {
+            queueState = QueueState.CLOSED;
+            isDirty = true;
+            return;
+        }
+        if (isPreGame()) {
+            if (UtilCalendar.isAfterSeconds(getPregameStartTime(), pregameTime)) {
+                queueState = QueueState.FINAL_PREGAME_TICK;
+                isDirty = true;
+                return;
+            } else if (UtilCalendar.isAfterSeconds(getPregameStartTime(), subRequestTime)) {
+                queueState = QueueState.PREGAME_SUBS;
+                isDirty = true;
+                return;
+            } else {
+                queueState = QueueState.PREGAME;
+                return;
+            }
+        }
+        if (queueState == QueueState.FINAL_ENROLL_TICK) {
+            queueState = QueueState.PREGAME;
+            isDirty = true;
+            return;
+        }
+        if (members.isEmpty() || !isResetTimeoutOnJoin()) {
+            if (UtilCalendar.isAfterSeconds(getStartTime(), timeoutTime)) {
+                queueState = QueueState.FINAL_ENROLL_TICK;
+                isDirty = true;
+                return;
+            } else {
+                queueState = QueueState.ENROLL;
+                return;
+            }
+        }
+        if (UtilCalendar.isAfterSeconds(recentJoinTime, timeoutTime)) {
+            queueState = QueueState.FINAL_ENROLL_TICK;
+            isDirty = true;
+        } else {
+            queueState = QueueState.ENROLL;
+        }
+    }
+
     public void update(Guild guild, LeagueData league, Consumer<String> debug) {
+        updateQueueState();
 		if (isClosed()) return;
-		if (pregameStartTime.isEmpty()) {
+		if (getQueueState() == QueueState.FINAL_ENROLL_TICK) {
             if (members.size() >= minPlayers && isEnoughPlayersAutoStart()) {
                 startPreGame(debug);
             }
@@ -79,44 +128,69 @@ public class QueueData implements Storable {
 		List<QueueMember> filteredQueueMembers = new ArrayList<>(sorted);
         filterQueueMembers(filteredQueueMembers);
 		MessageCreateBuilder mcb = new MessageCreateBuilder();
-        String queueState = "";
-        String nextQueueState = "";
-        String nextStateTime = "";
+        if (getQueueState() == QueueState.FINAL_PREGAME_TICK) {
+            if (filteredQueueMembers.size() >= minPlayers && isEnoughPlayersAutoStart()) {
+                createSet(guild, league, debug);
+            }
+        }
+        String queueState, nextQueueState;
+        if (getQueueState() == QueueState.ENROLL || getQueueState() == QueueState.FINAL_ENROLL_TICK) {
+            queueState = "ENROLL";
+            nextQueueState = "PRE-GAME";
+        } else if (getQueueState() == QueueState.PREGAME) {
+            queueState = "PRE-GAME";
+            nextQueueState = "PRE-GAME SUBS";
+        } else if (getQueueState() == QueueState.PREGAME_SUBS || getQueueState() == QueueState.FINAL_PREGAME_TICK) {
+            queueState = "PRE-GAME SUBS";
+            nextQueueState = "START";
+        } else if (getQueueState() == QueueState.CLOSED) {
+            queueState = nextQueueState = "CLOSED";
+        } else {
+            queueState = nextQueueState = "NONE";
+        }
+        String nextStateTime = switch (getQueueState()) {
+            case ENROLL, FINAL_ENROLL_TICK -> members.isEmpty() || !isResetTimeoutOnJoin()
+                    ? UtilCalendar.addSeconds(getStartTime(), timeoutTime)
+                    : UtilCalendar.addSeconds(recentJoinTime, timeoutTime);
+            case PREGAME -> UtilCalendar.addSeconds(getPregameStartTime(), subRequestTime);
+            case PREGAME_SUBS, FINAL_PREGAME_TICK -> UtilCalendar.addSeconds(getPregameStartTime(), pregameTime);
+            case CLOSED, NONE -> "";
+        };
         mcb.addContent("__**ID:"+getId()+" | "+queueState+" -> "+nextQueueState+" "+nextStateTime+"**__");
 		int maxPlayers = allowLargerTeams ? 200 : teamSize * 2;
 		Set<QueueStatus> displayedStatuses = new HashSet<>();
 		for (int i = 0; i < sorted.size(); ++i) {
 			QueueMember member = sorted.get(i);
 			String time;
-			if (!isPreGame()) {
-				if (i < maxPlayers) {
-					member.setQueueStatus(QueueStatus.PRIORITY);
-				} else {
-					member.setQueueStatus(QueueStatus.OVERFLOW);
-				}
-				if (!isAllowOddNum() && (i == sorted.size()-1) && i % 2 != 0) {
-					member.setQueueStatus(QueueStatus.OVERFLOW);
-				}
-                time = member.getJoinTime();
-			} else {
-				if (member.isCheckedIn()) {
-					if (i < maxPlayers) {
-						member.setQueueStatus(QueueStatus.CHECKED_IN);
-					} else {
-						member.setQueueStatus(QueueStatus.CHECKED_IN_SUB);
-					}
-					if (!isAllowOddNum() && (i == filteredQueueMembers.size()-1) && i % 2 != 0) {
-						member.setQueueStatus(QueueStatus.CHECKED_IN_SUB);
-					}
+			if (isPreGame()) {
+                if (member.isCheckedIn()) {
+                    if (i < maxPlayers) {
+                        member.setQueueStatus(QueueStatus.CHECKED_IN);
+                    } else {
+                        member.setQueueStatus(QueueStatus.CHECKED_IN_SUB);
+                    }
+                    if (!isAllowOddNum() && (i == filteredQueueMembers.size()-1) && i % 2 != 0) {
+                        member.setQueueStatus(QueueStatus.CHECKED_IN_SUB);
+                    }
                     time = member.getCheckInTime();
-				} else {
-					if (i < maxPlayers) {
-						member.setQueueStatus(QueueStatus.NOT_CHECKED_IN);
-					} else {
-						member.setQueueStatus(QueueStatus.NOT_CHECKED_IN_SUB);
-					}
+                } else {
+                    if (i < maxPlayers) {
+                        member.setQueueStatus(QueueStatus.NOT_CHECKED_IN);
+                    } else {
+                        member.setQueueStatus(QueueStatus.NOT_CHECKED_IN_SUB);
+                    }
                     time = member.getJoinTime();
-				}
+                }
+			} else {
+                if (i < maxPlayers) {
+                    member.setQueueStatus(QueueStatus.PRIORITY);
+                } else {
+                    member.setQueueStatus(QueueStatus.OVERFLOW);
+                }
+                if (!isAllowOddNum() && (i == sorted.size()-1) && i % 2 != 0) {
+                    member.setQueueStatus(QueueStatus.OVERFLOW);
+                }
+                time = member.getJoinTime();
 			}
 			QueueStatus status = member.getQueueStatus();
 			if (!displayedStatuses.contains(status)) {
@@ -147,7 +221,9 @@ public class QueueData implements Storable {
             return;
         }
         pregameStartTime = UtilCalendar.getCurrentDateTimeString();
+        queueState = QueueState.PREGAME;
         isDirty = true;
+        // TODO ping all players in the queue that it is time to lock in
     }
 
     private void displayQueue(TextChannel channel, MessageCreateData mcd) {
@@ -207,9 +283,8 @@ public class QueueData implements Storable {
         debug.accept("Successfully created set "+set.getId());
         set.displaySet(pairsChannel);
         resolved = true;
+        isDirty = true;
         GlobalData.saveData();
-        // TODO create a queues channel that updates and displays the current available queues
-        // TODO ping all players in the queue that it is time to lock in
     }
 
     protected void filterContestants(List<Contestant> contestants) {
@@ -276,7 +351,7 @@ public class QueueData implements Storable {
     }
 
     public QueueResult addIndividual(@NotNull UserData user) {
-        if (isClosed())
+        if (cantJoin())
             return QueueResult.CLOSED;
         long id = user.getId();
         if (members.containsKey(id))
@@ -288,7 +363,7 @@ public class QueueData implements Storable {
     public QueueResult addPreferredTeam(@NotNull String name, @NotNull UserData... users) {
         if (users.length > getTeamSize())
             return QueueResult.WRONG_TEAM_SIZE;
-        if (isClosed())
+        if (cantJoin())
             return QueueResult.CLOSED;
         Set<Long> teamMembers = new HashSet<>();
         boolean teamAlreadyExisted = false;
@@ -345,6 +420,7 @@ public class QueueData implements Storable {
         data.addProperty("recentJoinTime", recentJoinTime);
         data.addProperty("pregameStartTime", pregameStartTime);
         data.addProperty("messageId", messageId);
+        data.addProperty("queueState", getQueueState().name());
         JsonArray members = new JsonArray();
         this.members.forEach((id, qm) -> members.add(qm.getData()));
         data.add("members", members);
@@ -416,23 +492,15 @@ public class QueueData implements Storable {
     }
 
     public boolean isClosed() {
-        /*if (resolved) return true;
-        if (!getPregameStartTime().isEmpty()) return UtilCalendar.isAfterSeconds(getPregameStartTime(), pregameTime);
-        if (members.isEmpty() || !isResetTimeoutOnJoin()) return UtilCalendar.isAfterSeconds(getStartTime(), timeoutTime);
-        return UtilCalendar.isAfterSeconds(recentJoinTime, timeoutTime);*/
         return getQueueState() == QueueState.CLOSED;
     }
 
-    public QueueState getQueueState() {
-        if (resolved) return QueueState.CLOSED;
-        if (isPreGame()) return QueueState.PREGAME;
-        return QueueState.ENROLL;
+    public boolean cantJoin() {
+        return isClosed() || getQueueState() == QueueState.FINAL_PREGAME_TICK;
     }
 
-    public enum QueueState {
-        ENROLL,
-        PREGAME,
-        CLOSED
+    public QueueState getQueueState() {
+        return queueState;
     }
 
     @Nullable
@@ -501,16 +569,6 @@ public class QueueData implements Storable {
             };
 		}
     }
-
-	public enum QueueStatus {
-		CHECKED_IN,
-		CHECKED_IN_SUB,
-		NOT_CHECKED_IN,
-        NOT_CHECKED_IN_SUB,
-		PRIORITY,
-		OVERFLOW,
-		NONE
-	}
 
     public int getMinPlayers() {
         return minPlayers;
