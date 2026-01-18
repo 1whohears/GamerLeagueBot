@@ -416,10 +416,23 @@ public class QueueData implements Storable {
     }
 
     public boolean isClosed() {
-        if (resolved) return true;
+        /*if (resolved) return true;
         if (!getPregameStartTime().isEmpty()) return UtilCalendar.isAfterSeconds(getPregameStartTime(), pregameTime);
         if (members.isEmpty() || !isResetTimeoutOnJoin()) return UtilCalendar.isAfterSeconds(getStartTime(), timeoutTime);
-        return UtilCalendar.isAfterSeconds(recentJoinTime, timeoutTime);
+        return UtilCalendar.isAfterSeconds(recentJoinTime, timeoutTime);*/
+        return getQueueState() == QueueState.CLOSED;
+    }
+
+    public QueueState getQueueState() {
+        if (resolved) return QueueState.CLOSED;
+        if (isPreGame()) return QueueState.PREGAME;
+        return QueueState.ENROLL;
+    }
+
+    public enum QueueState {
+        ENROLL,
+        PREGAME,
+        CLOSED
     }
 
     @Nullable

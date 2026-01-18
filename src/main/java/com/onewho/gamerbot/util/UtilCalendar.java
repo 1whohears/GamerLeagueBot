@@ -194,4 +194,11 @@ public class UtilCalendar {
 		OffsetDateTime odt2 = OffsetDateTime.parse(time2, formatter);
 		return odt1.isBefore(odt2);
 	}
+
+	public static String addSeconds(String time, int seconds) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ssZ");
+		OffsetDateTime start = OffsetDateTime.parse(time, formatter);
+		OffsetDateTime end = start.plusMinutes(seconds);
+		return end.format(formatter);
+	}
 }
