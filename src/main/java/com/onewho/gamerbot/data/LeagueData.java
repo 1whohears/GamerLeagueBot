@@ -57,6 +57,17 @@ public class LeagueData implements Storable {
 	private long joinLeagueOptionId = -1;
 	private long setsaweekOptionId = -1;
 	private JsonObject channelIds = new JsonObject();
+
+    private int defaultQueueMinPlayers = 2;
+    private int defaultQueueTeamSize = 2;
+    private int defaultQueueTimeoutTime = 900;
+    private int defaultQueueSubRequestTime = 300;
+    private int defaultQueuePregameTime = 600;
+    private boolean defaultQueueAllowLargerTeams = true;
+    private boolean defaultQueueAllowOddNum = true;
+    private boolean defaultQueueResetTimeoutOnJoin = true;
+    private boolean defaultQueueEnoughPlayersAutoStart = true;
+    private boolean defaultQueueAllowJoinViaDiscord = true;
 	
 	/**
 	 * @param data league data written from disk
@@ -94,6 +105,17 @@ public class LeagueData implements Storable {
 		joinLeagueOptionId = ParseData.getLong(data, "join league option id", joinLeagueOptionId);
 		setsaweekOptionId = ParseData.getLong(data, "setsaweek option id", setsaweekOptionId);
 		channelIds = ParseData.getJsonObject(data, "channel ids");
+
+        defaultQueueMinPlayers = ParseData.getInt(data, "defaultQueueMinPlayers", defaultQueueMinPlayers);
+        defaultQueueTeamSize = ParseData.getInt(data, "defaultQueueTeamSize", defaultQueueTeamSize);
+        defaultQueueTimeoutTime = ParseData.getInt(data, "defaultQueueTimeoutTime", defaultQueueTimeoutTime);
+        defaultQueueSubRequestTime = ParseData.getInt(data, "defaultQueueSubRequestTime", defaultQueueSubRequestTime);
+        defaultQueuePregameTime = ParseData.getInt(data, "defaultQueuePregameTime", defaultQueuePregameTime);
+        defaultQueueAllowLargerTeams = ParseData.getBoolean(data, "defaultQueueAllowLargerTeams", defaultQueueAllowLargerTeams);
+        defaultQueueAllowOddNum = ParseData.getBoolean(data, "defaultQueueAllowOddNum", defaultQueueAllowOddNum);
+        defaultQueueResetTimeoutOnJoin = ParseData.getBoolean(data, "defaultQueueResetTimeoutOnJoin", defaultQueueResetTimeoutOnJoin);
+        defaultQueueEnoughPlayersAutoStart = ParseData.getBoolean(data, "defaultQueueEnoughPlayersAutoStart", defaultQueueEnoughPlayersAutoStart);
+        defaultQueueAllowJoinViaDiscord = ParseData.getBoolean(data, "defaultQueueAllowJoinViaDiscord", defaultQueueAllowJoinViaDiscord);
 	}
 	
 	/**
@@ -328,8 +350,22 @@ public class LeagueData implements Storable {
 
     public QueueData createQueue() {
         QueueData queue = new QueueData(getNewQueueId(), UtilCalendar.getCurrentDateTimeString());
+        resetQueueDefaults(queue);
         queues.add(queue);
         return queue;
+    }
+
+    public void resetQueueDefaults(@NotNull QueueData queue) {
+        queue.setMinPlayers(defaultQueueMinPlayers);
+        queue.setTeamSize(defaultQueueTeamSize);
+        queue.setAllowLargerTeams(defaultQueueAllowLargerTeams);
+        queue.setAllowOddNum(defaultQueueAllowOddNum);
+        queue.setTimeoutTime(defaultQueueTimeoutTime);
+        queue.setSubRequestTime(defaultQueueSubRequestTime);
+        queue.setPregameTime(defaultQueuePregameTime);
+        queue.setResetTimeoutOnJoin(defaultQueueResetTimeoutOnJoin);
+        queue.setEnoughPlayersAutoStart(defaultQueueEnoughPlayersAutoStart);
+        queue.setAllowJoinViaDiscord(defaultQueueAllowJoinViaDiscord);
     }
 
     private int getNewQueueId() {
@@ -1389,5 +1425,85 @@ public class LeagueData implements Storable {
 		LocalDate end = UtilCalendar.getDate(getSeasonEnd());
 		return !UtilCalendar.isOlder(now, end);
 	}
+
+    public int getDefaultQueueMinPlayers() {
+        return defaultQueueMinPlayers;
+    }
+
+    public void setDefaultQueueMinPlayers(int defaultQueueMinPlayers) {
+        this.defaultQueueMinPlayers = defaultQueueMinPlayers;
+    }
+
+    public int getDefaultQueueTeamSize() {
+        return defaultQueueTeamSize;
+    }
+
+    public void setDefaultQueueTeamSize(int defaultQueueTeamSize) {
+        this.defaultQueueTeamSize = defaultQueueTeamSize;
+    }
+
+    public int getDefaultQueueTimeoutTime() {
+        return defaultQueueTimeoutTime;
+    }
+
+    public void setDefaultQueueTimeoutTime(int defaultQueueTimeoutTime) {
+        this.defaultQueueTimeoutTime = defaultQueueTimeoutTime;
+    }
+
+    public int getDefaultQueueSubRequestTime() {
+        return defaultQueueSubRequestTime;
+    }
+
+    public void setDefaultQueueSubRequestTime(int defaultQueueSubRequestTime) {
+        this.defaultQueueSubRequestTime = defaultQueueSubRequestTime;
+    }
+
+    public int getDefaultQueuePregameTime() {
+        return defaultQueuePregameTime;
+    }
+
+    public void setDefaultQueuePregameTime(int defaultQueuePregameTime) {
+        this.defaultQueuePregameTime = defaultQueuePregameTime;
+    }
+
+    public boolean isDefaultQueueAllowLargerTeams() {
+        return defaultQueueAllowLargerTeams;
+    }
+
+    public void setDefaultQueueAllowLargerTeams(boolean defaultQueueAllowLargerTeams) {
+        this.defaultQueueAllowLargerTeams = defaultQueueAllowLargerTeams;
+    }
+
+    public boolean isDefaultQueueAllowOddNum() {
+        return defaultQueueAllowOddNum;
+    }
+
+    public void setDefaultQueueAllowOddNum(boolean defaultQueueAllowOddNum) {
+        this.defaultQueueAllowOddNum = defaultQueueAllowOddNum;
+    }
+
+    public boolean isDefaultQueueResetTimeoutOnJoin() {
+        return defaultQueueResetTimeoutOnJoin;
+    }
+
+    public void setDefaultQueueResetTimeoutOnJoin(boolean defaultQueueResetTimeoutOnJoin) {
+        this.defaultQueueResetTimeoutOnJoin = defaultQueueResetTimeoutOnJoin;
+    }
+
+    public boolean isDefaultQueueEnoughPlayersAutoStart() {
+        return defaultQueueEnoughPlayersAutoStart;
+    }
+
+    public void setDefaultQueueEnoughPlayersAutoStart(boolean defaultQueueEnoughPlayersAutoStart) {
+        this.defaultQueueEnoughPlayersAutoStart = defaultQueueEnoughPlayersAutoStart;
+    }
+
+    public boolean isDefaultQueueAllowJoinViaDiscord() {
+        return defaultQueueAllowJoinViaDiscord;
+    }
+
+    public void setDefaultQueueAllowJoinViaDiscord(boolean defaultQueueAllowJoinViaDiscord) {
+        this.defaultQueueAllowJoinViaDiscord = defaultQueueAllowJoinViaDiscord;
+    }
 	
 }
