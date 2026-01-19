@@ -98,6 +98,9 @@ public class LeagueData implements Storable {
 		sets.clear();
 		JsonArray ss = ParseData.getJsonArray(data, "sets");
 		for (int i = 0; i < ss.size(); ++i) sets.add(new SetData(this, ss.get(i).getAsJsonObject()));
+        queues.clear();
+        JsonArray qs = ParseData.getJsonArray(data, "queues");
+        for (int i = 0; i < qs.size(); ++i) queues.add(new QueueData(qs.get(i).getAsJsonObject()));
 		
 		leagueRoleId = ParseData.getLong(data, "league role id", leagueRoleId);
 		toRoleId = ParseData.getLong(data, "to role id", toRoleId);

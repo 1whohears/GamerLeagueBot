@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.gson.JsonObject;
+import com.onewho.gamerbot.util.UtilCalendar;
 import org.jetbrains.annotations.NotNull;
 
 public class UserData implements Contestant {
@@ -30,7 +31,7 @@ public class UserData implements Contestant {
 	
 	protected UserData(long id) {
 		this.id = id;
-		this.setLastActive(new SimpleDateFormat("dd-MM-yyyy").format(new Date()));
+		this.setLastActive(UtilCalendar.getCurrentDateString());
         this.extraData = new JsonObject();
 	}
 	
