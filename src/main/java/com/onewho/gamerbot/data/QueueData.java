@@ -127,7 +127,6 @@ public class QueueData implements Storable {
         sortQueueMembers(sorted);
 		List<QueueMember> filteredQueueMembers = new ArrayList<>(sorted);
         filterQueueMembers(filteredQueueMembers);
-		MessageCreateBuilder mcb = new MessageCreateBuilder();
         if (getQueueState() == QueueState.FINAL_PREGAME_TICK) {
             if (filteredQueueMembers.size() >= minPlayers && isEnoughPlayersAutoStart()) {
                 createSet(guild, league, debug);
@@ -156,12 +155,15 @@ public class QueueData implements Storable {
             case PREGAME_SUBS, FINAL_PREGAME_TICK -> UtilCalendar.addSeconds(getPregameStartTime(), pregameTime);
             case CLOSED, NONE -> "";
         };
+        nextStateTime = UtilCalendar.toDiscordTime(nextStateTime)+" "+UtilCalendar.toDiscordRelativeTime(nextStateTime);
+        MessageCreateBuilder mcb = new MessageCreateBuilder();
         mcb.addContent("__**ID:"+getId()+" | "+queueState+" -> "+nextQueueState+" "+nextStateTime+"**__");
 		int maxPlayers = allowLargerTeams ? 200 : teamSize * 2;
 		Set<QueueStatus> displayedStatuses = new HashSet<>();
 		for (int i = 0; i < sorted.size(); ++i) {
 			QueueMember member = sorted.get(i);
 			String time;
+            String name = getName(member, guild);
 			if (isPreGame()) {
                 if (member.isCheckedIn()) {
                     if (i < maxPlayers) {
@@ -180,6 +182,7 @@ public class QueueData implements Storable {
                         member.setQueueStatus(QueueStatus.NOT_CHECKED_IN_SUB);
                     }
                     time = member.getJoinTime();
+                    name = "<@"+member.getId()+"> ";
                 }
 			} else {
                 if (i < maxPlayers) {
@@ -197,7 +200,8 @@ public class QueueData implements Storable {
 				mcb.addContent(member.getQueueStatusEmoji()+" = **"+status.name()+"**");
 				displayedStatuses.add(status);
 			}
-			mcb.addContent(member.getQueueStatusEmoji()+" "+getName(member, guild)+" "+time);
+            time = UtilCalendar.toDiscordTime(time);
+			mcb.addContent(member.getQueueStatusEmoji()+" "+name+" "+time);
 		}
 		TextChannel queueChannel = guild.getChannelById(TextChannel.class, league.getChannelId("queues"));
         if (queueChannel == null) {
@@ -223,6 +227,7 @@ public class QueueData implements Storable {
         pregameStartTime = UtilCalendar.getCurrentDateTimeString();
         queueState = QueueState.PREGAME;
         isDirty = true;
+        debug.accept("Pre-Game for Queue "+getId()+" has started! All players must check in to their queue!");
         // TODO ping all players in the queue that it is time to lock in
     }
 
@@ -400,6 +405,24 @@ public class QueueData implements Storable {
         QueueMember member = members.remove(id);
         findClearTeam(id);
         return member != null;
+    }
+
+    public QueueResult checkIn(long id) {
+        if (isClosed()) return QueueResult.CLOSED;
+        if (!isPreGame()) return QueueResult.NOT_PRE_GAME;
+        QueueMember member = getQueueMemberData(id);
+        if (member == null) return QueueResult.NOT_IN_QUEUE;
+        member.setCheckedIn(true);
+        return QueueResult.SUCCESS;
+    }
+
+    public QueueResult checkOut(long id) {
+        if (isClosed()) return QueueResult.CLOSED;
+        if (!isPreGame()) return QueueResult.NOT_PRE_GAME;
+        QueueMember member = getQueueMemberData(id);
+        if (member == null) return QueueResult.NOT_IN_QUEUE;
+        member.setCheckedIn(false);
+        return QueueResult.SUCCESS;
     }
 
     @Override

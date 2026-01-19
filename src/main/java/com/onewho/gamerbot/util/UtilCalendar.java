@@ -13,7 +13,9 @@ import java.util.Locale;
 import javax.annotation.Nullable;
 
 public class UtilCalendar {
-	
+
+    public static final DateTimeFormatter TIME_DAY_SEC_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ssZ");
+
 	public static int getCurrentWeek() {
 		LocalDate date = LocalDate.now();
 		return date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
@@ -173,32 +175,38 @@ public class UtilCalendar {
 	}
 
     public static boolean isWithin60Seconds(String createdTime) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ssZ");
-        OffsetDateTime created = OffsetDateTime.parse(createdTime, formatter);
+        OffsetDateTime created = OffsetDateTime.parse(createdTime, TIME_DAY_SEC_FORMATTER);
         Instant now = Instant.now();
         long secondsBetween = Math.abs(Duration.between(created.toInstant(), now).getSeconds());
         return secondsBetween <= 60;
     }
 
 	public static boolean isAfterSeconds(String startTime, int seconds) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ssZ");
-		OffsetDateTime created = OffsetDateTime.parse(startTime, formatter);
+		OffsetDateTime created = OffsetDateTime.parse(startTime, TIME_DAY_SEC_FORMATTER);
 		Instant now = Instant.now();
 		long secondsBetween = Math.abs(Duration.between(created.toInstant(), now).getSeconds());
 		return secondsBetween > seconds;
 	}
 
 	public static boolean isOlderTime(String time1, String time2) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ssZ");
-		OffsetDateTime odt1 = OffsetDateTime.parse(time1, formatter);
-		OffsetDateTime odt2 = OffsetDateTime.parse(time2, formatter);
+		OffsetDateTime odt1 = OffsetDateTime.parse(time1, TIME_DAY_SEC_FORMATTER);
+		OffsetDateTime odt2 = OffsetDateTime.parse(time2, TIME_DAY_SEC_FORMATTER);
 		return odt1.isBefore(odt2);
 	}
 
 	public static String addSeconds(String time, int seconds) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm-ssZ");
-		OffsetDateTime start = OffsetDateTime.parse(time, formatter);
+		OffsetDateTime start = OffsetDateTime.parse(time, TIME_DAY_SEC_FORMATTER);
 		OffsetDateTime end = start.plusMinutes(seconds);
-		return end.format(formatter);
+		return end.format(TIME_DAY_SEC_FORMATTER);
 	}
+
+    public static String toDiscordRelativeTime(String time) {
+        OffsetDateTime odt = OffsetDateTime.parse(time, TIME_DAY_SEC_FORMATTER);
+        return "<t:"+odt.toEpochSecond()+":R>";
+    }
+
+    public static String toDiscordTime(String time) {
+        OffsetDateTime odt = OffsetDateTime.parse(time, TIME_DAY_SEC_FORMATTER);
+        return "<t:"+odt.toEpochSecond()+":S>";
+    }
 }
