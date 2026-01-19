@@ -33,16 +33,16 @@ public class QueueData implements Storable {
     private String pregameStartTime = "";
     private long messageId = -1;
 
-    private int minPlayers; // TODO minPlayers | default value and override command
-    private int teamSize; // TODO teamSize | default value and override command
-    private boolean allowLargerTeams; // TODO allowLargerTeams | default value and override command
-    private boolean allowOddNum; // TODO allowOddNum | default value and override command
-    private int timeoutTime; // TODO timeoutTime | default value and override command
-    private int subRequestTime; // TODO subRequestTime | default value and override command
-    private int pregameTime; // TODO pregameTime | default value and override command
-    private boolean resetTimeoutOnJoin; // TODO resetTimeoutOnJoin | default value and override command
-    private boolean ifEnoughPlayersAutoStart; // TODO ifEnoughPlayersAutoStart | default value and override command
-    private boolean allowJoinViaDiscord; // TODO allowJoinViaDiscord | default value and override command
+    private int minPlayers;
+    private int teamSize;
+    private boolean allowLargerTeams;
+    private boolean allowOddNum;
+    private int timeoutTime;
+    private int subRequestTime;
+    private int pregameTime;
+    private boolean resetTimeoutOnJoin;
+    private boolean ifEnoughPlayersAutoStart;
+    private boolean allowJoinViaDiscord;
 
     protected QueueData(int id, @NotNull String startTime) {
         this.id = id;
