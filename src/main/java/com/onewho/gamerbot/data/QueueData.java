@@ -22,10 +22,10 @@ import java.util.function.Consumer;
 public class QueueData implements Storable {
 
     private final int id;
-    @NotNull private final String startTime;
     @NotNull private final Map<Long,QueueMember> members = new HashMap<>();
     @NotNull private final Map<String,Set<Long>> preferredTeams = new HashMap<>();
 
+    @NotNull private String startTime;
     private boolean resolved;
     private boolean isDirty = true;
     private QueueState queueState = QueueState.NONE;
@@ -42,6 +42,7 @@ public class QueueData implements Storable {
     private int pregameTime; // TODO pregameTime | default value and override command
     private boolean resetTimeoutOnJoin; // TODO resetTimeoutOnJoin | default value and override command
     private boolean ifEnoughPlayersAutoStart; // TODO ifEnoughPlayersAutoStart | default value and override command
+    private boolean allowJoinViaDiscord; // TODO allowJoinViaDiscord | default value and override command
 
     protected QueueData(int id, @NotNull String startTime) {
         this.id = id;
@@ -60,6 +61,7 @@ public class QueueData implements Storable {
         pregameTime = ParseData.getInt(data, "pregameTime", 2);
         resetTimeoutOnJoin = ParseData.getBoolean(data, "resetTimeoutOnJoin", true);
         ifEnoughPlayersAutoStart = ParseData.getBoolean(data, "ifEnoughPlayersAutoStart", true);
+        allowJoinViaDiscord = ParseData.getBoolean(data, "allowJoinViaDiscord", true);
         resolved = ParseData.getBoolean(data, "resolved", false);
         recentJoinTime = ParseData.getString(data, "recentJoinTime", "");
         pregameStartTime = ParseData.getString(data, "pregameStartTime", "");
@@ -219,16 +221,27 @@ public class QueueData implements Storable {
     	else return member.getId()+"";
 	}
 
+    public void resetTimeOut(Consumer<String> debug) {
+        if (resolved) {
+            debug.accept("Cannot reset timeout for queue "+getId()+" because a set has already been generated.");
+            return;
+        }
+        startTime = UtilCalendar.getCurrentDateTimeString();
+        pregameStartTime = "";
+        queueState = QueueState.ENROLL;
+        isDirty = true;
+        debug.accept("Queue "+getId()+" has been reset to the start of the Enroll Phase.");
+    }
+
     public void startPreGame(Consumer<String> debug) {
         if (isClosed()) {
-            debug.accept("Cannot start the pregame of this queue because it is closed.");
+            debug.accept("Cannot start the pregame of queue "+getId()+" because it is closed.");
             return;
         }
         pregameStartTime = UtilCalendar.getCurrentDateTimeString();
         queueState = QueueState.PREGAME;
         isDirty = true;
         debug.accept("Pre-Game for Queue "+getId()+" has started! All players must check in to their queue!");
-        // TODO ping all players in the queue that it is time to lock in
     }
 
     private void displayQueue(TextChannel channel, MessageCreateData mcd) {
@@ -254,7 +267,6 @@ public class QueueData implements Storable {
             debug.accept(Important.getError()+" Queue "+id+" cannot make pairs because it is Closed!");
             return;
         }
-        debug.accept("Generating Pairs for Queue "+id+" ");
         TextChannel pairsChannel = guild.getChannelById(TextChannel.class, league.getChannelId("pairings"));
         if (pairsChannel == null) {
             debug.accept(Important.getError()+" Queue **"+id+"** Can't generate pairings!"
@@ -285,10 +297,11 @@ public class QueueData implements Storable {
                             +" __Attempted to make "+team1.getName()+" and "+team2.getName()+" fight each other!__");
             return;
         }
-        debug.accept("Successfully created set "+set.getId());
         set.displaySet(pairsChannel);
+        debug.accept("Successfully Created Set "+set.getId()+" for Queue "+getId());
         resolved = true;
         isDirty = true;
+        queueState = QueueState.CLOSED;
         GlobalData.saveData();
     }
 
@@ -389,6 +402,7 @@ public class QueueData implements Storable {
         String currentTime = UtilCalendar.getCurrentDateTimeString();
         members.put(user.getId(), new QueueMember(user.getId(), currentTime));
         recentJoinTime = currentTime;
+        isDirty = true;
     }
 
     private boolean findClearTeam(Long id) {
@@ -404,6 +418,7 @@ public class QueueData implements Storable {
     public boolean removeFromQueue(long id) {
         QueueMember member = members.remove(id);
         findClearTeam(id);
+        isDirty = true;
         return member != null;
     }
 
@@ -413,6 +428,7 @@ public class QueueData implements Storable {
         QueueMember member = getQueueMemberData(id);
         if (member == null) return QueueResult.NOT_IN_QUEUE;
         member.setCheckedIn(true);
+        isDirty = true;
         return QueueResult.SUCCESS;
     }
 
@@ -422,6 +438,7 @@ public class QueueData implements Storable {
         QueueMember member = getQueueMemberData(id);
         if (member == null) return QueueResult.NOT_IN_QUEUE;
         member.setCheckedIn(false);
+        isDirty = true;
         return QueueResult.SUCCESS;
     }
 
@@ -439,6 +456,7 @@ public class QueueData implements Storable {
         data.addProperty("pregameTime", pregameTime);
         data.addProperty("resetTimeoutOnJoin", resetTimeoutOnJoin);
         data.addProperty("ifEnoughPlayersAutoStart", ifEnoughPlayersAutoStart);
+        data.addProperty("allowJoinViaDiscord", allowJoinViaDiscord);
         data.addProperty("resolved", resolved);
         data.addProperty("recentJoinTime", recentJoinTime);
         data.addProperty("pregameStartTime", pregameStartTime);
@@ -662,6 +680,15 @@ public class QueueData implements Storable {
 
     public void setEnoughPlayersAutoStart(boolean ifEnoughPlayersAutoStart) {
         this.ifEnoughPlayersAutoStart = ifEnoughPlayersAutoStart;
+        isDirty = true;
+    }
+
+    public boolean isAllowJoinViaDiscord() {
+        return allowJoinViaDiscord;
+    }
+
+    public void setAllowJoinViaDiscord(boolean allowJoinViaDiscord) {
+        this.allowJoinViaDiscord = allowJoinViaDiscord;
         isDirty = true;
     }
 

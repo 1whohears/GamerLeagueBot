@@ -11,17 +11,17 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public interface ICommand {
 	
-	public boolean getNeedsAdmin();
+	boolean getNeedsAdmin();
 	
-	public boolean getNeedsTO();
+	boolean getNeedsTO();
 	
-	public String getCommandString();
+	String getCommandString();
 	
-	public String getHelp();
+	String getHelp();
 	
-	public boolean runCommand(MessageReceivedEvent event, String[] params);
+	boolean runCommand(MessageReceivedEvent event, String[] params);
 	
-	public HashMap<String, SubCommand> subCommands = new HashMap<>();
+	HashMap<String, SubCommand> subCommands = new HashMap<>();
 	
 	default SubCommandResult runSubCommands(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 		if (params.length < 2) return SubCommandResult.NO_PARAMS;
@@ -49,24 +49,29 @@ public interface ICommand {
 		return true;
 	}
 	
-	public static enum SubCommandResult {
+	enum SubCommandResult {
 		NO_PARAMS,
 		PARAM_DNE,
 		COMMAND_FAIL,
 		SUCCESS
 	}
 	
-	default public boolean checkIfMention(String m) {
+	static boolean checkIfMention(String m) {
 		return m.length() > 10 && m.charAt(0) == '<' && m.charAt(1) == '@' && m.charAt(m.length()-1) == '>';
 	}
 	
-	default public long getIdFromMention(String m) {
+	static long getIdFromMentionStr(String m) {
 		if (!checkIfMention(m)) return -1;
-		long id = -1;
 		String pingString = m.substring(2, m.length()-1);
-		try { id = Long.parseLong(pingString); } 
-		catch (NumberFormatException e) {}
-		return id;
+		try {
+            return Long.parseLong(pingString);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
 	}
+
+    default long getIdFromMention(String m) {
+        return ICommand.getIdFromMentionStr(m);
+    }
 	
 }
