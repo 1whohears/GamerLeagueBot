@@ -57,9 +57,10 @@ public class CommandParser {
         commands.add(new TestPairings());
         commands.add(new CreateQueue());
         commands.add(new ManageQueue());
-		// TODO join queue command
-		// TODO leave queue command
-		// TODO check in queue command
+        commands.add(new PlayerQueue.JoinQueue());
+        commands.add(new PlayerQueue.LeaveQueue());
+        commands.add(new PlayerQueue.CheckInQueue());
+        commands.add(new PlayerQueue.CheckOutQueue());
         commands.add(new LinkDiscord());
 	}
 	
