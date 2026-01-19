@@ -32,6 +32,7 @@ public class QueueData implements Storable {
     private String recentJoinTime = "";
     private String pregameStartTime = "";
     private long messageId = -1;
+    private int resolvedSetId = -1;
 
     private int minPlayers;
     private int teamSize;
@@ -66,6 +67,7 @@ public class QueueData implements Storable {
         recentJoinTime = ParseData.getString(data, "recentJoinTime", "");
         pregameStartTime = ParseData.getString(data, "pregameStartTime", "");
         messageId = ParseData.getLong(data, "messageId", messageId);
+        resolvedSetId = ParseData.getInt(data, "resolvedSetId", -1);
         readMembers(data);
     }
 
@@ -302,6 +304,7 @@ public class QueueData implements Storable {
         resolved = true;
         isDirty = true;
         queueState = QueueState.CLOSED;
+        resolvedSetId = set.getId();
         GlobalData.saveData();
     }
 
@@ -461,6 +464,7 @@ public class QueueData implements Storable {
         data.addProperty("recentJoinTime", recentJoinTime);
         data.addProperty("pregameStartTime", pregameStartTime);
         data.addProperty("messageId", messageId);
+        data.addProperty("resolvedSetId", resolvedSetId);
         data.addProperty("queueState", getQueueState().name());
         JsonArray members = new JsonArray();
         this.members.forEach((id, qm) -> members.add(qm.getData()));
