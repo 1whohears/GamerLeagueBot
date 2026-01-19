@@ -2,6 +2,7 @@ package com.onewho.gamerbot.data;
 
 import com.google.gson.JsonObject;
 
+import com.onewho.gamerbot.util.UtilCalendar;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
@@ -311,7 +312,7 @@ public class SetData {
 				.addContent(p2Name)
 				.addContent("**"+getP2score()+"** ")
 				.addContent("__**"+getStatus()+"**__ ")
-				.addContent("__"+date+"__")
+				.addContent("__"+UtilCalendar.toDiscordTime(date)+"__")
 				.build();
 		if (messageId == -1) messageId = channel.sendMessage(mcd).complete().getIdLong();
 		else {
