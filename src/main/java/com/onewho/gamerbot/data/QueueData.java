@@ -305,7 +305,7 @@ public class QueueData implements Storable {
         isDirty = true;
         queueState = QueueState.CLOSED;
         resolvedSetId = set.getId();
-        GlobalData.saveData();
+        GlobalData.markReadyToSave();
     }
 
     protected void filterContestants(List<Contestant> contestants) {

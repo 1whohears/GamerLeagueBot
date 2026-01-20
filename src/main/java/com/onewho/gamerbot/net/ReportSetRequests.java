@@ -98,7 +98,7 @@ public class ReportSetRequests {
                 MessageChannelUnion channel = guild.getChannelById(MessageChannelUnion.class,
                         league.getChannelId("bot-commands"));
                 league.updateRanks(guild, channel);
-                GlobalData.saveData();
+                GlobalData.markReadyToSave();
             }
             String result = "Set "+set.getId()+" successfully reported.";
             if (!msg.get().isEmpty()) result = msg.get();
@@ -110,7 +110,7 @@ public class ReportSetRequests {
             MessageChannelUnion channel = guild.getChannelById(MessageChannelUnion.class,
                     league.getChannelId("bot-commands"));
             league.updateRanks(guild, channel);
-            GlobalData.saveData();
+            GlobalData.markReadyToSave();
             return getGson().toJson(Map.of("result", "Updated ranks!"));
         });
     }

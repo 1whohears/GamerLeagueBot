@@ -40,7 +40,7 @@ public class ManageQueue extends LeagueCommand {
                         return false;
                     }
                     queue.resetTimeOut(msg -> event.getChannel().sendMessage(msg).queue());
-                    GlobalData.saveData();
+                    GlobalData.markReadyToSave();
                     return true;
                 })));
         addSubCommand(new QueueSubCommand("start_pregame",
@@ -50,7 +50,7 @@ public class ManageQueue extends LeagueCommand {
                         return false;
                     }
                     queue.startPreGame(msg -> event.getChannel().sendMessage(msg).queue());
-                    GlobalData.saveData();
+                    GlobalData.markReadyToSave();
                     return true;
                 })));
 		addSubCommand(new QueueSubCommand("create_set",
@@ -71,7 +71,7 @@ public class ManageQueue extends LeagueCommand {
                     QueueResult result = queue.addIndividual(user);
                     if (result == QueueResult.SUCCESS) {
                         event.getChannel().sendMessage("Added player to queue "+queue.getId()).queue();
-                        GlobalData.saveData();
+                        GlobalData.markReadyToSave();
                         return true;
                     } else {
                         event.getChannel().sendMessage(Important.getError()
@@ -89,7 +89,7 @@ public class ManageQueue extends LeagueCommand {
                     boolean result = queue.removeFromQueue(user.getId());
                     if (result) {
                         event.getChannel().sendMessage("Removed player from queue "+queue.getId()).queue();
-                        GlobalData.saveData();
+                        GlobalData.markReadyToSave();
                         return true;
                     } else {
                         event.getChannel().sendMessage(Important.getError()
@@ -106,7 +106,7 @@ public class ManageQueue extends LeagueCommand {
                     QueueResult result = queue.checkIn(user.getId());
                     if (result == QueueResult.SUCCESS) {
                         event.getChannel().sendMessage("Checked In player to queue "+queue.getId()).queue();
-                        GlobalData.saveData();
+                        GlobalData.markReadyToSave();
                         return true;
                     } else {
                         event.getChannel().sendMessage(Important.getError()
@@ -123,7 +123,7 @@ public class ManageQueue extends LeagueCommand {
                     QueueResult result = queue.checkOut(user.getId());
                     if (result == QueueResult.SUCCESS) {
                         event.getChannel().sendMessage("Checked Out player from queue "+queue.getId()).queue();
-                        GlobalData.saveData();
+                        GlobalData.markReadyToSave();
                         return true;
                     } else {
                         event.getChannel().sendMessage(Important.getError()
@@ -140,7 +140,7 @@ public class ManageQueue extends LeagueCommand {
                         queue.setMinPlayers(value);
                         event.getChannel().sendMessage("Set Min Players for queue " + queue.getId() + " to " + value).queue();
                     }
-                    GlobalData.saveData();
+                    GlobalData.markReadyToSave();
                     return true;
                 })));
         addSubCommand(new QueueSubCommand("team_size",
@@ -152,7 +152,7 @@ public class ManageQueue extends LeagueCommand {
                         queue.setTeamSize(value);
                         event.getChannel().sendMessage("Set Team Size for queue " + queue.getId() + " to " + value).queue();
                     }
-                    GlobalData.saveData();
+                    GlobalData.markReadyToSave();
                     return true;
                 })));
         addSubCommand(new QueueSubCommand("timeout_time",
@@ -164,7 +164,7 @@ public class ManageQueue extends LeagueCommand {
                         queue.setTimeoutTime(value);
                         event.getChannel().sendMessage("Set Timeout Time for queue " + queue.getId() + " to " + value).queue();
                     }
-                    GlobalData.saveData();
+                    GlobalData.markReadyToSave();
                     return true;
                 })));
         addSubCommand(new QueueSubCommand("sub_request_time",
@@ -176,7 +176,7 @@ public class ManageQueue extends LeagueCommand {
                         queue.setSubRequestTime(value);
                         event.getChannel().sendMessage("Set Sub Request Time for queue " + queue.getId() + " to " + value).queue();
                     }
-                    GlobalData.saveData();
+                    GlobalData.markReadyToSave();
                     return true;
                 })));
         addSubCommand(new QueueSubCommand("pregame_time",
@@ -188,7 +188,7 @@ public class ManageQueue extends LeagueCommand {
                         queue.setPregameTime(value);
                         event.getChannel().sendMessage("Set Pre-Game Time for queue " + queue.getId() + " to " + value).queue();
                     }
-                    GlobalData.saveData();
+                    GlobalData.markReadyToSave();
                     return true;
                 })));
         addSubCommand(new QueueSubCommand("allow_odd_num",
@@ -200,7 +200,7 @@ public class ManageQueue extends LeagueCommand {
                         queue.setAllowOddNum(value);
                         event.getChannel().sendMessage("Set Allow Odd Number of Players for queue " + queue.getId() + " to " + value).queue();
                     }
-                    GlobalData.saveData();
+                    GlobalData.markReadyToSave();
                     return true;
                 })));
         addSubCommand(new QueueSubCommand("reset_timeout_on_join",
@@ -212,7 +212,7 @@ public class ManageQueue extends LeagueCommand {
                         queue.setResetTimeoutOnJoin(value);
                         event.getChannel().sendMessage("Set Reset Timeout on Join for queue " + queue.getId() + " to " + value).queue();
                     }
-                    GlobalData.saveData();
+                    GlobalData.markReadyToSave();
                     return true;
                 })));
         addSubCommand(new QueueSubCommand("if_enough_players_auto_start",
@@ -224,7 +224,7 @@ public class ManageQueue extends LeagueCommand {
                         queue.setEnoughPlayersAutoStart(value);
                         event.getChannel().sendMessage("Set Auto Start if Enough Players for queue " + queue.getId() + " to " + value).queue();
                     }
-                    GlobalData.saveData();
+                    GlobalData.markReadyToSave();
                     return true;
                 })));
         addSubCommand(new QueueSubCommand("allow_join_via_discord",
@@ -236,7 +236,7 @@ public class ManageQueue extends LeagueCommand {
                         queue.setAllowJoinViaDiscord(value);
                         event.getChannel().sendMessage("Set Allow Join Via Discord Commands for queue " + queue.getId() + " to " + value).queue();
                     }
-                    GlobalData.saveData();
+                    GlobalData.markReadyToSave();
                     return true;
                 })));
 	}

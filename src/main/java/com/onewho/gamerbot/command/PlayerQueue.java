@@ -13,7 +13,7 @@ public abstract class PlayerQueue extends LeagueCommand {
                                   LeagueData league, @NotNull UserData user, @NotNull QueueData queue) {
             QueueResult result = queue.addIndividual(user);
             event.getChannel().sendMessage("Join Queue "+queue.getId()+" result: "+result.name()).queue();
-            if (result == QueueResult.SUCCESS) GlobalData.saveData();
+            if (result == QueueResult.SUCCESS) GlobalData.markReadyToSave();
             return true;
         }
         @Override
@@ -32,7 +32,7 @@ public abstract class PlayerQueue extends LeagueCommand {
                                   LeagueData league, @NotNull UserData user, @NotNull QueueData queue) {
             boolean result = queue.removeFromQueue(user.getId());
             event.getChannel().sendMessage("Leave Queue "+queue.getId()+" result: "+result).queue();
-            if (result) GlobalData.saveData();
+            if (result) GlobalData.markReadyToSave();
             return true;
         }
         @Override
@@ -51,7 +51,7 @@ public abstract class PlayerQueue extends LeagueCommand {
                                   LeagueData league, @NotNull UserData user, @NotNull QueueData queue) {
             QueueResult result = queue.checkIn(user.getId());
             event.getChannel().sendMessage("Check In Queue "+queue.getId()+" result: "+result.name()).queue();
-            if (result == QueueResult.SUCCESS) GlobalData.saveData();
+            if (result == QueueResult.SUCCESS) GlobalData.markReadyToSave();
             return true;
         }
         @Override
@@ -70,7 +70,7 @@ public abstract class PlayerQueue extends LeagueCommand {
                                   LeagueData league, @NotNull UserData user, @NotNull QueueData queue) {
             QueueResult result = queue.checkOut(user.getId());
             event.getChannel().sendMessage("Check Out Queue "+queue.getId()+" result: "+result.name()).queue();
-            if (result == QueueResult.SUCCESS) GlobalData.saveData();
+            if (result == QueueResult.SUCCESS) GlobalData.markReadyToSave();
             return true;
         }
         @Override

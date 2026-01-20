@@ -30,7 +30,7 @@ public class CreateLeague extends AdminCommand {
 		String name = "";
 		for (int i = 1; i < params.length; ++i) name += params[i];
 		gdata.createLeague(event.getGuild(), event.getChannel(), name);
-		GlobalData.saveData();
+		GlobalData.markReadyToSave();
 		return true;
 	}
 

@@ -909,7 +909,7 @@ public class LeagueData implements Storable {
 		guild.addRoleToMember(m, guild.getRoleById(getLeagueRoleId())).queue();
 		userData.setActive(true);
 		userData.setLastActive(UtilCalendar.getCurrentDateString());
-		GlobalData.saveData();
+		GlobalData.markReadyToSave();
 		return "You have joined the Gamer League! Please select how many sets you want to do per week!"
 				+ " Use $help in #bot-commands for more info!";
 	}
@@ -1000,7 +1000,7 @@ public class LeagueData implements Storable {
 			e.printStackTrace();
 			return;
 		}
-		GlobalData.saveData();
+		GlobalData.markReadyToSave();
 		debugChannel.sendMessage("Bot Channel Setup for League "+name+" Complete!").queue();		
 	}
 	
@@ -1423,7 +1423,7 @@ public class LeagueData implements Storable {
 			pairsChannel.sendMessage("__**SEASON "+getSeasonId()+" HAS BEGUN!**__").queue();
 		}
 		sets.clear();
-		GlobalData.saveData();
+		GlobalData.markReadyToSave();
 		return true;
 	}
 	

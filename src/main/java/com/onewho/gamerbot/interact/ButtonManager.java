@@ -91,7 +91,7 @@ public class ButtonManager {
 				GlobalData.getGuildDataById(guild.getIdLong())
 					.getLeagueByChannel(event.getChannel()).getChannelId("pairings"));
 		set.displaySet(pairsChannel);
-		GlobalData.saveData();
+		GlobalData.markReadyToSave();
 	}
 	
 	private static void handleReportDisputeButton(ButtonInteractionEvent event) {

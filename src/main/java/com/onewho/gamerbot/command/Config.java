@@ -45,7 +45,7 @@ public class Config extends LeagueCommand {
 				value = ldata.setMaxSetsPerWeek(value);
 				ldata.updateOptions(event.getGuild());
 				event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
-				GlobalData.saveData();
+				GlobalData.markReadyToSave();
 				return true;
 			}
 		});
@@ -59,7 +59,7 @@ public class Config extends LeagueCommand {
 				}
 				value = ldata.setWeeksBeforeAutoInactive(value);
 				event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
-				GlobalData.saveData();
+				GlobalData.markReadyToSave();
 				return true;
 			}
 		});
@@ -73,7 +73,7 @@ public class Config extends LeagueCommand {
 				}
 				value = ldata.setWeeksBeforeSetExpires(value);
 				event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
-				GlobalData.saveData();
+				GlobalData.markReadyToSave();
 				return true;
 			}
 		});
@@ -87,7 +87,7 @@ public class Config extends LeagueCommand {
 				}
 				value = ldata.setWeeksUntilSetRepeat(value);
 				event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
-				GlobalData.saveData();
+				GlobalData.markReadyToSave();
 				return true;
 			}
 		});
@@ -101,7 +101,7 @@ public class Config extends LeagueCommand {
 				}
 				value = ldata.setDefaultScore(value);
 				event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
-				GlobalData.saveData();
+				GlobalData.markReadyToSave();
 				return true;
 			}
 		});
@@ -115,7 +115,7 @@ public class Config extends LeagueCommand {
 				}
 				ldata.setK(valueD);
 				event.getChannel().sendMessage("`"+params[1]+"` set to `"+valueD+"`").queue();
-				GlobalData.saveData();
+				GlobalData.markReadyToSave();
 				return true;
 			}
 		});
@@ -131,7 +131,7 @@ public class Config extends LeagueCommand {
 				}
 				ldata.autoGenPairs = valueB;
 				event.getChannel().sendMessage("`"+params[1]+"` set to `"+valueB+"`").queue();
-				GlobalData.saveData();
+				GlobalData.markReadyToSave();
 				return true;
 			}
 		});
@@ -147,7 +147,7 @@ public class Config extends LeagueCommand {
 				}
 				ldata.autoUpdateRanks = valueB;
 				event.getChannel().sendMessage("`"+params[1]+"` set to `"+valueB+"`").queue();
-				GlobalData.saveData();
+				GlobalData.markReadyToSave();
 				return true;
 			}
 		});
@@ -161,7 +161,7 @@ public class Config extends LeagueCommand {
 				}
 				value = ldata.setChallengesPerWeek(value);
 				event.getChannel().sendMessage("`"+params[1]+"` set to `"+value+"`").queue();
-				GlobalData.saveData();
+				GlobalData.markReadyToSave();
 				return true;
 			}
 		});
@@ -172,7 +172,7 @@ public class Config extends LeagueCommand {
 				if (end.equals("none")) end = "";
 				if (ldata.setSeasonEnd(end)) event.getChannel().sendMessage("`"+params[1]+"` set to `"+end+"`").queue();
 				else event.getChannel().sendMessage(Important.getError(end+" is not in `dd-mm-yyyy` format!")).queue();
-				GlobalData.saveData();
+				GlobalData.markReadyToSave();
 				return true;
 			}
 		});
@@ -182,7 +182,7 @@ public class Config extends LeagueCommand {
 				String start = params[2];
 				if (ldata.setSeasonStart(start)) event.getChannel().sendMessage("`"+params[1]+"` set to `"+start+"`").queue();
 				else event.getChannel().sendMessage(Important.getError(start+" is not in `dd-mm-yyyy` format!")).queue();
-				GlobalData.saveData();
+				GlobalData.markReadyToSave();
 				return true;
 			}
 		});

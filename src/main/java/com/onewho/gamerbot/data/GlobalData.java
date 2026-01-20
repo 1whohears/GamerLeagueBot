@@ -23,6 +23,8 @@ public class GlobalData {
 	private static final String dataFileName = "data.json";
 	
 	private static final HashMap<Long, GuildData> guilds = new HashMap<>();
+
+    private static boolean readyToSave = false;
 	
 	public static Gson getGson() {
 		if (gson == null) {
@@ -44,7 +46,7 @@ public class GlobalData {
         Path path = Paths.get(dataFileName);
         if (!Files.exists(path)) {
 			json.add("guilds", new JsonArray());
-			saveData();
+			markReadyToSave();
 		} else {
 			Reader reader = Files.newBufferedReader(path);
 			json = gson.fromJson(reader, JsonObject.class);
@@ -58,25 +60,35 @@ public class GlobalData {
 		}
 		return json;
 	}
-	
-	/**
-	 * writes data for all discord servers/guilds to disk
-	 */
-	public static void saveData() {
-		JsonObject json = new JsonObject();
-		JsonArray gs = new JsonArray();
-		guilds.forEach((id, data) -> saveGuild(data, gs));
-		json.add("guilds", gs);
-		String data = gson.toJson(json);
-		BufferedWriter writer;
-		try {
-			writer = new BufferedWriter(new FileWriter(dataFileName));
-			writer.write(data);
-		    writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+
+    public static void markReadyToSave() {
+        readyToSave = true;
+    }
+
+    /**
+     * writes data for all discord servers/guilds to disk.
+     * will not actually do anything until {@link #markReadyToSave()}
+     * is called first.
+     * instead of running this operation hundreds of times a tick, use
+     * {@link #markReadyToSave()} and the scheduler will run this once every couple seconds.
+     */
+    public static void saveData() {
+        if (!readyToSave) return;
+        JsonObject json = new JsonObject();
+        JsonArray gs = new JsonArray();
+        guilds.forEach((id, data) -> saveGuild(data, gs));
+        json.add("guilds", gs);
+        String data = gson.toJson(json);
+        BufferedWriter writer;
+        try {
+            writer = new BufferedWriter(new FileWriter(dataFileName));
+            writer.write(data);
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        readyToSave = false;
+    }
 	
 	private static void saveGuild(GuildData data, JsonArray gs) {
 		gs.add(data.getJson());

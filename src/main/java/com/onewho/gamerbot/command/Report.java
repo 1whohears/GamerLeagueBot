@@ -102,7 +102,7 @@ public class Report extends LeagueCommand {
 		TextChannel pairsChannel = event.getGuild().getChannelById(TextChannel.class, 
 				ldata.getChannelId("pairings"));
 		set.displaySet(pairsChannel);
-		GlobalData.saveData();
+		GlobalData.markReadyToSave();
 		return true;
 	}
 	

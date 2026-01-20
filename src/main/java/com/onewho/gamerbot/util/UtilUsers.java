@@ -20,7 +20,7 @@ public class UtilUsers {
 			return "How can you leave something that you aren't in?";
 		guild.removeRoleFromMember(user, guild.getRoleById(data.getLeagueRoleId())).queue();
 		userData.setActive(false);
-		GlobalData.saveData();
+		GlobalData.markReadyToSave();
 		return "You have left this league...sad...";
 	}
 	
@@ -36,7 +36,7 @@ public class UtilUsers {
 		if (!userData.isActive()) 
 			return "You have been set as an inactive player. Please rejoin the league first!";
 		userData.setSetsPerWeek(sets);
-		GlobalData.saveData();
+		GlobalData.markReadyToSave();
 		return "I will try to give you "+sets+" pairings next week!";
 	}
 

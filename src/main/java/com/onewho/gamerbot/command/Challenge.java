@@ -55,7 +55,7 @@ public class Challenge extends LeagueCommand {
 			return false;
 		}
 		if (!ldata.createChallenge(event.getGuild(), event.getChannel(), selfId, enemyId)) return false;
-		GlobalData.saveData();
+		GlobalData.markReadyToSave();
 		return true;
 	}
 

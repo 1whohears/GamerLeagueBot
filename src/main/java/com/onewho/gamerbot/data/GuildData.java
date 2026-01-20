@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.onewho.gamerbot.BotMain;
 
 import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Guild;
@@ -111,7 +110,7 @@ public class GuildData {
 				+ "\nIf you want to revive this league you must `$createleague` a new one and "
 				+ "`$readbackup` Users then rejoin and select the number of sets they want again!")
 			.queue();
-		GlobalData.saveData();
+		GlobalData.markReadyToSave();
 		return true;
 	}
 	

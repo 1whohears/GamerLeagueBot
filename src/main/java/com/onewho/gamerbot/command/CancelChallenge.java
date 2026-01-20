@@ -76,7 +76,7 @@ public class CancelChallenge extends LeagueCommand {
 			return false;
 		}
 		event.getChannel().sendMessage("Removed the challenge!").queue();
-		GlobalData.saveData();
+		GlobalData.markReadyToSave();
 		return true;
 	}
 

@@ -87,7 +87,7 @@ public class ReadBackup extends LeagueCommand {
 			event.getChannel().sendMessage("The uploaded file is not a backup file").queue();
 			return false;
 		}
-		GlobalData.saveData();
+		GlobalData.markReadyToSave();
 		event.getChannel().sendMessage("Backup has been loaded!").queue();
 		return true;
 	}

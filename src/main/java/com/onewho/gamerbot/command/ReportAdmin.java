@@ -100,7 +100,7 @@ public class ReportAdmin extends LeagueCommand {
         //display new sets
         TextChannel pairsChannel = guild.getChannelById(TextChannel.class, ldata.getChannelId("pairings"));
         set.displaySet(pairsChannel);
-        GlobalData.saveData();
+        GlobalData.markReadyToSave();
         return set;
     }
 	

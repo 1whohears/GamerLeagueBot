@@ -32,7 +32,7 @@ public class GenPairs extends LeagueCommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 		ldata.genWeeklyPairs(event.getGuild(), event.getChannel());
-		GlobalData.saveData();
+		GlobalData.markReadyToSave();
 		return true;
 	}
 

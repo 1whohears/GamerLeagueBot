@@ -50,7 +50,7 @@ public class RemoveSet extends LeagueCommand {
 			return false;
 		}
 		event.getChannel().sendMessage("Removed "+num+" sets!").queue();
-		GlobalData.saveData();
+		GlobalData.markReadyToSave();
 		return true;
 	}
 

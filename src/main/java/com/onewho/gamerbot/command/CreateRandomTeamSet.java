@@ -5,7 +5,6 @@ import com.onewho.gamerbot.data.*;
 import com.onewho.gamerbot.util.UtilUsers;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.util.function.Consumer;
@@ -64,7 +63,7 @@ public class CreateRandomTeamSet extends LeagueCommand {
         debugConsumer.accept("Successfully created set "+set.getId());
         TextChannel pairsChannel = guild.getChannelById(TextChannel.class, ldata.getChannelId("pairings"));
         set.displaySet(pairsChannel);
-        GlobalData.saveData();
+        GlobalData.markReadyToSave();
         return set;
     }
 

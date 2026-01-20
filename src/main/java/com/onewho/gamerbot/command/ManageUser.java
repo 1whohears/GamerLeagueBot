@@ -42,7 +42,7 @@ public class ManageUser extends LeagueCommand {
 					return false;
 				}
 				if (!ldata.postUserData(event.getGuild(), event.getChannel(), pingId)) return false;
-				GlobalData.saveData();
+				GlobalData.markReadyToSave();
 				return true;
 			}
 		});
@@ -86,7 +86,7 @@ public class ManageUser extends LeagueCommand {
 					return false;
 				}
 				if (!ldata.removeUser(event.getGuild(), event.getChannel(), pingId)) return false;
-				GlobalData.saveData();
+				GlobalData.markReadyToSave();
 				return true;
 			}
 		});
@@ -106,7 +106,7 @@ public class ManageUser extends LeagueCommand {
 					return false;
 				}
 				if (!ldata.userSetsPerWeek(event.getGuild(), event.getChannel(), pingId, sets)) return false;
-				GlobalData.saveData();
+				GlobalData.markReadyToSave();
 				return true;
 			}
 		});
@@ -126,7 +126,7 @@ public class ManageUser extends LeagueCommand {
                     return false;
                 }
                 if (!ldata.userOverrideScore(event.getGuild(), event.getChannel(), pingId, score)) return false;
-                GlobalData.saveData();
+                GlobalData.markReadyToSave();
                 return true;
             }
         });

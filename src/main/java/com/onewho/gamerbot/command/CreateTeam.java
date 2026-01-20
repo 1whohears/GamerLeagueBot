@@ -29,7 +29,7 @@ public class CreateTeam extends LeagueCommand {
         }
         String memberPings = Report.getMention(team);
         event.getChannel().sendMessage("Created Team "+teamName+" with members "+memberPings+"!").queue();
-        GlobalData.saveData();
+        GlobalData.markReadyToSave();
         return true;
     }
 

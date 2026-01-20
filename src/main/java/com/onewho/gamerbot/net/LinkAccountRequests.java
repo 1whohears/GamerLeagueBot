@@ -49,7 +49,7 @@ public class LinkAccountRequests {
 
             user.getExtraData().addProperty("mcUUID", mcUUIDStr);
             user.getExtraData().addProperty("linkCode", "");
-            GlobalData.saveData();
+            GlobalData.markReadyToSave();
 
             return getGson().toJson(Map.of("result", "Successfully linked minecraft account with discord account!"));
         });

@@ -38,7 +38,7 @@ public class CreateQueue extends LeagueCommand {
 
     public static QueueData run(LeagueData ldata, Consumer<String> debugConsumer) {
         QueueData queue = ldata.createQueue();
-        GlobalData.saveData();
+        GlobalData.markReadyToSave();
         String message = "Successfully created queue "+queue.getId()+"!";
         debugConsumer.accept(message);
         return queue;

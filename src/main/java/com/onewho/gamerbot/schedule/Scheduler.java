@@ -21,11 +21,12 @@ public class Scheduler {
         System.out.println("RUNNING DAILY TASKS "+ZonedDateTime.now(ZoneId.of("America/Chicago")));
         GlobalData.updateRanksForAllLeagues();
         GlobalData.genScheduledPairsForAllLeagues();
-        GlobalData.saveData();
+        GlobalData.markReadyToSave();
     }
 
     private static void runOften() {
         GlobalData.updateQueuesForAllLeagues();
+        GlobalData.saveData();
     }
 	
 	private static void scheduleDaily(ScheduledExecutorService service) {

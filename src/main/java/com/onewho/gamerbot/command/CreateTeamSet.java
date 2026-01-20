@@ -42,7 +42,7 @@ public class CreateTeamSet extends LeagueCommand {
         debugConsumer.accept("Successfully created set "+set.getId());
         TextChannel pairsChannel = guild.getChannelById(TextChannel.class, ldata.getChannelId("pairings"));
         set.displaySet(pairsChannel);
-        GlobalData.saveData();
+        GlobalData.markReadyToSave();
         return set;
     }
 
