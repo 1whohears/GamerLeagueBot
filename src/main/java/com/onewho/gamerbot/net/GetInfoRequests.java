@@ -1,6 +1,7 @@
 package com.onewho.gamerbot.net;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.onewho.gamerbot.data.Contestant;
 import com.onewho.gamerbot.data.SetData;
 import com.onewho.gamerbot.data.TeamData;
@@ -34,9 +35,41 @@ public class GetInfoRequests {
                 return getGson().toJson(Map.of("error", "There is no set with ID "+setId));
             }
 
-            // TODO OPTIONAL include data for both teams
+            String includeContestantsStr = req.queryParams("includeContestants");
+            boolean includeContestants;
+            if (includeContestantsStr == null) {
+                includeContestants = false;
+            } else if (includeContestantsStr.equals("true")) {
+                includeContestants = true;
+            } else if (includeContestantsStr.equals("false")) {
+                includeContestants = false;
+            } else {
+                res.status(400);
+                return getGson().toJson(Map.of("error", includeContestantsStr+"is not true or false"));
+            }
 
-            return getGson().toJson(Map.of("result", "Success", "set", set.getJson()));
+            if (includeContestants) {
+                String includeFullTeamStr = req.queryParams("includeFullTeam");
+                boolean includeFullTeam;
+                if (includeFullTeamStr == null) {
+                    includeFullTeam = false;
+                } else if (includeFullTeamStr.equals("true")) {
+                    includeFullTeam = true;
+                } else if (includeFullTeamStr.equals("false")) {
+                    includeFullTeam = false;
+                } else {
+                    res.status(400);
+                    return getGson().toJson(Map.of("error", includeFullTeamStr+"is not true or false"));
+                }
+
+                return getGson().toJson(Map.of("result", "Success",
+                        "set", set.getJson(),
+                        "contestant1", getContestantData(set.getContestant1(), includeFullTeam),
+                        "contestant2", getContestantData(set.getContestant2(), includeFullTeam)
+                ));
+            } else {
+                return getGson().toJson(Map.of("result", "Success", "set", set.getJson()));
+            }
         });
 
         // get info about an existing contestant
@@ -59,6 +92,28 @@ public class GetInfoRequests {
                 return getGson().toJson(Map.of("error", "There is no contestant with ID "+contestantId));
             }
 
+            String includeFullTeamStr = req.queryParams("includeFullTeam");
+            boolean includeFullTeam;
+            if (includeFullTeamStr == null) {
+                includeFullTeam = false;
+            } else if (includeFullTeamStr.equals("true")) {
+                includeFullTeam = true;
+            } else if (includeFullTeamStr.equals("false")) {
+                includeFullTeam = false;
+            } else {
+                res.status(400);
+                return getGson().toJson(Map.of("error", includeFullTeamStr+"is not true or false"));
+            }
+
+            return getGson().toJson(Map.of("result", "Success",
+                    "contestant", getContestantData(contestant, includeFullTeam)
+            ));
+        });
+    }
+
+    public static JsonObject getContestantData(Contestant contestant, boolean includeFullTeam) {
+        JsonObject data = contestant.getJson();
+        if (includeFullTeam) {
             JsonArray teamMembers = new JsonArray();
             if (contestant.isTeam()) {
                 TeamData team = (TeamData) contestant;
@@ -66,14 +121,9 @@ public class GetInfoRequests {
                     teamMembers.add(user.getJson());
                 }
             }
-
-            // TODO OPTIONAL include list of info about individual members
-
-            return getGson().toJson(Map.of("result", "Success",
-                    "contestant", contestant.getJson(),
-                    "teamMembers", teamMembers
-            ));
-        });
+            data.add("team_members", teamMembers);
+        }
+        return data;
     }
 
 }

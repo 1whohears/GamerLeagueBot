@@ -28,6 +28,7 @@ public class NetApiManager {
         CreateTeamRequests.init();
         ReportSetRequests.inti();
         QueueRequests.init();
+        GetInfoRequests.init();
 
         notFound((req, res) -> getGson().toJson(Map.of("error", "Not found")));
     }
