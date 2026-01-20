@@ -186,8 +186,6 @@ public class SetData {
 	 */
 	public ReportResult report(long reporterId, long opponentId, int reporterScore, int opponentScore, String date) {
 		if (isComplete()) return ReportResult.AlreadyVerified;
-		System.out.println("reporter id = "+reporterId);
-		System.out.println("opponent id = "+opponentId);
 		if (c1.hasUserId(reporterId) && c2.hasUserId(opponentId)) {
 			if (p2c) {
 				if (p1s == reporterScore && p2s == opponentScore) {
