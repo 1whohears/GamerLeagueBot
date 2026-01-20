@@ -37,7 +37,7 @@ public abstract class PlayerQueue extends LeagueCommand {
         }
         @Override
         public String getCommandString() {
-            return "joinqueue";
+            return "leavequeue";
         }
         @Override
         public String getHelp() {
@@ -56,7 +56,7 @@ public abstract class PlayerQueue extends LeagueCommand {
         }
         @Override
         public String getCommandString() {
-            return "joinqueue";
+            return "checkin";
         }
         @Override
         public String getHelp() {
@@ -75,7 +75,7 @@ public abstract class PlayerQueue extends LeagueCommand {
         }
         @Override
         public String getCommandString() {
-            return "joinqueue";
+            return "checkout";
         }
         @Override
         public String getHelp() {
