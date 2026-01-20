@@ -14,7 +14,19 @@ public class Scheduler {
 	public static void init() {
 		ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
 		scheduleDaily(service);
+        scheduleOften(service);
 	}
+
+    private static void runDaily() {
+        System.out.println("RUNNING DAILY TASKS "+ZonedDateTime.now(ZoneId.of("America/Chicago")));
+        GlobalData.updateRanksForAllLeagues();
+        GlobalData.genScheduledPairsForAllLeagues();
+        GlobalData.saveData();
+    }
+
+    private static void runOften() {
+        GlobalData.updateQueuesForAllLeagues();
+    }
 	
 	private static void scheduleDaily(ScheduledExecutorService service) {
 		ZonedDateTime now = ZonedDateTime.now(ZoneId.of("America/Chicago"));
@@ -22,22 +34,11 @@ public class Scheduler {
 		if (now.compareTo(next) > 0) next = next.plusDays(1);
 		Duration duration = Duration.between(now, next);
 		long delay = duration.getSeconds();
-		service.scheduleAtFixedRate(getDailyRun(), delay, TimeUnit.DAYS.toSeconds(1), TimeUnit.SECONDS);
+		service.scheduleAtFixedRate(Scheduler::runDaily, delay, TimeUnit.DAYS.toSeconds(1), TimeUnit.SECONDS);
 	}
-	
-	private static void runDaily() {
-		System.out.println("RUNNING DAILY TASKS "+ZonedDateTime.now(ZoneId.of("America/Chicago")));
-		GlobalData.updateRanksForAllLeagues();
-		GlobalData.genScheduledPairsForAllLeagues();
-		GlobalData.saveData();
-	}
-	
-	private static Runnable getDailyRun() {
-		return new Runnable() {
-			public void run() {
-				runDaily();
-			}
-		};
-	}
+
+    private static void scheduleOften(ScheduledExecutorService service) {
+        service.scheduleAtFixedRate(Scheduler::runOften, 0L, 15L, TimeUnit.SECONDS);
+    }
 	
 }

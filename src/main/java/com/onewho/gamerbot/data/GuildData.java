@@ -124,12 +124,16 @@ public class GuildData {
 		for (LeagueData l : leagues) l.setupDiscordStuff(guild, debugChannel);
 	}
 	
-	protected void genScheduledPairsForAllLeagues() {
-		for (LeagueData l : leagues) l.genScheduledPairs(BotMain.JDA.getGuildById(id));
+	protected void genScheduledPairsForAllLeagues(Guild guild) {
+		for (LeagueData l : leagues) l.genScheduledPairs(guild);
 	}
 	
-	protected void updateRanksForAllLeagues() {
-		for (LeagueData l : leagues) l.updateRanks(BotMain.JDA.getGuildById(id));
+	protected void updateRanksForAllLeagues(Guild guild) {
+		for (LeagueData l : leagues) l.updateRanks(guild);
 	}
+    
+    protected void updateQueuesForAllLeagues(Guild guild) {
+        for (LeagueData l : leagues) l.updateAllQueues(guild);
+    }
 	
 }

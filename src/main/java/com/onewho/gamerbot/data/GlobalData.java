@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.onewho.gamerbot.BotMain;
 
 public class GlobalData {
 	
@@ -103,11 +104,15 @@ public class GlobalData {
 	}
 	
 	public static void genScheduledPairsForAllLeagues() {
-		guilds.forEach((id, data) -> data.genScheduledPairsForAllLeagues());
+		guilds.forEach((id, data) -> data.genScheduledPairsForAllLeagues(BotMain.JDA.getGuildById(id)));
 	}
 	
 	public static void updateRanksForAllLeagues() {
-		guilds.forEach((id, data) -> data.updateRanksForAllLeagues());
+		guilds.forEach((id, data) -> data.updateRanksForAllLeagues(BotMain.JDA.getGuildById(id)));
 	}
+    
+    public static void updateQueuesForAllLeagues() {
+        guilds.forEach((id, data) -> data.updateQueuesForAllLeagues(BotMain.JDA.getGuildById(id)));
+    }
 	
 }

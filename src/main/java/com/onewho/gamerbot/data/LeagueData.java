@@ -7,8 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.*;
 
-import javax.annotation.Nullable;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.onewho.gamerbot.util.UtilCalendar;
@@ -26,6 +24,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class LeagueData implements Storable {
 	
@@ -342,6 +341,12 @@ public class LeagueData implements Storable {
 		challengesPerWeek = ch;
 		return challengesPerWeek;
 	}
+    
+    public void updateAllQueues(Guild guild) {
+        MessageChannelUnion debug = getMessageChannelUnion(guild, "bot-commands");
+        if (debug == null) return;
+        queues.forEach(queue -> queue.update(guild, this, msg -> debug.sendMessage(msg).queue()));
+    }
 
     @Nullable
     public QueueData getQueueById(int id) {
@@ -686,7 +691,7 @@ public class LeagueData implements Storable {
 	}
 	
 	private int removeUnprocessedSets(Guild guild) {
-		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, getChannelId("pairings"));
+		TextChannel pairsChannel = getTextChannel(guild, "pairings");
 		if (pairsChannel == null) return 0;
 		int success = 0;
 		for (int i = 0; i < sets.size(); ++i) {
@@ -707,7 +712,7 @@ public class LeagueData implements Storable {
 	 */
 	public int removeSets(Guild guild, MessageChannelUnion debugChannel, int[] ids) {
 		backup(guild, debugChannel, "pre_removesets_backup");
-		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, getChannelId("pairings"));
+		TextChannel pairsChannel = getTextChannel(guild, "pairings");
 		if (pairsChannel == null) return 0;
 		int success = 0;
         for (int id : ids) if (removeSet(id, pairsChannel)) ++success;
@@ -1196,7 +1201,7 @@ public class LeagueData implements Storable {
 	public void genWeeklyPairs(Guild guild, MessageChannelUnion debugChannel) {
 		System.out.println("GENERATING WEEKLY PAIRS: "+getName());
 		debugChannel.sendMessage("Generating Pairs...").queue();
-		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, getChannelId("pairings"));
+		TextChannel pairsChannel = getTextChannel(guild, "pairings");
 		if (pairsChannel == null) {
 			debugChannel.sendMessage(Important.getError()+
 					" Can't generate pairings because the pairings channel is gone!").queue();
@@ -1275,7 +1280,7 @@ public class LeagueData implements Storable {
 		}
 		set.setChallenge();
 		debugChannel.sendMessage("Successfully created challlenge! "+set.getId()).queue();
-		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, getChannelId("pairings"));
+		TextChannel pairsChannel = getTextChannel(guild, "pairings");
 		set.displaySet(pairsChannel);
 		return true;
 	}
@@ -1289,11 +1294,11 @@ public class LeagueData implements Storable {
 			return;
 		}
 		debugChannel.sendMessage("Processed "+num+" sets! Ranks and backups are being updated!").queue();
-		TextChannel ranksChannel = guild.getChannelById(TextChannel.class, getChannelId("ranks"));
+		TextChannel ranksChannel = getTextChannel(guild, "ranks");
 		List<UserData> users = getActiveUsersThisSeason();
 		LeagueData.sortByScoreDescend(users);
         MessageCreateData mcd = createMessage(finalized, users);
-		ranksChannel.sendMessage(mcd).queue();
+		if (ranksChannel != null) ranksChannel.sendMessage(mcd).queue();
 	}
 
     private @NotNull MessageCreateData createMessage(boolean finalized, List<UserData> users) {
@@ -1333,14 +1338,15 @@ public class LeagueData implements Storable {
 	
 	protected void genScheduledPairs(Guild guild) {
 		if (autoGenPairs) {
-			MessageChannelUnion channel = guild.getChannelById(MessageChannelUnion.class, getChannelId("bot-commands"));
-			genWeeklyPairs(guild, channel);
+			MessageChannelUnion channel = getMessageChannelUnion(guild, "bot-commands");
+			if (channel != null) genWeeklyPairs(guild, channel);
 		}
 	}
 	
 	protected void updateRanks(Guild guild) {
 		if (autoUpdateRanks) {
-			MessageChannelUnion channel = guild.getChannelById(MessageChannelUnion.class, getChannelId("bot-commands"));
+			MessageChannelUnion channel = getMessageChannelUnion(guild, "bot-commands");
+            if (channel == null) return; 
 			if (shouldStartNewSeason()) startNewSeason(guild, channel);
 			else updateRanks(guild, channel);
 		}
@@ -1370,8 +1376,7 @@ public class LeagueData implements Storable {
 	}
 	
 	public boolean uploadJson(Guild guild, MessageChannelUnion debugChannel, JsonObject json, String fileName) {
-		TextChannel historyChannel = guild.getChannelById(TextChannel.class, 
-				getChannelId("set-history"));
+		TextChannel historyChannel = getTextChannel(guild, "set-history");
 		if (historyChannel == null) {
 			debugChannel.sendMessage(Important.getError()+" Can't backup because the backup channel is gone!").queue();
 			return false;
@@ -1413,7 +1418,7 @@ public class LeagueData implements Storable {
 		setSeasonEnd(null);
 		resetAllUsers();
 		removeUnprocessedSets(guild);
-		TextChannel pairsChannel = guild.getChannelById(TextChannel.class, getChannelId("pairings"));
+		TextChannel pairsChannel = getTextChannel(guild, "pairings");
 		if (pairsChannel != null) {
 			pairsChannel.sendMessage("__**SEASON "+getSeasonId()+" HAS BEGUN!**__").queue();
 		}
@@ -1507,6 +1512,16 @@ public class LeagueData implements Storable {
 
     public void setDefaultQueueAllowJoinViaDiscord(boolean defaultQueueAllowJoinViaDiscord) {
         this.defaultQueueAllowJoinViaDiscord = defaultQueueAllowJoinViaDiscord;
+    }
+
+    @Nullable
+    public MessageChannelUnion getMessageChannelUnion(Guild guild, String channelName) {
+        return guild.getChannelById(MessageChannelUnion.class, getChannelId(channelName));
+    }
+
+    @Nullable
+    public TextChannel getTextChannel(Guild guild, String channelName) {
+        return guild.getChannelById(TextChannel.class, getChannelId(channelName));
     }
 	
 }
