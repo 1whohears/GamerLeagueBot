@@ -201,11 +201,11 @@ public class QueueData implements Storable {
 			}
 			QueueStatus status = member.getQueueStatus();
 			if (!displayedStatuses.contains(status)) {
-				mcb.addContent(member.getQueueStatusEmoji()+" = **"+status.name()+"**");
+				mcb.addContent("\n"+member.getQueueStatusEmoji()+" = **"+status.name()+"**");
 				displayedStatuses.add(status);
 			}
             time = UtilCalendar.toDiscordTime(time);
-			mcb.addContent(member.getQueueStatusEmoji()+" "+name+" "+time);
+			mcb.addContent("\n"+member.getQueueStatusEmoji()+" "+name+" "+time);
 		}
 		TextChannel queueChannel = guild.getChannelById(TextChannel.class, league.getChannelId("queues"));
         if (queueChannel == null) {
