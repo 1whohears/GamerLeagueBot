@@ -229,7 +229,7 @@ public class QueueData implements Storable {
             return;
         }
         startTime = UtilCalendar.getCurrentDateTimeString();
-        recentJoinTime = "";
+        recentJoinTime = startTime;
         pregameStartTime = "";
         queueState = QueueState.ENROLL;
         isDirty = true;
