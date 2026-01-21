@@ -182,11 +182,13 @@ public class UtilCalendar {
     }
 
     public static String toDiscordRelativeTime(String time) {
+        if (time.isBlank()) return "";
         OffsetDateTime odt = parseTime(time);
         return "<t:"+odt.toEpochSecond()+":R>";
     }
 
     public static String toDiscordTime(String time) {
+        if (time.isBlank()) return "";
         OffsetDateTime odt = parseTime(time);
         return "<t:"+odt.toEpochSecond()+":S>";
     }

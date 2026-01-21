@@ -5,6 +5,8 @@ import com.onewho.gamerbot.data.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.Nullable;
 
+import static com.onewho.gamerbot.data.GlobalData.getGson;
+
 public class ManageQueue extends LeagueCommand {
 
 	@Override
@@ -20,7 +22,7 @@ public class ManageQueue extends LeagueCommand {
 	@Override
 	public String getHelp() {
 		return "`"+BotMain.PREFIX+getCommandString()+" [setting] [queue_id/default] (value)`"
-				+ " Settings: `reset_timeout`, `start_pregame`, `create_set`,"
+				+ " Settings: `info`, `reset_timeout`, `start_pregame`, `create_set`,"
                 + " `join_player`, `remove_player`, `check_in_player`, `check_out_player`,"
                 + " `min_players`, `team_size`, `allow_larger_teams`, `allow_odd_num`,"
                 + " `timeout_time`, `sub_request_time`, `pregame_time`, `reset_timeout_on_join`,"
@@ -33,6 +35,16 @@ public class ManageQueue extends LeagueCommand {
 	}
 
 	public ManageQueue() {
+        addSubCommand(new QueueSubCommand("info",
+                ((event, params, gdata, league, queue) -> {
+                    if (queue == null) {
+                        event.getChannel().sendMessage("This cub command does not support `default`").queue();
+                        return false;
+                    }
+                    event.getChannel().sendMessage(getGson().toJson(queue.getJson())).queue();
+                    GlobalData.markReadyToSave();
+                    return true;
+                })));
         addSubCommand(new QueueSubCommand("reset_timeout",
                 ((event, params, gdata, league, queue) -> {
                     if (queue == null) {

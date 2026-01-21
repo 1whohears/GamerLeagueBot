@@ -18,15 +18,23 @@ public class Scheduler {
 	}
 
     private static void runDaily() {
-        System.out.println("RUNNING DAILY TASKS "+ZonedDateTime.now(ZoneId.of("America/Chicago")));
-        GlobalData.updateRanksForAllLeagues();
-        GlobalData.genScheduledPairsForAllLeagues();
-        GlobalData.markReadyToSave();
+        try {
+            System.out.println("RUNNING DAILY TASKS " + ZonedDateTime.now(ZoneId.of("America/Chicago")));
+            GlobalData.updateRanksForAllLeagues();
+            GlobalData.genScheduledPairsForAllLeagues();
+            GlobalData.markReadyToSave();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private static void runOften() {
-        GlobalData.updateQueuesForAllLeagues();
-        GlobalData.saveData();
+        try {
+            GlobalData.updateQueuesForAllLeagues();
+            GlobalData.saveData();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 	
 	private static void scheduleDaily(ScheduledExecutorService service) {

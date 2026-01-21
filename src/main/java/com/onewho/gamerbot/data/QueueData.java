@@ -33,6 +33,7 @@ public class QueueData implements Storable {
     private String pregameStartTime = "";
     private long messageId = -1;
     private int resolvedSetId = -1;
+    private boolean firstPregameTick = true;
 
     private int minPlayers;
     private int teamSize;
@@ -72,8 +73,12 @@ public class QueueData implements Storable {
     }
 
     private void updateQueueState() {
+        if (queueState == QueueState.CLOSED) {
+            return;
+        }
         if (resolved) {
             queueState = QueueState.CLOSED;
+            isDirty = true;
             return;
         }
         if (queueState == QueueState.FINAL_PREGAME_TICK) {
@@ -119,14 +124,17 @@ public class QueueData implements Storable {
     }
 
     public void update(Guild guild, LeagueData league, Consumer<String> debug) {
+        if (isClosed()) return;
         updateQueueState();
-		if (isClosed()) return;
+        if (!isDirty) return;
 		if (getQueueState() == QueueState.FINAL_ENROLL_TICK) {
             if (members.size() >= minPlayers && isEnoughPlayersAutoStart()) {
                 startPreGame(debug);
+            } else {
+                queueState = QueueState.CLOSED;
+                debug.accept("Not enough players joined queue "+getId()+" closing.");
             }
 		}
-        if (!isDirty) return;
 		List<QueueMember> sorted = new ArrayList<>(members.values());
         sortQueueMembers(sorted);
 		List<QueueMember> filteredQueueMembers = new ArrayList<>(sorted);
@@ -134,6 +142,9 @@ public class QueueData implements Storable {
         if (getQueueState() == QueueState.FINAL_PREGAME_TICK) {
             if (filteredQueueMembers.size() >= minPlayers && isEnoughPlayersAutoStart()) {
                 createSet(guild, league, debug);
+            } else {
+                queueState = QueueState.CLOSED;
+                debug.accept("Not enough players checked into queue "+getId()+" closing.");
             }
         }
         String queueState, nextQueueState;
@@ -207,6 +218,10 @@ public class QueueData implements Storable {
             time = UtilCalendar.toDiscordTime(time);
 			mcb.addContent("\n"+member.getQueueStatusEmoji()+" "+name+" "+time);
 		}
+        if (firstPregameTick && isPreGame()) {
+            firstPregameTick = false;
+            members.keySet().forEach(mcb::mentionUsers);
+        }
 		TextChannel queueChannel = guild.getChannelById(TextChannel.class, league.getChannelId("queues"));
         if (queueChannel == null) {
             debug.accept(Important.getError()+" Queue **"+id+"** Can't display!"
@@ -215,6 +230,24 @@ public class QueueData implements Storable {
         }
 		displayQueue(queueChannel, mcb.build());
         isDirty = false;
+    }
+
+    private void displayQueue(TextChannel channel, MessageCreateData mcd) {
+        if (messageId == -1) messageId = channel.sendMessage(mcd).complete().getIdLong();
+        else {
+            MessageEditData med = new MessageEditBuilder().applyCreateData(mcd).build();
+            try {
+                channel.editMessageById(messageId, med).complete();
+            } catch (ErrorResponseException e) {
+                switch (e.getErrorResponse()) {
+                    case UNKNOWN_MESSAGE:
+                        messageId = channel.sendMessage(mcd).complete().getIdLong();
+                        return;
+                    default:
+                        return;
+                }
+            }
+        }
     }
 
 	private String getName(QueueMember member, Guild guild) {
@@ -245,24 +278,6 @@ public class QueueData implements Storable {
         queueState = QueueState.PREGAME;
         isDirty = true;
         debug.accept("Pre-Game for Queue "+getId()+" has started! All players must check in to their queue!");
-    }
-
-    private void displayQueue(TextChannel channel, MessageCreateData mcd) {
-		if (messageId == -1) messageId = channel.sendMessage(mcd).complete().getIdLong();
-		else {
-			MessageEditData med = new MessageEditBuilder().applyCreateData(mcd).build();
-			try {
-				channel.editMessageById(messageId, med).complete();
-			} catch (ErrorResponseException e) {
-				switch (e.getErrorResponse()) {
-				case UNKNOWN_MESSAGE:
-					messageId = channel.sendMessage(mcd).complete().getIdLong();
-					return;
-				default:
-					return;
-				}
-			} 
-		}
     }
 
     public void createSet(Guild guild, LeagueData league, Consumer<String> debug) {
@@ -467,6 +482,7 @@ public class QueueData implements Storable {
         data.addProperty("messageId", messageId);
         data.addProperty("resolvedSetId", resolvedSetId);
         data.addProperty("queueState", getQueueState().name());
+        data.addProperty("isDirty", isDirty);
         JsonArray members = new JsonArray();
         this.members.forEach((id, qm) -> members.add(qm.getData()));
         data.add("members", members);
@@ -704,4 +720,8 @@ public class QueueData implements Storable {
 	public boolean isPreGame() {
 		return !getPregameStartTime().isEmpty();
 	}
+
+    public boolean isDirty() {
+        return isDirty;
+    }
 }
