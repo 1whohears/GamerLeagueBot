@@ -212,7 +212,7 @@ public class QueueData implements Storable {
 			}
 			QueueStatus status = member.getQueueStatus();
 			if (!displayedStatuses.contains(status)) {
-				mcb.addContent("\n"+member.getQueueStatusEmoji()+" = **"+status.name()+"**");
+				mcb.addContent("\n**"+status.name()+"**");
 				displayedStatuses.add(status);
 			}
             time = UtilCalendar.toDiscordTime(time);
