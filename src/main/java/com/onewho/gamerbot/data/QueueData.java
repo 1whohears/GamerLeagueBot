@@ -81,11 +81,11 @@ public class QueueData implements Storable {
             isDirty = true;
             return;
         }
-        if (queueState == QueueState.FINAL_PREGAME_TICK) {
+        /*if (queueState == QueueState.FINAL_PREGAME_TICK) {
             queueState = QueueState.CLOSED;
             isDirty = true;
             return;
-        }
+        }*/
         if (isPreGame()) {
             if (UtilCalendar.isAfterSeconds(getPregameStartTime(), pregameTime)) {
                 queueState = QueueState.FINAL_PREGAME_TICK;
@@ -100,11 +100,11 @@ public class QueueData implements Storable {
                 return;
             }
         }
-        if (queueState == QueueState.FINAL_ENROLL_TICK) {
+        /*if (queueState == QueueState.FINAL_ENROLL_TICK) {
             queueState = QueueState.PREGAME;
             isDirty = true;
             return;
-        }
+        }*/
         if (members.isEmpty() || !isResetTimeoutOnJoin()) {
             if (UtilCalendar.isAfterSeconds(getStartTime(), timeoutTime)) {
                 queueState = QueueState.FINAL_ENROLL_TICK;
@@ -127,8 +127,8 @@ public class QueueData implements Storable {
         if (isClosed()) return;
         updateQueueState();
         if (!isDirty) return;
-		if (getQueueState() == QueueState.FINAL_ENROLL_TICK) {
-            if (members.size() >= minPlayers && isEnoughPlayersAutoStart()) {
+		if (isEnoughPlayersAutoStart() && getQueueState() == QueueState.FINAL_ENROLL_TICK) {
+            if (members.size() >= minPlayers) {
                 startPreGame(debug);
             } else {
                 queueState = QueueState.CLOSED;
@@ -139,8 +139,8 @@ public class QueueData implements Storable {
         sortQueueMembers(sorted);
 		List<QueueMember> filteredQueueMembers = new ArrayList<>(sorted);
         filterQueueMembers(filteredQueueMembers);
-        if (getQueueState() == QueueState.FINAL_PREGAME_TICK) {
-            if (filteredQueueMembers.size() >= minPlayers && isEnoughPlayersAutoStart()) {
+        if (isEnoughPlayersAutoStart() && getQueueState() == QueueState.FINAL_PREGAME_TICK) {
+            if (filteredQueueMembers.size() >= minPlayers) {
                 createSet(guild, league, debug);
             } else {
                 queueState = QueueState.CLOSED;
