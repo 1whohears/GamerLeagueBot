@@ -623,8 +623,8 @@ public class QueueData implements Storable {
             return switch (queueStatus) {
                 case CHECKED_IN -> ":white_check_mark:";
                 case CHECKED_IN_SUB -> ":ballot_box_with_check:";
-                case NOT_CHECKED_IN -> ":negative_squared_cross_mark:";
-                case NOT_CHECKED_IN_SUB -> ":x:";
+                case NOT_CHECKED_IN -> ":x:";
+                case NOT_CHECKED_IN_SUB -> ":heavy_multiplication_x:";
                 case PRIORITY -> ":arrow_up:";
                 case OVERFLOW -> ":arrow_down:";
                 case NONE -> ":question:";
