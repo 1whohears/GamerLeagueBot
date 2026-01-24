@@ -72,7 +72,7 @@ public class Report extends LeagueCommand {
 			event.getChannel().sendMessage(Important.getError()+" The set with id "+id+" does not exist!").queue();
 			return false;
 		}
-		String currentDate = UtilCalendar.getCurrentDateString();
+		String currentDate = UtilCalendar.getCurrentDateTimeString();
 		ReportResult result = set.report(event.getAuthor().getIdLong(), pingId, s1, s2, currentDate);
 		switch (result) {
 		case IDsDontMatch:

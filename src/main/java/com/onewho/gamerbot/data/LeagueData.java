@@ -808,7 +808,7 @@ public class LeagueData implements Storable {
         UserData ud2 = getUserDataById(id2);
 		if (ud1 == null) return null;
 		if (ud2 == null) return null;
-		SetData set = new SetData(getNewSetId(), ud1, ud2, UtilCalendar.getCurrentDateString());
+		SetData set = new SetData(getNewSetId(), ud1, ud2, UtilCalendar.getCurrentDateTimeString());
 		sets.add(set);
 		return set;
 	}
@@ -821,7 +821,7 @@ public class LeagueData implements Storable {
         if (team1 == null) return null;
         if (team2 == null) return null;
         if (team1.hasOverlappingMembers(team2)) return null;
-        SetData set = new SetData(getNewSetId(), team1, team2, UtilCalendar.getCurrentDateString());
+        SetData set = new SetData(getNewSetId(), team1, team2, UtilCalendar.getCurrentDateTimeString());
         sets.add(set);
         return set;
     }

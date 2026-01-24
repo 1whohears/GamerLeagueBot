@@ -79,7 +79,7 @@ public class ButtonManager {
 			event.reply("You can't press this button!").setEphemeral(true).queue();
 			return;
 		}
-		String currentDate = UtilCalendar.getCurrentDateString();
+		String currentDate = UtilCalendar.getCurrentDateTimeString();
 		ReportResult result = set.report(presserId, c2.getUserId(), s1, s2, currentDate);
 		if (result == ReportResult.AlreadyVerified) {
 			event.reply("You already verified this set!").setEphemeral(true).queue();

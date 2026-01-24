@@ -198,4 +198,10 @@ public class UtilCalendar {
         OffsetDateTime odt = parseTime(time);
         return "<t:"+odt.toEpochSecond()+":S>";
     }
+
+    public static String toDiscordDate(String time) {
+        if (time.isBlank()) return "";
+        OffsetDateTime odt = parseTime(time);
+        return "<t:"+odt.toEpochSecond()+":d>";
+    }
 }

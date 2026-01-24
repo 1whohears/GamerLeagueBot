@@ -82,7 +82,7 @@ public class ReportAdmin extends LeagueCommand {
             debugConsumer.accept(Important.getError()+" The set with id "+setId+" does not exist!");
             return null;
         }
-        String currentDate = UtilCalendar.getCurrentDateString();
+        String currentDate = UtilCalendar.getCurrentDateTimeString();
         ReportResult result = set.reportAdmin(playerId1, playerId2, score1, score2, currentDate);
         if (result == ReportResult.IDsDontMatch) {
             debugConsumer.accept(Important.getError()+" This set id does not have those players!");
