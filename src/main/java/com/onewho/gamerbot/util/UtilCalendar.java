@@ -150,8 +150,14 @@ public class UtilCalendar {
         try {
             return OffsetDateTime.parse(time, TIME_DAY_SEC_FORMATTER);
         } catch (DateTimeParseException e) {
-            LocalDateTime ldt = LocalDateTime.parse(time, TIME_DAY_SEC_NO_TZ_FORMATTER);
-            return ldt.atZone(DEFAULT_ZONE).toOffsetDateTime();
+            try {
+                LocalDateTime ldt = LocalDateTime.parse(time, TIME_DAY_SEC_NO_TZ_FORMATTER);
+                return ldt.atZone(DEFAULT_ZONE).toOffsetDateTime();
+            } catch (DateTimeParseException e2) {
+                LocalDate ld = getDate(time);
+                if (ld == null) return OffsetDateTime.now();
+                return ld.atTime(12, 0).atZone(DEFAULT_ZONE).toOffsetDateTime();
+            }
         }
     }
 
