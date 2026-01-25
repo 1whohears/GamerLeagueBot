@@ -32,7 +32,7 @@ public class UpdateRanks extends LeagueCommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
         boolean force = params.length >= 2 && params[1].equals("force");
-		ldata.updateRanks(event.getGuild(), event.getChannel(), force);
+		ldata.updateRanks(event.getGuild(), event.getChannel(), false, force);
 		GlobalData.markReadyToSave();
 		return true;
 	}

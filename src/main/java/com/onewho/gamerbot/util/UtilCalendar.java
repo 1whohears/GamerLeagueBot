@@ -134,16 +134,24 @@ public class UtilCalendar {
         return d1.isAfter(d2);
     }
 
+    public static boolean isNewer(OffsetDateTime d1, OffsetDateTime d2) {
+        return d1.isAfter(d2);
+    }
+
     public static boolean isNewer(String d1, String d2) {
-        return isNewer(getDate(d1), getDate(d2));
+        return isNewer(parseTime(d1), parseTime(d2));
     }
 
     public static boolean isOlder(LocalDate d1, LocalDate d2) {
         return d1.isBefore(d2);
     }
 
+    public static boolean isOlder(OffsetDateTime d1, OffsetDateTime d2) {
+        return d1.isBefore(d2);
+    }
+
     public static boolean isOlder(String d1, String d2) {
-        return isOlder(getDate(d1), getDate(d2));
+        return isOlder(parseTime(d1), parseTime(d2));
     }
 
     private static OffsetDateTime parseTime(String time) {
