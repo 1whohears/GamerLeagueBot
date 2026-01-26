@@ -79,12 +79,12 @@ public class GetInfoRequests {
                 res.status(400);
                 return getGson().toJson(Map.of("error", "contestantId not defined"));
             }
-            int contestantId;
+            long contestantId;
             try {
-                contestantId = Integer.parseInt(contestantIdStr);
+                contestantId = Long.parseLong(contestantIdStr);
             } catch (NumberFormatException e) {
                 res.status(400);
-                return getGson().toJson(Map.of("error", contestantIdStr+"is not a number"));
+                return getGson().toJson(Map.of("error", contestantIdStr+" is not a number"));
             }
             Contestant contestant = league.getContestantById(contestantId);
             if (contestant == null) {

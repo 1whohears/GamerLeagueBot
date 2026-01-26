@@ -586,7 +586,7 @@ public class QueueData implements Storable {
         }
         public JsonObject getData() {
             JsonObject data = new JsonObject();
-            data.addProperty("id", id);
+            data.addProperty("id", id+"");
             data.addProperty("joinTime", joinTime);
             data.addProperty("checkInTime", checkInTime);
 			data.addProperty("queueStatus", queueStatus.name());
