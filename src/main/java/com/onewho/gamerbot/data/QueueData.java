@@ -27,7 +27,8 @@ public class QueueData implements Storable {
 
     @NotNull private String startTime;
     private boolean resolved;
-    private boolean isDirty = true;
+    private boolean closed;
+    private boolean isDirty = false;
     private QueueState queueState = QueueState.NONE;
     private String recentJoinTime = "";
     private String pregameStartTime = "";
@@ -69,6 +70,7 @@ public class QueueData implements Storable {
         pregameStartTime = ParseData.getString(data, "pregameStartTime", "");
         messageId = ParseData.getLong(data, "messageId", messageId);
         resolvedSetId = ParseData.getInt(data, "resolvedSetId", -1);
+        closed = ParseData.getBoolean(data, "closed", false);
         readMembers(data);
     }
 
@@ -76,13 +78,17 @@ public class QueueData implements Storable {
         if (queueState == QueueState.CLOSED) {
             return;
         }
+        if (closed) {
+            setClosed();
+            return;
+        }
         if (resolved) {
-            queueState = QueueState.CLOSED;
+            setClosed();
             isDirty = true;
             return;
         }
         /*if (queueState == QueueState.FINAL_PREGAME_TICK) {
-            queueState = QueueState.CLOSED;
+            setClosed();
             isDirty = true;
             return;
         }*/
@@ -123,6 +129,11 @@ public class QueueData implements Storable {
         }
     }
 
+    private void setClosed() {
+        queueState = QueueState.CLOSED;
+        closed = true;
+    }
+
     public void update(Guild guild, LeagueData league, Consumer<String> debug) {
         if (isClosed()) return;
         updateQueueState();
@@ -131,7 +142,7 @@ public class QueueData implements Storable {
             if (members.size() >= minPlayers) {
                 startPreGame(debug);
             } else {
-                queueState = QueueState.CLOSED;
+                setClosed();
                 debug.accept("Not enough players joined queue "+getId()+" closing.");
             }
 		}
@@ -143,7 +154,7 @@ public class QueueData implements Storable {
             if (filteredQueueMembers.size() >= minPlayers) {
                 createSet(guild, league, debug);
             } else {
-                queueState = QueueState.CLOSED;
+                setClosed();
                 debug.accept("Not enough players checked into queue "+getId()+" closing.");
             }
         }
@@ -319,7 +330,7 @@ public class QueueData implements Storable {
         debug.accept("Successfully Created Set "+set.getId()+" for Queue "+getId());
         resolved = true;
         isDirty = true;
-        queueState = QueueState.CLOSED;
+        setClosed();
         resolvedSetId = set.getId();
         GlobalData.markReadyToSave();
     }
@@ -483,6 +494,7 @@ public class QueueData implements Storable {
         data.addProperty("resolvedSetId", resolvedSetId);
         data.addProperty("queueState", getQueueState().name());
         data.addProperty("isDirty", isDirty);
+        data.addProperty("closed", closed);
         JsonArray members = new JsonArray();
         this.members.forEach((id, qm) -> members.add(qm.getData()));
         data.add("members", members);
