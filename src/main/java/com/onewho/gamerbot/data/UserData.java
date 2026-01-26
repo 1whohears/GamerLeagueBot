@@ -1,13 +1,11 @@
 package com.onewho.gamerbot.data;
 
-import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
 import com.google.gson.JsonObject;
 import com.onewho.gamerbot.util.UtilCalendar;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
+import java.util.List;
 
 public class UserData implements Contestant {
 	

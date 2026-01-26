@@ -1,5 +1,6 @@
 package com.onewho.gamerbot.util;
 
+import javax.annotation.Nullable;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -7,10 +8,7 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.IsoFields;
 import java.time.temporal.WeekFields;
-import java.util.Date;
 import java.util.Locale;
-
-import javax.annotation.Nullable;
 
 public class UtilCalendar {
 
@@ -28,12 +26,12 @@ public class UtilCalendar {
         return date.getYear();
     }
 
-    public static LocalDate getCurrentDate() {
-        return ZonedDateTime.now(DEFAULT_ZONE).toLocalDate();
+    public static OffsetDateTime getCurrentDate() {
+        return ZonedDateTime.now(DEFAULT_ZONE).toOffsetDateTime();
     }
 
     public static String getCurrentDateString() {
-        return new SimpleDateFormat("dd-MM-yyyy").format(new Date());
+        return new SimpleDateFormat("dd-MM-yyyy").format(getCurrentDate());
     }
 
     public static String getCurrentDateTimeString() {
@@ -49,10 +47,10 @@ public class UtilCalendar {
      * @param dateString format dd-MM-yyyy
      */
     public static int getWeek(String dateString) {
-        return getDate(dateString).get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
+        return parseTime(dateString).get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
     }
 
-    public static int getWeek(LocalDate date) {
+    public static int getWeek(OffsetDateTime date) {
         return date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
     }
 
@@ -60,14 +58,14 @@ public class UtilCalendar {
      * @param dateString format dd-MM-yyyy
      */
     public static int getYear(String dateString) {
-        return getDate(dateString).getYear();
+        return parseTime(dateString).getYear();
     }
 
     /**
      * @param dateString format dd-MM-yyyy
      */
     @Nullable
-    public static LocalDate getDate(String dateString) {
+    private static LocalDate getDateOld(String dateString) {
         try {
             return LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         } catch (DateTimeParseException e) {
@@ -82,10 +80,10 @@ public class UtilCalendar {
     }
 
     public static int getWeekDiff(String start, String end) {
-        return getWeekDiff(getDate(start), getDate(end));
+        return getWeekDiff(parseTime(start), parseTime(end));
     }
 
-    public static int getWeekDiff(LocalDate start, LocalDate end) {
+    public static int getWeekDiff(OffsetDateTime start, OffsetDateTime end) {
         return (int)ChronoUnit.WEEKS.between(start, end);
     }
 
@@ -95,7 +93,7 @@ public class UtilCalendar {
         return (int)ChronoUnit.WEEKS.between(startDate, endDate);
     }
 
-    public static int getWeekDiffByWeekDay(LocalDate start, LocalDate end, int dayOfWeek) {
+    public static int getWeekDiffByWeekDay(OffsetDateTime start, OffsetDateTime end, int dayOfWeek) {
         if (dayOfWeek < 1) dayOfWeek = 1;
         else if (dayOfWeek > 7) dayOfWeek = 7;
         return (int)ChronoUnit.WEEKS.between(
@@ -104,25 +102,24 @@ public class UtilCalendar {
     }
 
     public static int getWeekDiffByWeekDay(String start, String end, int dayOfWeek) {
-        return getWeekDiffByWeekDay(getDate(start), getDate(end), dayOfWeek);
+        return getWeekDiffByWeekDay(parseTime(start), parseTime(end), dayOfWeek);
     }
 
     public static int getWeekDiffByWeekDayFromNow(String start, int dayOfWeek) {
-        return getWeekDiffByWeekDay(getDate(start), getCurrentDate(), dayOfWeek);
+        return getWeekDiffByWeekDay(parseTime(start), getCurrentDate(), dayOfWeek);
     }
 
     public static ZonedDateTime weekYearToZonedDate(int week, int year, int dayOfWeek) {
         if (dayOfWeek < 1) dayOfWeek = 1;
         else if (dayOfWeek > 7) dayOfWeek = 7;
         WeekFields wf = WeekFields.of(Locale.getDefault());
-        ZonedDateTime zdt = ZonedDateTime.now(DEFAULT_ZONE)
+        return ZonedDateTime.now(DEFAULT_ZONE)
                 .withYear(year)
                 .with(wf.weekOfYear(), week)
                 .with(wf.dayOfWeek(), dayOfWeek);
-        return zdt;
     }
 
-    public static ZonedDateTime toDayInWeek(LocalDate date, int dayOfWeek) {
+    public static ZonedDateTime toDayInWeek(OffsetDateTime date, int dayOfWeek) {
         return weekYearToZonedDate(getWeek(date), date.getYear(), dayOfWeek);
     }
 
@@ -154,7 +151,7 @@ public class UtilCalendar {
         return isOlder(parseTime(d1), parseTime(d2));
     }
 
-    private static OffsetDateTime parseTime(String time) {
+    public static OffsetDateTime parseTime(String time) {
         try {
             return OffsetDateTime.parse(time, TIME_DAY_SEC_FORMATTER);
         } catch (DateTimeParseException e) {
@@ -162,7 +159,7 @@ public class UtilCalendar {
                 LocalDateTime ldt = LocalDateTime.parse(time, TIME_DAY_SEC_NO_TZ_FORMATTER);
                 return ldt.atZone(DEFAULT_ZONE).toOffsetDateTime();
             } catch (DateTimeParseException e2) {
-                LocalDate ld = getDate(time);
+                LocalDate ld = getDateOld(time);
                 if (ld == null) return OffsetDateTime.now();
                 return ld.atTime(12, 0).atZone(DEFAULT_ZONE).toOffsetDateTime();
             }

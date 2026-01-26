@@ -1,17 +1,9 @@
 package com.onewho.gamerbot.data;
 
-import java.awt.Color;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.util.*;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.onewho.gamerbot.util.UtilCalendar;
 import com.onewho.gamerbot.util.UtilKClosest;
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
@@ -25,6 +17,14 @@ import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.awt.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
+import java.util.*;
+import java.util.List;
 
 public class LeagueData implements Storable {
 	
@@ -288,7 +288,7 @@ public class LeagueData implements Storable {
 			seasonEnd = "";
 			return true;
 		}
-		if (UtilCalendar.getDate(end) == null) return false;
+		if (UtilCalendar.parseTime(end) == null) return false;
 		seasonEnd = end;
 		return true;
 	}
@@ -301,7 +301,7 @@ public class LeagueData implements Storable {
 		if (start == null || start.isEmpty()) {
 			return false;
 		}
-		if (UtilCalendar.getDate(start) == null) return false;
+		if (UtilCalendar.parseTime(start) == null) return false;
 		seasonStart = start;
 		return true;
 	}
@@ -1433,8 +1433,8 @@ public class LeagueData implements Storable {
 	
 	public boolean shouldStartNewSeason() {
 		if (!willSeasonEnd()) return false;
-		LocalDate now = UtilCalendar.getCurrentDate();
-		LocalDate end = UtilCalendar.getDate(getSeasonEnd());
+        OffsetDateTime now = UtilCalendar.getCurrentDate();
+        OffsetDateTime end = UtilCalendar.parseTime(getSeasonEnd());
 		return !UtilCalendar.isOlder(now, end);
 	}
 

@@ -1,14 +1,13 @@
 package com.onewho.gamerbot.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-
 import net.dv8tion.jda.api.entities.Channel;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GuildData {
 	
