@@ -28,7 +28,7 @@ public class QueueData implements Storable {
     @NotNull private String startTime;
     private boolean resolved;
     private boolean closed;
-    private boolean isDirty = false;
+    private boolean isDirty = true;
     private QueueState queueState = QueueState.NONE;
     private String recentJoinTime = "";
     private String pregameStartTime = "";
@@ -71,6 +71,8 @@ public class QueueData implements Storable {
         messageId = ParseData.getLong(data, "messageId", messageId);
         resolvedSetId = ParseData.getInt(data, "resolvedSetId", -1);
         closed = ParseData.getBoolean(data, "closed", false);
+        String queueStateStr = ParseData.getString(data, "queueState", "NONE");
+        queueState = QueueState.valueOf(queueStateStr);
         readMembers(data);
     }
 
@@ -566,7 +568,7 @@ public class QueueData implements Storable {
     }
 
     public boolean isClosed() {
-        return getQueueState() == QueueState.CLOSED;
+        return closed;
     }
 
     public boolean cantJoin() {
