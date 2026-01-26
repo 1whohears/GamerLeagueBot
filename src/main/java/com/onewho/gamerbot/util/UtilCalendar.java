@@ -8,6 +8,7 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.IsoFields;
 import java.time.temporal.WeekFields;
+import java.util.Date;
 import java.util.Locale;
 
 public class UtilCalendar {
@@ -31,7 +32,7 @@ public class UtilCalendar {
     }
 
     public static String getCurrentDateString() {
-        return new SimpleDateFormat("dd-MM-yyyy").format(getCurrentDate());
+        return new SimpleDateFormat("dd-MM-yyyy").format(new Date());
     }
 
     public static String getCurrentDateTimeString() {
