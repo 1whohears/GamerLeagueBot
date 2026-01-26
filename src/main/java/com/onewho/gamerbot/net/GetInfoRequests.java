@@ -74,22 +74,33 @@ public class GetInfoRequests {
 
         // get info about an existing contestant
         get("/league/info/contestant", (LeagueDataRoute) (req, res, guild, league) -> {
+            Contestant contestant;
             String contestantIdStr = req.queryParams("contestantId");
-            if (contestantIdStr == null) {
+            String key = req.queryParams("contestantDataKey");
+            String value = req.queryParams("contestantDataValue");
+            if (contestantIdStr != null) {
+                long contestantId;
+                try {
+                    contestantId = Long.parseLong(contestantIdStr);
+                } catch (NumberFormatException e) {
+                    res.status(400);
+                    return getGson().toJson(Map.of("error", contestantIdStr+" is not a number"));
+                }
+                contestant = league.getContestantById(contestantId);
+                if (contestant == null) {
+                    res.status(400);
+                    return getGson().toJson(Map.of("error", "There is no contestant with ID "+contestantId));
+                }
+            } else if (key != null && value != null) {
+                contestant = league.getUserByExtraData(key, value);
+                if (contestant == null) {
+                    res.status(400);
+                    return getGson().toJson(Map.of("error", "There is no contestant that has a "
+                            +key+" of "+value));
+                }
+            } else {
                 res.status(400);
                 return getGson().toJson(Map.of("error", "contestantId not defined"));
-            }
-            long contestantId;
-            try {
-                contestantId = Long.parseLong(contestantIdStr);
-            } catch (NumberFormatException e) {
-                res.status(400);
-                return getGson().toJson(Map.of("error", contestantIdStr+" is not a number"));
-            }
-            Contestant contestant = league.getContestantById(contestantId);
-            if (contestant == null) {
-                res.status(400);
-                return getGson().toJson(Map.of("error", "There is no contestant with ID "+contestantId));
             }
 
             String includeFullTeamStr = req.queryParams("includeFullTeam");
