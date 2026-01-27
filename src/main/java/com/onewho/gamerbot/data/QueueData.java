@@ -140,25 +140,25 @@ public class QueueData implements Storable {
         if (isClosed()) return;
         updateQueueState();
         if (!isDirty) return;
-		if (isEnoughPlayersAutoStart() && getQueueState() == QueueState.FINAL_ENROLL_TICK) {
-            if (members.size() >= minPlayers) {
+        if (members.size() >= minPlayers) {
+            if (isEnoughPlayersAutoStart() || getQueueState() == QueueState.FINAL_ENROLL_TICK) {
                 startPreGame(debug);
-            } else {
-                setClosed();
-                debug.accept("Not enough players joined queue "+getId()+" closing.");
             }
-		}
+        } else if (getQueueState() == QueueState.FINAL_ENROLL_TICK) {
+            setClosed();
+            debug.accept("Not enough players joined queue "+getId()+" closing.");
+        }
 		List<QueueMember> sorted = new ArrayList<>(members.values());
         sortQueueMembers(sorted);
 		List<QueueMember> filteredQueueMembers = new ArrayList<>(sorted);
         filterQueueMembers(filteredQueueMembers);
-        if (isEnoughPlayersAutoStart() && getQueueState() == QueueState.FINAL_PREGAME_TICK) {
-            if (filteredQueueMembers.size() >= minPlayers) {
+        if (filteredQueueMembers.size() >= minPlayers) {
+            if (isEnoughPlayersAutoStart() || getQueueState() == QueueState.FINAL_PREGAME_TICK) {
                 createSet(guild, league, debug);
-            } else {
-                setClosed();
-                debug.accept("Not enough players checked into queue "+getId()+" closing.");
             }
+        } else if (getQueueState() == QueueState.FINAL_PREGAME_TICK) {
+            setClosed();
+            debug.accept("Not enough players checked into queue "+getId()+" closing.");
         }
         String queueState, nextQueueState;
         if (getQueueState() == QueueState.ENROLL || getQueueState() == QueueState.FINAL_ENROLL_TICK) {
