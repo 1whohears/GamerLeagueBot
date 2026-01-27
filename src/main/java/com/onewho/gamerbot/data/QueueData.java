@@ -140,25 +140,29 @@ public class QueueData implements Storable {
         if (isClosed()) return;
         updateQueueState();
         if (!isDirty) return;
-        if (members.size() >= minPlayers) {
-            if (isEnoughPlayersAutoStart() || getQueueState() == QueueState.FINAL_ENROLL_TICK) {
-                startPreGame(debug);
+        if (isEnroll()) {
+            if (members.size() >= minPlayers) {
+                if (isEnoughPlayersAutoStart() || getQueueState() == QueueState.FINAL_ENROLL_TICK) {
+                    startPreGame(debug);
+                }
+            } else if (getQueueState() == QueueState.FINAL_ENROLL_TICK) {
+                setClosed();
+                debug.accept("Not enough players joined queue " + getId() + " closing.");
             }
-        } else if (getQueueState() == QueueState.FINAL_ENROLL_TICK) {
-            setClosed();
-            debug.accept("Not enough players joined queue "+getId()+" closing.");
         }
 		List<QueueMember> sorted = new ArrayList<>(members.values());
         sortQueueMembers(sorted);
 		List<QueueMember> filteredQueueMembers = new ArrayList<>(sorted);
         filterQueueMembers(filteredQueueMembers);
-        if (filteredQueueMembers.size() >= minPlayers) {
-            if (isEnoughPlayersAutoStart() || getQueueState() == QueueState.FINAL_PREGAME_TICK) {
-                createSet(guild, league, debug);
+        if (isPreGame()) {
+            if (filteredQueueMembers.size() >= minPlayers) {
+                if (isEnoughPlayersAutoStart() || getQueueState() == QueueState.FINAL_PREGAME_TICK) {
+                    createSet(guild, league, debug);
+                }
+            } else if (getQueueState() == QueueState.FINAL_PREGAME_TICK) {
+                setClosed();
+                debug.accept("Not enough players checked into queue " + getId() + " closing.");
             }
-        } else if (getQueueState() == QueueState.FINAL_PREGAME_TICK) {
-            setClosed();
-            debug.accept("Not enough players checked into queue "+getId()+" closing.");
         }
         String queueState, nextQueueState;
         if (getQueueState() == QueueState.ENROLL || getQueueState() == QueueState.FINAL_ENROLL_TICK) {
@@ -737,5 +741,9 @@ public class QueueData implements Storable {
 
     public boolean isDirty() {
         return isDirty;
+    }
+
+    public boolean isEnroll() {
+        return queueState == QueueState.ENROLL || queueState == QueueState.FINAL_ENROLL_TICK;
     }
 }
