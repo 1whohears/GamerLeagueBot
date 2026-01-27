@@ -154,12 +154,12 @@ public class QueueData implements Storable {
         sortQueueMembers(sorted);
 		List<QueueMember> filteredQueueMembers = new ArrayList<>(sorted);
         filterQueueMembers(filteredQueueMembers);
-        if (isPreGame()) {
+        if (getQueueState() == QueueState.FINAL_PREGAME_TICK) {
             if (filteredQueueMembers.size() >= minPlayers) {
-                if (isEnoughPlayersAutoStart() || getQueueState() == QueueState.FINAL_PREGAME_TICK) {
+                if (isEnoughPlayersAutoStart()) {
                     createSet(guild, league, debug);
                 }
-            } else if (getQueueState() == QueueState.FINAL_PREGAME_TICK) {
+            } else {
                 setClosed();
                 debug.accept("Not enough players checked into queue " + getId() + " closing.");
             }
