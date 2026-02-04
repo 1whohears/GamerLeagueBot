@@ -6,6 +6,9 @@ import com.onewho.gamerbot.data.SetData;
 import com.onewho.gamerbot.data.UserData;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 
+import java.sql.Array;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -36,8 +39,15 @@ public class ReportSetRequests {
             if (penaltyMcUUIDListStr == null) penaltyMcUUIDList = new String[0];
             else penaltyMcUUIDList = parseUUIDList(penaltyMcUUIDListStr);
 
+            List<UserData> penaltyUsers = new ArrayList<>();
+            for (String uuid : penaltyMcUUIDList) {
+                UserData user = league.getUserByExtraData("mcUUID", uuid);
+                if (user == null) continue;
+                penaltyUsers.add(user);
+            }
+
             AtomicReference<String> result = new AtomicReference<>("Success");
-            if (!league.cancelSet(setId, penaltyMcUUIDList, result::set)) {
+            if (!league.cancelSet(setId, penaltyUsers, guild, result::set)) {
                 res.status(400);
                 return getGson().toJson(Map.of("error", result.get()));
             }

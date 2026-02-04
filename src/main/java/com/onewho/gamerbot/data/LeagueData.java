@@ -42,6 +42,7 @@ public class LeagueData implements Storable {
 	private int dayOfWeek = 1;
 	private int defaultScore = 1000;
 	private double K = 20d;
+	private int penaltyScore = 20;
 	
 	public boolean autoGenPairs = false;
 	public boolean autoUpdateRanks = false;
@@ -87,6 +88,7 @@ public class LeagueData implements Storable {
 		challengesPerWeek = ParseData.getInt(data, "challenges per week", challengesPerWeek);
 		defaultScore = ParseData.getInt(data, "default score", defaultScore);
 		K = ParseData.getDouble(data, "K", K);
+		penaltyScore = ParseData.getInt(data, "penaltyScore", penaltyScore);
 		
 		autoGenPairs = ParseData.getBoolean(data, "auto gen pairs", false);
 		autoUpdateRanks = ParseData.getBoolean(data, "auto update ranks", false);
@@ -147,6 +149,7 @@ public class LeagueData implements Storable {
 		data.addProperty("challenges per week", challengesPerWeek);
 		data.addProperty("default score", defaultScore);
 		data.addProperty("K", K);
+		data.addProperty("penaltyScore", penaltyScore);
 		data.addProperty("auto gen pairs", autoGenPairs);
 		data.addProperty("auto update ranks", autoUpdateRanks);
 		data.add("users", getUsersJson());
@@ -1372,14 +1375,19 @@ public class LeagueData implements Storable {
 		}
 	}
 
-	public boolean cancelSet(int setId, String[] penaltyMcUUIDList, Consumer<String> debug) {
+	public boolean cancelSet(int setId, Collection<UserData> penaltyUsers, Guild guild, Consumer<String> debug) {
 		SetData set = getSetDataById(setId);
 		if (set == null) {
 			debug.accept("There is no set with ID "+setId);
 			return false;
 		}
-		// TODO get pairs channel
-		set.cancelSet(null);
+		for (UserData user : penaltyUsers) {
+			user.changeScore(-getPenaltyScore());
+		}
+		TextChannel pairsChannel = getTextChannel(guild, "pairings");
+		set.cancelSet(pairsChannel);
+		debug.accept("Set "+setId+" was canceled! "+penaltyUsers.size()
+				+" players received an elo penalty of "+getPenaltyScore());
 		return true;
 	}
 	
@@ -1551,6 +1559,16 @@ public class LeagueData implements Storable {
 
 	public void setDefaultCloseIfEmpty(boolean closeIfEmpty) {
 		this.defaultCloseIfEmpty = closeIfEmpty;
+	}
+
+	public int getPenaltyScore() {
+		return penaltyScore;
+	}
+
+	public int setPenaltyScore(int penaltyScore) {
+		if (penaltyScore < 0) penaltyScore = 0;
+		this.penaltyScore = penaltyScore;
+		return this.penaltyScore;
 	}
 
     @Nullable
