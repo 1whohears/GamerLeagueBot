@@ -1306,6 +1306,7 @@ public class LeagueData implements Storable {
 	public void updateRanks(Guild guild, MessageChannelUnion debugChannel, boolean finalized, boolean force) {
 		if (!finalized) backup(guild, debugChannel, "pre_updateranks_backup");
 		int num = processSets();
+		// TODO elo decay?
 		//display
 		if (num == 0 && !finalized && !force) {
 			debugChannel.sendMessage("There were no sets ready to be processed!").queue();

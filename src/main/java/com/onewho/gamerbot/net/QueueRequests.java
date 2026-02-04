@@ -14,10 +14,49 @@ import static spark.Spark.get;
 public class QueueRequests {
 
     public static void init() {
-        // TODO queue reset timeout request
-        // TODO queue start pregame request
-        // TODO queue create set request
-        // TODO queue close request
+        // queue reset timeout, start pregame, create set, close
+        get("/league/queue/action", (LeagueDataRoute) (req, res, guild, league) -> {
+            String queueIdStr = req.queryParams("queueId");
+            if (queueIdStr == null) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", "queueId not defined"));
+            }
+            int queueId;
+            try {
+                queueId = Integer.parseInt(queueIdStr);
+            } catch (NumberFormatException e) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", queueIdStr+"is not a number"));
+            }
+
+            QueueData queue = league.getQueueById(queueId);
+            if (queue == null) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", "Queue with ID "+queueId+" does not exist."));
+            }
+
+            String action = req.queryParams("action");
+            if (action == null) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", "action not defined"));
+            }
+
+            AtomicReference<String> result = new AtomicReference<>("Success");
+            if (action.equals("reset_timeout")) {
+                queue.resetTimeOut(result::set);
+            } else if (action.equals("start_pregame")) {
+                queue.startPreGame(result::set);
+            } else if (action.equals("create_set")) {
+                queue.createSet(guild, league, result::set);
+            } else if (action.equals("close")) {
+                queue.markForClosing();
+            } else {
+                res.status(400);
+                return getGson().toJson(Map.of("error", action+" is not a valid action!"));
+            }
+
+            return getGson().toJson(Map.of("result", result.get(), "queue", queue.getJson()));
+        });
 
         // create queue
         get("/league/queue/create", (LeagueDataRoute) (req, res, guild, league) -> {
