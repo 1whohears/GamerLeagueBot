@@ -35,6 +35,7 @@ public class QueueData implements Storable {
     private long messageId = -1;
     private int resolvedSetId = -1;
     private boolean firstPregameTick = true;
+    private boolean closeNext = false;
 
     private int minPlayers;
     private int teamSize;
@@ -46,6 +47,7 @@ public class QueueData implements Storable {
     private boolean resetTimeoutOnJoin;
     private boolean ifEnoughPlayersAutoStart;
     private boolean allowJoinViaDiscord;
+    // TODO close queue if empty
 
     protected QueueData(int id, @NotNull String startTime) {
         this.id = id;
@@ -84,16 +86,16 @@ public class QueueData implements Storable {
             setClosed();
             return;
         }
+        if (closeNext) {
+            setClosed();
+            isDirty = true;
+            return;
+        }
         if (resolved) {
             setClosed();
             isDirty = true;
             return;
         }
-        /*if (queueState == QueueState.FINAL_PREGAME_TICK) {
-            setClosed();
-            isDirty = true;
-            return;
-        }*/
         if (isPreGame()) {
             if (UtilCalendar.isAfterSeconds(getPregameStartTime(), pregameTime)) {
                 queueState = QueueState.FINAL_PREGAME_TICK;
@@ -108,11 +110,6 @@ public class QueueData implements Storable {
                 return;
             }
         }
-        /*if (queueState == QueueState.FINAL_ENROLL_TICK) {
-            queueState = QueueState.PREGAME;
-            isDirty = true;
-            return;
-        }*/
         if (members.isEmpty() || !isResetTimeoutOnJoin()) {
             if (UtilCalendar.isAfterSeconds(getStartTime(), timeoutTime)) {
                 queueState = QueueState.FINAL_ENROLL_TICK;
@@ -134,6 +131,10 @@ public class QueueData implements Storable {
     private void setClosed() {
         queueState = QueueState.CLOSED;
         closed = true;
+    }
+
+    public void markForClosing() {
+        closeNext = true;
     }
 
     public void update(Guild guild, LeagueData league, Consumer<String> debug) {

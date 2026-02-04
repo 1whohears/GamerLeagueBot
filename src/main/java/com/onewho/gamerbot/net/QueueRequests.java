@@ -14,6 +14,11 @@ import static spark.Spark.get;
 public class QueueRequests {
 
     public static void init() {
+        // TODO queue reset timeout request
+        // TODO queue start pregame request
+        // TODO queue create set request
+        // TODO queue close request
+
         // create queue
         get("/league/queue/create", (LeagueDataRoute) (req, res, guild, league) -> {
             AtomicReference<String> msg = new AtomicReference<>("");

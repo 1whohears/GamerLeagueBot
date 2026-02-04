@@ -22,7 +22,7 @@ public class ManageQueue extends LeagueCommand {
 	@Override
 	public String getHelp() {
 		return "`"+BotMain.PREFIX+getCommandString()+" [setting] [queue_id/default] (value)`"
-				+ " Settings: `info`, `reset_timeout`, `start_pregame`, `create_set`,"
+				+ " Settings: `info`, `reset_timeout`, `start_pregame`, `create_set`, `close`,"
                 + " `join_player`, `remove_player`, `check_in_player`, `check_out_player`,"
                 + " `min_players`, `team_size`, `allow_larger_teams`, `allow_odd_num`,"
                 + " `timeout_time`, `sub_request_time`, `pregame_time`, `reset_timeout_on_join`,"
@@ -38,7 +38,7 @@ public class ManageQueue extends LeagueCommand {
         addSubCommand(new QueueSubCommand("info",
                 ((event, params, gdata, league, queue) -> {
                     if (queue == null) {
-                        event.getChannel().sendMessage("This cub command does not support `default`").queue();
+                        event.getChannel().sendMessage("This sub command does not support `default`").queue();
                         return false;
                     }
                     event.getChannel().sendMessage(getGson().toJson(queue.getJson())).queue();
@@ -48,7 +48,7 @@ public class ManageQueue extends LeagueCommand {
         addSubCommand(new QueueSubCommand("reset_timeout",
                 ((event, params, gdata, league, queue) -> {
                     if (queue == null) {
-                        event.getChannel().sendMessage("This cub command does not support `default`").queue();
+                        event.getChannel().sendMessage("This sub command does not support `default`").queue();
                         return false;
                     }
                     queue.resetTimeOut(msg -> event.getChannel().sendMessage(msg).queue());
@@ -58,7 +58,7 @@ public class ManageQueue extends LeagueCommand {
         addSubCommand(new QueueSubCommand("start_pregame",
                 ((event, params, gdata, league, queue) -> {
                     if (queue == null) {
-                        event.getChannel().sendMessage("This cub command does not support `default`").queue();
+                        event.getChannel().sendMessage("This sub command does not support `default`").queue();
                         return false;
                     }
                     queue.startPreGame(msg -> event.getChannel().sendMessage(msg).queue());
@@ -68,16 +68,25 @@ public class ManageQueue extends LeagueCommand {
 		addSubCommand(new QueueSubCommand("create_set",
                 ((event, params, gdata, league, queue) -> {
                     if (queue == null) {
-                        event.getChannel().sendMessage("This cub command does not support `default`").queue();
+                        event.getChannel().sendMessage("This sub command does not support `default`").queue();
                         return false;
                     }
                     queue.createSet(event.getGuild(), league, msg -> event.getChannel().sendMessage(msg).queue());
                     return true;
                 })));
+        addSubCommand(new QueueSubCommand("close",
+                ((event, params, gdata, league, queue) -> {
+                    if (queue == null) {
+                        event.getChannel().sendMessage("This sub command does not support `default`").queue();
+                        return false;
+                    }
+                    queue.markForClosing();
+                    return true;
+                })));
         addSubCommand(new QueueSubCommand("join_player",
                 ((QueueSubComUserRun)(event, params, gdata, league, queue, user) -> {
                     if (queue == null) {
-                        event.getChannel().sendMessage("This cub command does not support `default`").queue();
+                        event.getChannel().sendMessage("This sub command does not support `default`").queue();
                         return false;
                     }
                     QueueResult result = queue.addIndividual(user);
@@ -95,7 +104,7 @@ public class ManageQueue extends LeagueCommand {
         addSubCommand(new QueueSubCommand("remove_player",
                 ((QueueSubComUserRun)(event, params, gdata, league, queue, user) -> {
                     if (queue == null) {
-                        event.getChannel().sendMessage("This cub command does not support `default`").queue();
+                        event.getChannel().sendMessage("This sub command does not support `default`").queue();
                         return false;
                     }
                     boolean result = queue.removeFromQueue(user.getId());
@@ -112,7 +121,7 @@ public class ManageQueue extends LeagueCommand {
         addSubCommand(new QueueSubCommand("check_in_player",
                 ((QueueSubComUserRun)(event, params, gdata, league, queue, user) -> {
                     if (queue == null) {
-                        event.getChannel().sendMessage("This cub command does not support `default`").queue();
+                        event.getChannel().sendMessage("This sub command does not support `default`").queue();
                         return false;
                     }
                     QueueResult result = queue.checkIn(user.getId());
@@ -129,7 +138,7 @@ public class ManageQueue extends LeagueCommand {
         addSubCommand(new QueueSubCommand("check_out_player",
                 ((QueueSubComUserRun)(event, params, gdata, league, queue, user) -> {
                     if (queue == null) {
-                        event.getChannel().sendMessage("This cub command does not support `default`").queue();
+                        event.getChannel().sendMessage("This sub command does not support `default`").queue();
                         return false;
                     }
                     QueueResult result = queue.checkOut(user.getId());
