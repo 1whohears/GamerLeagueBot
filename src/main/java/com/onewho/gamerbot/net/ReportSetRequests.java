@@ -10,11 +10,42 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.onewho.gamerbot.data.GlobalData.getGson;
+import static com.onewho.gamerbot.net.CreateTeamRequests.parseUUIDList;
 import static spark.Spark.get;
 
 public class ReportSetRequests {
 
     public static void inti() {
+        // cancel set
+        get("/league/set/cancel", (LeagueDataRoute) (req, res, guild, league) -> {
+            String setIdStr = req.queryParams("setId");
+            if (setIdStr == null) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", "setId not defined"));
+            }
+            int setId;
+            try {
+                setId = Integer.parseInt(setIdStr);
+            } catch (NumberFormatException e) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", setIdStr+" is not a number"));
+            }
+
+            String penaltyMcUUIDListStr = req.queryParams("penaltyMcUUIDList");
+            String[] penaltyMcUUIDList;
+            if (penaltyMcUUIDListStr == null) penaltyMcUUIDList = new String[0];
+            else penaltyMcUUIDList = parseUUIDList(penaltyMcUUIDListStr);
+
+            AtomicReference<String> result = new AtomicReference<>("Success");
+            if (!league.cancelSet(setId, penaltyMcUUIDList, result::set)) {
+                res.status(400);
+                return getGson().toJson(Map.of("error", result.get()));
+            }
+
+            GlobalData.markReadyToSave();
+            return getGson().toJson(Map.of("result", result.get()));
+        });
+
         // report admin command hook
         get("/league/reportadmin", (LeagueDataRoute) (req, res, guild, league) -> {
             String setIdStr = req.queryParams("setId");

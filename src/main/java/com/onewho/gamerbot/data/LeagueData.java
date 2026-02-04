@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class LeagueData implements Storable {
 	
@@ -1370,6 +1371,17 @@ public class LeagueData implements Storable {
 			else updateRanks(guild, channel);
 		}
 	}
+
+	public boolean cancelSet(int setId, String[] penaltyMcUUIDList, Consumer<String> debug) {
+		SetData set = getSetDataById(setId);
+		if (set == null) {
+			debug.accept("There is no set with ID "+setId);
+			return false;
+		}
+		// TODO get pairs channel
+		set.cancelSet(null);
+		return true;
+	}
 	
 	/**
 	 * backup this league
@@ -1550,5 +1562,4 @@ public class LeagueData implements Storable {
     public TextChannel getTextChannel(Guild guild, String channelName) {
         return guild.getChannelById(TextChannel.class, getChannelId(channelName));
     }
-	
 }

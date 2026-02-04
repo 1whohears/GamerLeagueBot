@@ -351,6 +351,15 @@ public class SetData {
 		c2.changeScore(-change);
 		processed = true;
 	}
+
+	public void cancelSet(TextChannel pairsChannel) {
+		processed = true;
+		p1c = true;
+		p2c = true;
+		p1s = 0;
+		p2s = 0;
+		displaySet(pairsChannel);
+	}
 	
 	private static double getChangeInScore(int points1, int points2, int score1, int score2, double k) {
 		return k * (getActualScore(points1, points2) - getExpectedScore(score1, score2));
