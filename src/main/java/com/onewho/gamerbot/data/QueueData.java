@@ -81,6 +81,7 @@ public class QueueData implements Storable {
 
     private void updateQueueState() {
         if (queueState == QueueState.CLOSED) {
+            isDirty = false;
             return;
         }
         if (closed) {
