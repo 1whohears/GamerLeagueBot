@@ -67,6 +67,7 @@ public class LeagueData implements Storable {
     private boolean defaultQueueResetTimeoutOnJoin = true;
     private boolean defaultQueueEnoughPlayersAutoStart = true;
     private boolean defaultQueueAllowJoinViaDiscord = true;
+	private boolean defaultCloseIfEmpty = false;
 	
 	/**
 	 * @param data league data written from disk
@@ -118,6 +119,7 @@ public class LeagueData implements Storable {
         defaultQueueResetTimeoutOnJoin = ParseData.getBoolean(data, "defaultQueueResetTimeoutOnJoin", defaultQueueResetTimeoutOnJoin);
         defaultQueueEnoughPlayersAutoStart = ParseData.getBoolean(data, "defaultQueueEnoughPlayersAutoStart", defaultQueueEnoughPlayersAutoStart);
         defaultQueueAllowJoinViaDiscord = ParseData.getBoolean(data, "defaultQueueAllowJoinViaDiscord", defaultQueueAllowJoinViaDiscord);
+		defaultCloseIfEmpty = ParseData.getBoolean(data, "defaultCloseIfEmpty", defaultCloseIfEmpty);
 	}
 	
 	/**
@@ -156,6 +158,17 @@ public class LeagueData implements Storable {
 		data.addProperty("join league option id", joinLeagueOptionId);
 		data.addProperty("setsaweek option id", setsaweekOptionId);
 		data.add("channel ids", channelIds);
+		data.addProperty("defaultQueueMinPlayers", defaultQueueMinPlayers);
+		data.addProperty("defaultQueueTeamSize", defaultQueueTeamSize);
+		data.addProperty("defaultQueueTimeoutTime", defaultQueueTimeoutTime);
+		data.addProperty("defaultQueueSubRequestTime", defaultQueueSubRequestTime);
+		data.addProperty("defaultQueuePregameTime", defaultQueuePregameTime);
+		data.addProperty("defaultQueueAllowLargerTeams", defaultQueueAllowLargerTeams);
+		data.addProperty("defaultQueueAllowOddNum", defaultQueueAllowOddNum);
+		data.addProperty("defaultQueueResetTimeoutOnJoin", defaultQueueResetTimeoutOnJoin);
+		data.addProperty("defaultQueueEnoughPlayersAutoStart", defaultQueueEnoughPlayersAutoStart);
+		data.addProperty("defaultQueueAllowJoinViaDiscord", defaultQueueAllowJoinViaDiscord);
+		data.addProperty("defaultCloseIfEmpty", defaultCloseIfEmpty);
 		return data;
 	}
 	
@@ -374,6 +387,7 @@ public class LeagueData implements Storable {
         queue.setResetTimeoutOnJoin(defaultQueueResetTimeoutOnJoin);
         queue.setEnoughPlayersAutoStart(defaultQueueEnoughPlayersAutoStart);
         queue.setAllowJoinViaDiscord(defaultQueueAllowJoinViaDiscord);
+		queue.setCloseIfEmpty(defaultCloseIfEmpty);
     }
 
     private int getNewQueueId() {
@@ -1517,6 +1531,14 @@ public class LeagueData implements Storable {
     public void setDefaultQueueAllowJoinViaDiscord(boolean defaultQueueAllowJoinViaDiscord) {
         this.defaultQueueAllowJoinViaDiscord = defaultQueueAllowJoinViaDiscord;
     }
+
+	public boolean isDefaultCloseIfEmpty() {
+		return defaultCloseIfEmpty;
+	}
+
+	public void setDefaultCloseIfEmpty(boolean closeIfEmpty) {
+		this.defaultCloseIfEmpty = closeIfEmpty;
+	}
 
     @Nullable
     public MessageChannelUnion getMessageChannelUnion(Guild guild, String channelName) {

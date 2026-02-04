@@ -47,7 +47,7 @@ public class QueueData implements Storable {
     private boolean resetTimeoutOnJoin;
     private boolean ifEnoughPlayersAutoStart;
     private boolean allowJoinViaDiscord;
-    // TODO close queue if empty
+    private boolean closeIfEmpty;
 
     protected QueueData(int id, @NotNull String startTime) {
         this.id = id;
@@ -67,6 +67,7 @@ public class QueueData implements Storable {
         resetTimeoutOnJoin = ParseData.getBoolean(data, "resetTimeoutOnJoin", true);
         ifEnoughPlayersAutoStart = ParseData.getBoolean(data, "ifEnoughPlayersAutoStart", true);
         allowJoinViaDiscord = ParseData.getBoolean(data, "allowJoinViaDiscord", true);
+        closeIfEmpty = ParseData.getBoolean(data, "closeIfEmpty", false);
         resolved = ParseData.getBoolean(data, "resolved", false);
         recentJoinTime = ParseData.getString(data, "recentJoinTime", "");
         pregameStartTime = ParseData.getString(data, "pregameStartTime", "");
@@ -141,6 +142,10 @@ public class QueueData implements Storable {
         if (isClosed()) return;
         updateQueueState();
         if (!isDirty) return;
+        if (isCloseIfEmpty() && members.isEmpty() && !recentJoinTime.isEmpty()) {
+            setClosed();
+            debug.accept("All players left queue " + getId() + " closing.");
+        }
         if (isEnroll()) {
             if (members.size() >= minPlayers) {
                 if (isEnoughPlayersAutoStart() || getQueueState() == QueueState.FINAL_ENROLL_TICK) {
@@ -494,6 +499,7 @@ public class QueueData implements Storable {
         data.addProperty("resetTimeoutOnJoin", resetTimeoutOnJoin);
         data.addProperty("ifEnoughPlayersAutoStart", ifEnoughPlayersAutoStart);
         data.addProperty("allowJoinViaDiscord", allowJoinViaDiscord);
+        data.addProperty("closeIfEmpty", closeIfEmpty);
         data.addProperty("resolved", resolved);
         data.addProperty("recentJoinTime", recentJoinTime);
         data.addProperty("pregameStartTime", pregameStartTime);
@@ -746,5 +752,13 @@ public class QueueData implements Storable {
 
     public boolean isEnroll() {
         return queueState == QueueState.ENROLL || queueState == QueueState.FINAL_ENROLL_TICK;
+    }
+
+    public boolean isCloseIfEmpty() {
+        return closeIfEmpty;
+    }
+
+    public void setCloseIfEmpty(boolean closeIfEmpty) {
+        this.closeIfEmpty = closeIfEmpty;
     }
 }

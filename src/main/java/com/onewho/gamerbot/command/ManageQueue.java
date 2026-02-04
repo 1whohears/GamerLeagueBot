@@ -26,7 +26,7 @@ public class ManageQueue extends LeagueCommand {
                 + " `join_player`, `remove_player`, `check_in_player`, `check_out_player`,"
                 + " `min_players`, `team_size`, `allow_larger_teams`, `allow_odd_num`,"
                 + " `timeout_time`, `sub_request_time`, `pregame_time`, `reset_timeout_on_join`,"
-                + " `if_enough_players_auto_start`, `allow_join_via_discord`";
+                + " `if_enough_players_auto_start`, `allow_join_via_discord`, `close_if_empty`";
 	}
 
 	@Override
@@ -256,6 +256,18 @@ public class ManageQueue extends LeagueCommand {
                     } else {
                         queue.setAllowJoinViaDiscord(value);
                         event.getChannel().sendMessage("Set Allow Join Via Discord Commands for queue " + queue.getId() + " to " + value).queue();
+                    }
+                    GlobalData.markReadyToSave();
+                    return true;
+                })));
+        addSubCommand(new QueueSubCommand("close_if_empty",
+                ((QueueSubComBoolRun)(event, params, gdata, league, queue, value) -> {
+                    if (queue == null) {
+                        league.setDefaultCloseIfEmpty(value);
+                        event.getChannel().sendMessage("Set Default Close if Empty for new queues to " + value).queue();
+                    } else {
+                        queue.setCloseIfEmpty(value);
+                        event.getChannel().sendMessage("Set Close if Empty for queue " + queue.getId() + " to " + value).queue();
                     }
                     GlobalData.markReadyToSave();
                     return true;

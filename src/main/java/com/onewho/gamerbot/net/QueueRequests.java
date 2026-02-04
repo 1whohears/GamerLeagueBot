@@ -86,8 +86,8 @@ public class QueueRequests {
 
             String allowOddNumStr = req.queryParams("allowOddNum");
             if (allowOddNumStr != null) {
-                if (allowOddNumStr.equals("true")) queue.setAllowLargerTeams(true);
-                else if (allowOddNumStr.equals("false")) queue.setAllowLargerTeams(false);
+                if (allowOddNumStr.equals("true")) queue.setAllowOddNum(true);
+                else if (allowOddNumStr.equals("false")) queue.setAllowOddNum(false);
                 else {
                     res.status(400);
                     return getGson().toJson(Map.of("error", allowOddNumStr + "is not true or false"));
@@ -96,8 +96,8 @@ public class QueueRequests {
 
             String resetTimeoutOnJoinStr = req.queryParams("resetTimeoutOnJoin");
             if (resetTimeoutOnJoinStr != null) {
-                if (resetTimeoutOnJoinStr.equals("true")) queue.setAllowLargerTeams(true);
-                else if (resetTimeoutOnJoinStr.equals("false")) queue.setAllowLargerTeams(false);
+                if (resetTimeoutOnJoinStr.equals("true")) queue.setResetTimeoutOnJoin(true);
+                else if (resetTimeoutOnJoinStr.equals("false")) queue.setResetTimeoutOnJoin(false);
                 else {
                     res.status(400);
                     return getGson().toJson(Map.of("error", resetTimeoutOnJoinStr + "is not true or false"));
@@ -106,8 +106,8 @@ public class QueueRequests {
 
             String ifEnoughPlayersAutoStartStr = req.queryParams("ifEnoughPlayersAutoStart");
             if (ifEnoughPlayersAutoStartStr != null) {
-                if (ifEnoughPlayersAutoStartStr.equals("true")) queue.setAllowLargerTeams(true);
-                else if (ifEnoughPlayersAutoStartStr.equals("false")) queue.setAllowLargerTeams(false);
+                if (ifEnoughPlayersAutoStartStr.equals("true")) queue.setEnoughPlayersAutoStart(true);
+                else if (ifEnoughPlayersAutoStartStr.equals("false")) queue.setEnoughPlayersAutoStart(false);
                 else {
                     res.status(400);
                     return getGson().toJson(Map.of("error", ifEnoughPlayersAutoStartStr + "is not true or false"));
@@ -116,11 +116,21 @@ public class QueueRequests {
 
             String allowJoinViaDiscordStr = req.queryParams("allowJoinViaDiscord");
             if (allowJoinViaDiscordStr != null) {
-                if (allowJoinViaDiscordStr.equals("true")) queue.setAllowLargerTeams(true);
-                else if (allowJoinViaDiscordStr.equals("false")) queue.setAllowLargerTeams(false);
+                if (allowJoinViaDiscordStr.equals("true")) queue.setAllowJoinViaDiscord(true);
+                else if (allowJoinViaDiscordStr.equals("false")) queue.setAllowJoinViaDiscord(false);
                 else {
                     res.status(400);
                     return getGson().toJson(Map.of("error", allowJoinViaDiscordStr + "is not true or false"));
+                }
+            }
+
+            String closeIfEmptyStr = req.queryParams("closeIfEmpty");
+            if (closeIfEmptyStr != null) {
+                if (closeIfEmptyStr.equals("true")) queue.setCloseIfEmpty(true);
+                else if (closeIfEmptyStr.equals("false")) queue.setCloseIfEmpty(false);
+                else {
+                    res.status(400);
+                    return getGson().toJson(Map.of("error", closeIfEmptyStr + "is not true or false"));
                 }
             }
 
