@@ -62,6 +62,7 @@ public class ManageUser extends LeagueCommand {
 					return true;
 				}
 				if (!ldata.lockUser(event.getGuild(), event.getChannel(), pingId, valueB)) return false;
+				GlobalData.markReadyToSave();
 				return true;
 			}
 		});

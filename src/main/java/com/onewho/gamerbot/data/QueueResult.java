@@ -7,5 +7,5 @@ public enum QueueResult {
     CHANGED_TEAM,
     NOT_PRE_GAME,
     NOT_IN_QUEUE,
-    WRONG_TEAM_SIZE
+    ACCOUNT_SUSPENDED, WRONG_TEAM_SIZE
 }

@@ -1383,6 +1383,7 @@ public class LeagueData implements Storable {
 		}
 		for (UserData user : penaltyUsers) {
 			user.changeScore(-getPenaltyScore());
+			user.lockUser();
 		}
 		TextChannel pairsChannel = getTextChannel(guild, "pairings");
 		set.cancelSet(pairsChannel);

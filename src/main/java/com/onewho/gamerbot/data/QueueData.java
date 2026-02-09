@@ -414,6 +414,8 @@ public class QueueData implements Storable {
     public QueueResult addIndividual(@NotNull UserData user) {
         if (cantJoin())
             return QueueResult.CLOSED;
+        if (user.isLocked())
+            return QueueResult.ACCOUNT_SUSPENDED;
         long id = user.getId();
         if (members.containsKey(id))
             return QueueResult.ALREADY_JOINED;
@@ -429,6 +431,8 @@ public class QueueData implements Storable {
         Set<Long> teamMembers = new HashSet<>();
         boolean teamAlreadyExisted = false;
         for (UserData user : users) {
+            if (user.isLocked())
+                return QueueResult.ACCOUNT_SUSPENDED;
             long id = user.getId();
             if (findClearTeam(id))
                 teamAlreadyExisted = true;
