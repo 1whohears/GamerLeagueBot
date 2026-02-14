@@ -1326,7 +1326,7 @@ public class LeagueData implements Storable {
 
     private @NotNull MessageCreateData createMessage(boolean finalized, List<UserData> users) {
         MessageCreateBuilder mcb = new MessageCreateBuilder();
-        String date = UtilCalendar.toDiscordTime(UtilCalendar.getCurrentDateString());
+        String date = UtilCalendar.toDiscordTime(UtilCalendar.getCurrentDateTimeString());
         if (finalized) mcb.addContent("__**END OF SEASON "+getSeasonId()+" RANKS "+date+"**__");
         else mcb.addContent("__**Current Season "+getSeasonId()+" Ranks "+date+"**__");
         int r = 0, r2 = 0, prevScore = Integer.MAX_VALUE;
