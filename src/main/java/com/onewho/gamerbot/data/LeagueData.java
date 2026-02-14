@@ -686,7 +686,7 @@ public class LeagueData implements Storable {
 	public List<UserData> getActiveUsersThisSeason() {
 		List<UserData> active = new ArrayList<>();
 		for (UserData user : users)
-			if (user.isActive() && !UtilCalendar.isOlder(user.getLastActive(), getSeasonStart())) 
+			if (user.isActive() && UtilCalendar.isNewer(user.getLastActive(), getSeasonStart()))
 				active.add(user);
 		return active;
 	}
@@ -1316,10 +1316,11 @@ public class LeagueData implements Storable {
 			debugChannel.sendMessage("There were no sets ready to be processed!").queue();
 			return;
 		}
-		debugChannel.sendMessage("Processed "+num+" sets! Ranks and backups are being updated!").queue();
 		TextChannel ranksChannel = getTextChannel(guild, "ranks");
 		List<UserData> users = getActiveUsersThisSeason();
 		LeagueData.sortByScoreDescend(users);
+        debugChannel.sendMessage("Processed "+num+" sets! Ranks for "+users.size()
+                +" users and backups are being updated!").queue();
         MessageCreateData mcd = createMessage(finalized, users);
 		if (ranksChannel != null) ranksChannel.sendMessage(mcd).queue();
 	}
