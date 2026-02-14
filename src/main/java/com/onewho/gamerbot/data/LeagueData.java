@@ -686,7 +686,7 @@ public class LeagueData implements Storable {
 	public List<UserData> getActiveUsersThisSeason() {
 		List<UserData> active = new ArrayList<>();
 		for (UserData user : users)
-			if (user.isActive() && UtilCalendar.isNewer(user.getLastActive(), getSeasonStart()))
+			if (user.isActive()/* && UtilCalendar.isNewer(user.getLastActive(), getSeasonStart())*/)
 				active.add(user);
 		return active;
 	}
@@ -1465,6 +1465,7 @@ public class LeagueData implements Storable {
 			pairsChannel.sendMessage("__**SEASON "+getSeasonId()+" HAS BEGUN!**__").queue();
 		}
 		sets.clear();
+        queues.clear();
 		GlobalData.markReadyToSave();
 		return true;
 	}
