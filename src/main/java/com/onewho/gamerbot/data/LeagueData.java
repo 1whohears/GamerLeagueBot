@@ -305,7 +305,7 @@ public class LeagueData implements Storable {
 			seasonEnd = "";
 			return true;
 		}
-		if (UtilCalendar.parseTime(end) == null) return false;
+		if (UtilCalendar.getDateOld(end) == null) return false; // intentional use of getDateOld
 		seasonEnd = end;
 		return true;
 	}
@@ -318,7 +318,7 @@ public class LeagueData implements Storable {
 		if (start == null || start.isEmpty()) {
 			return false;
 		}
-		if (UtilCalendar.parseTime(start) == null) return false;
+		if (UtilCalendar.getDateOld(start) == null) return false; // intentional use of getDateOld
 		seasonStart = start;
 		return true;
 	}

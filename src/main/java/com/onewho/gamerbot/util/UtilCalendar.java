@@ -66,7 +66,7 @@ public class UtilCalendar {
      * @param dateString format dd-MM-yyyy
      */
     @Nullable
-    private static LocalDate getDateOld(String dateString) {
+    public static LocalDate getDateOld(String dateString) {
         try {
             return LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         } catch (DateTimeParseException e) {
