@@ -31,7 +31,8 @@ public class UtilCalendar {
     }
 
     public static String getCurrentDateString() {
-        return new SimpleDateFormat("dd-MM-yyyy").format(getCurrentDate());
+        //return new SimpleDateFormat("dd-MM-yyyy").format(getCurrentDate());
+        return getCurrentDate().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
     }
 
     public static String getCurrentDateTimeString() {
