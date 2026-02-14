@@ -44,7 +44,7 @@ public class ReadBackup extends LeagueCommand {
 	@Override
 	public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 		List<Attachment> att = event.getMessage().getAttachments();
-		if (att.size() == 0) {
+		if (att.isEmpty()) {
 			event.getChannel().sendMessage("There were no files attached to your command.").queue();
 			return false;
 		}
