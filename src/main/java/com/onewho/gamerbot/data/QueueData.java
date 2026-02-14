@@ -343,7 +343,6 @@ public class QueueData implements Storable {
         debug.accept("Successfully Created Set "+set.getId()+" for Queue "+getId());
         resolved = true;
         isDirty = true;
-        setClosed();
         resolvedSetId = set.getId();
         GlobalData.markReadyToSave();
     }

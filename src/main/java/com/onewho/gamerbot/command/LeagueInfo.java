@@ -39,7 +39,6 @@ public class LeagueInfo extends LeagueCommand {
 		}
 		MessageChannelUnion mcu = event.getChannel();
 		mcu.sendMessage("__**"+ldata.getName()+" INFO**__"
-				+ "\nDefault Score = "+ldata.getDefaultScore()
 				+ "\nSeason Number = "+ldata.getSeasonId()
 				+ "\nSeason Start = "+ldata.getSeasonStart()
 				+ "\nSeason End = "+ldata.getSeasonEnd()
