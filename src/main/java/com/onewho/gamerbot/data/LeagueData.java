@@ -675,7 +675,7 @@ public class LeagueData implements Storable {
 	 * @return list of all users league data 
 	 */
 	public List<UserData> getActiveUsers() {
-		List<UserData> active = new ArrayList<UserData>();
+		List<UserData> active = new ArrayList<>();
 		for (UserData user : users) if (user.isActive()) active.add(user);
 		return active;
 	}
@@ -686,7 +686,7 @@ public class LeagueData implements Storable {
 	public List<UserData> getActiveUsersThisSeason() {
 		List<UserData> active = new ArrayList<>();
 		for (UserData user : users)
-			if (user.isActive()/* && UtilCalendar.isNewer(user.getLastActive(), getSeasonStart())*/)
+			if (user.isActive() && UtilCalendar.isNewer(user.getLastActive(), getSeasonStart()))
 				active.add(user);
 		return active;
 	}
