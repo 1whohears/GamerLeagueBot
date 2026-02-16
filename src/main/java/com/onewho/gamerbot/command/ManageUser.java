@@ -23,8 +23,8 @@ public class ManageUser extends LeagueCommand {
 	@Override
 	public String getHelp() {
 		return "`"+BotMain.PREFIX+getCommandString()+" [setting] [user ping] (value)`"
-				+ " Settings: `get`, `lock`, `join`, `remove`, `sets-per-week`, `override-score`" +
-                ", `join-queue`, `quit-queue`";
+				+ " Settings: `get`, `lock`, `join`, `remove`, `sets_per_week`, `override_score`" +
+                ", `join_queue`, `quit_queue`";
 	}
 
 	@Override
@@ -55,10 +55,10 @@ public class ManageUser extends LeagueCommand {
 					return false;
 				}
 				boolean valueB;
-				if (params[2].equals("true")) valueB = true;
-				else if (params[2].equals("false")) valueB = false;
+				if (params[3].equals("true")) valueB = true;
+				else if (params[3].equals("false")) valueB = false;
 				else {
-					event.getChannel().sendMessage(Important.getError()+" "+params[2]+" is not true or false!").queue();
+					event.getChannel().sendMessage(Important.getError()+" "+params[3]+" is not true or false!").queue();
 					return true;
 				}
 				if (!ldata.lockUser(event.getGuild(), event.getChannel(), pingId, valueB)) return false;
@@ -91,7 +91,7 @@ public class ManageUser extends LeagueCommand {
 				return true;
 			}
 		});
-		addSubCommand(new SubCommand("sets-per-week") {
+		addSubCommand(new SubCommand("sets_per_week") {
 			@Override
 			public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
 				long pingId = getIdFromMention(params[2]);
@@ -111,7 +111,7 @@ public class ManageUser extends LeagueCommand {
 				return true;
 			}
 		});
-        addSubCommand(new SubCommand("override-score") {
+        addSubCommand(new SubCommand("override_score") {
             @Override
             public boolean runCommand(MessageReceivedEvent event, String[] params, GuildData gdata, LeagueData ldata) {
                 long pingId = getIdFromMention(params[2]);
