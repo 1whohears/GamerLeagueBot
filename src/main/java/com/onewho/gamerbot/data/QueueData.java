@@ -631,7 +631,7 @@ public class QueueData implements Storable {
             return !checkInTime.isEmpty();
         }
         public void setCheckedIn(boolean checkedIn) {
-            if (checkedIn) checkInTime = UtilCalendar.getCurrentDateTimeString();
+            if (checkedIn) if (!isCheckedIn()) checkInTime = UtilCalendar.getCurrentDateTimeString();
             else checkInTime = "";
         }
         public String getCheckInTime() {
