@@ -47,7 +47,7 @@ public class Scheduler {
 	}
 
     private static void scheduleOften(ScheduledExecutorService service) {
-        service.scheduleAtFixedRate(Scheduler::runOften, 0L, 15L, TimeUnit.SECONDS);
+        service.scheduleAtFixedRate(Scheduler::runOften, 0L, 10L, TimeUnit.SECONDS);
     }
 	
 }
