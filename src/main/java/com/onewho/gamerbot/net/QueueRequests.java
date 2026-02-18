@@ -1,9 +1,7 @@
 package com.onewho.gamerbot.net;
 
 import com.onewho.gamerbot.command.CreateQueue;
-import com.onewho.gamerbot.data.QueueData;
-import com.onewho.gamerbot.data.QueueResult;
-import com.onewho.gamerbot.data.UserData;
+import com.onewho.gamerbot.data.*;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -171,6 +169,28 @@ public class QueueRequests {
                     res.status(400);
                     return getGson().toJson(Map.of("error", closeIfEmptyStr + "is not true or false"));
                 }
+            }
+
+            String numSetsPerQueueStr = req.queryParams("numSetsPerQueue");
+            if (numSetsPerQueueStr != null) {
+                try {
+                    queue.setNumSetsPerQueue(Integer.parseInt(numSetsPerQueueStr));
+                } catch (NumberFormatException e) {
+                    res.status(400);
+                    return getGson().toJson(Map.of("error", numSetsPerQueueStr + "is not a number"));
+                }
+            }
+
+            String queueTypeStr = req.queryParams("queueType");
+            if (queueTypeStr != null) {
+                QueueType type;
+                try {
+                    type = QueueType.valueOf(queueTypeStr);
+                } catch (IllegalArgumentException e) {
+                    res.status(400);
+                    return getGson().toJson(Map.of("error", queueTypeStr + "is not a valid type"));
+                }
+                queue.setQueueType(type);
             }
 
             return getGson().toJson(Map.of("result", msg.get(), "queue", queue.getJson()));

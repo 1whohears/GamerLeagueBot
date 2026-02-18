@@ -26,7 +26,8 @@ public class ManageQueue extends LeagueCommand {
                 + " `join_player`, `remove_player`, `check_in_player`, `check_out_player`,"
                 + " `min_players`, `team_size`, `allow_larger_teams`, `allow_odd_num`,"
                 + " `timeout_time`, `sub_request_time`, `pregame_time`, `reset_timeout_on_join`,"
-                + " `if_enough_players_auto_start`, `allow_join_via_discord`, `close_if_empty`";
+                + " `if_enough_players_auto_start`, `allow_join_via_discord`, `close_if_empty`,"
+                + " `num_sets_per_queue`, `queue_type` (`BIG_TEAM`,`MULTI_SOLO`)";
 	}
 
 	@Override
@@ -268,6 +269,37 @@ public class ManageQueue extends LeagueCommand {
                     } else {
                         queue.setCloseIfEmpty(value);
                         event.getChannel().sendMessage("Set Close if Empty for queue " + queue.getId() + " to " + value).queue();
+                    }
+                    GlobalData.markReadyToSave();
+                    return true;
+                })));
+        addSubCommand(new QueueSubCommand("num_sets_per_queue",
+                ((QueueSubComIntRun)(event, params, gdata, league, queue, value) -> {
+                    if (queue == null) {
+                        league.setDefaultNumSetsPerQueue(value);
+                        event.getChannel().sendMessage("Set Number of Sets Per Queue for new queues to " + value).queue();
+                    } else {
+                        queue.setNumSetsPerQueue(value);
+                        event.getChannel().sendMessage("Set Number of Sets Per Queue for queue " + queue.getId() + " to " + value).queue();
+                    }
+                    GlobalData.markReadyToSave();
+                    return true;
+                })));
+        addSubCommand(new QueueSubCommand("queue_type",
+                ((QueueSubComValueRun)(event, params, gdata, league, queue, value) -> {
+                    QueueType type;
+                    try {
+                        type = QueueType.valueOf(value);
+                    } catch (IllegalArgumentException e) {
+                        event.getChannel().sendMessage(Important.getError()+" "+value+" is not a valid type!").queue();
+                        return false;
+                    }
+                    if (queue == null) {
+                        league.setDefaultQueueType(type);
+                        event.getChannel().sendMessage("Set Queue Type for new queues to " + value).queue();
+                    } else {
+                        queue.setQueueType(type);
+                        event.getChannel().sendMessage("Set Queue Type for queue " + queue.getId() + " to " + value).queue();
                     }
                     GlobalData.markReadyToSave();
                     return true;

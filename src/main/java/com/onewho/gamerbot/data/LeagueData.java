@@ -4,6 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.onewho.gamerbot.util.UtilCalendar;
 import com.onewho.gamerbot.util.UtilKClosest;
+import kotlin.jvm.functions.Function2;
+import kotlin.jvm.functions.Function3;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
@@ -64,12 +66,14 @@ public class LeagueData implements Storable {
     private int defaultQueueTimeoutTime = 900;
     private int defaultQueueSubRequestTime = 300;
     private int defaultQueuePregameTime = 600;
+    private int defaultNumSetsPerQueue = 1;
     private boolean defaultQueueAllowLargerTeams = true;
     private boolean defaultQueueAllowOddNum = true;
     private boolean defaultQueueResetTimeoutOnJoin = true;
     private boolean defaultQueueEnoughPlayersAutoStart = true;
     private boolean defaultQueueAllowJoinViaDiscord = true;
 	private boolean defaultCloseIfEmpty = false;
+    private QueueType defaultQueueType = QueueType.BIG_TEAM;
 	
 	/**
 	 * @param data league data written from disk
@@ -117,12 +121,15 @@ public class LeagueData implements Storable {
         defaultQueueTimeoutTime = ParseData.getInt(data, "defaultQueueTimeoutTime", defaultQueueTimeoutTime);
         defaultQueueSubRequestTime = ParseData.getInt(data, "defaultQueueSubRequestTime", defaultQueueSubRequestTime);
         defaultQueuePregameTime = ParseData.getInt(data, "defaultQueuePregameTime", defaultQueuePregameTime);
+        defaultNumSetsPerQueue = ParseData.getInt(data, "defaultNumSetsPerQueue", defaultNumSetsPerQueue);
         defaultQueueAllowLargerTeams = ParseData.getBoolean(data, "defaultQueueAllowLargerTeams", defaultQueueAllowLargerTeams);
         defaultQueueAllowOddNum = ParseData.getBoolean(data, "defaultQueueAllowOddNum", defaultQueueAllowOddNum);
         defaultQueueResetTimeoutOnJoin = ParseData.getBoolean(data, "defaultQueueResetTimeoutOnJoin", defaultQueueResetTimeoutOnJoin);
         defaultQueueEnoughPlayersAutoStart = ParseData.getBoolean(data, "defaultQueueEnoughPlayersAutoStart", defaultQueueEnoughPlayersAutoStart);
         defaultQueueAllowJoinViaDiscord = ParseData.getBoolean(data, "defaultQueueAllowJoinViaDiscord", defaultQueueAllowJoinViaDiscord);
 		defaultCloseIfEmpty = ParseData.getBoolean(data, "defaultCloseIfEmpty", defaultCloseIfEmpty);
+        String queueTypeStr = ParseData.getString(data, "defaultQueueType", "BIG_TEAM");
+        defaultQueueType = QueueType.valueOf(queueTypeStr);
 	}
 	
 	/**
@@ -167,12 +174,14 @@ public class LeagueData implements Storable {
 		data.addProperty("defaultQueueTimeoutTime", defaultQueueTimeoutTime);
 		data.addProperty("defaultQueueSubRequestTime", defaultQueueSubRequestTime);
 		data.addProperty("defaultQueuePregameTime", defaultQueuePregameTime);
+		data.addProperty("defaultNumSetsPerQueue", defaultNumSetsPerQueue);
 		data.addProperty("defaultQueueAllowLargerTeams", defaultQueueAllowLargerTeams);
 		data.addProperty("defaultQueueAllowOddNum", defaultQueueAllowOddNum);
 		data.addProperty("defaultQueueResetTimeoutOnJoin", defaultQueueResetTimeoutOnJoin);
 		data.addProperty("defaultQueueEnoughPlayersAutoStart", defaultQueueEnoughPlayersAutoStart);
 		data.addProperty("defaultQueueAllowJoinViaDiscord", defaultQueueAllowJoinViaDiscord);
 		data.addProperty("defaultCloseIfEmpty", defaultCloseIfEmpty);
+		data.addProperty("defaultQueueType", defaultQueueType.name());
 		return data;
 	}
 	
@@ -392,6 +401,8 @@ public class LeagueData implements Storable {
         queue.setEnoughPlayersAutoStart(defaultQueueEnoughPlayersAutoStart);
         queue.setAllowJoinViaDiscord(defaultQueueAllowJoinViaDiscord);
 		queue.setCloseIfEmpty(defaultCloseIfEmpty);
+        queue.setNumSetsPerQueue(defaultNumSetsPerQueue);
+        queue.setQueueType(defaultQueueType);
     }
 
     private int getNewQueueId() {
@@ -1227,25 +1238,36 @@ public class LeagueData implements Storable {
 		}
 		removeOldSets(pairsChannel);
 		List<UserData> activeUsers = getAvailableSortedUsers(guild);
-		List<SetData> newSets = new ArrayList<SetData>();
-		boolean createdSet = true;
-		while (createdSet) {
-			createdSet = false;
-			//System.out.println("=====");
-			//System.out.println("BIG LOOP");
-			for (UserData udata : activeUsers) {
-				//System.out.println("USER LOOP");
-				//System.out.println("user "+udata);
-				if (hasEnoughSets(udata)) continue;
-				int[] ksort = LeagueData.getClosestUserIndexsByScore(udata, activeUsers);
-				//UtilDebug.printIntArray("K LOOP index sort", ksort);
+		genPairsWithUsers(activeUsers,
+                (user, newSets) -> hasEnoughSets(user),
+                (user1, user2, newSets) -> willSetRepeat(user1, user2),
+                pairsChannel, msg -> debugChannel.sendMessage(msg).queue());
+	}
+
+    public void genPairsWithUsers(@NotNull List<UserData> users,
+                                  @NotNull Function2<UserData,List<SetData>,Boolean> hasEnoughSets,
+                                  @NotNull Function3<UserData,UserData,List<SetData>,Boolean> willSetRepeat,
+                                  @NotNull TextChannel pairsChannel,
+                                  @NotNull Consumer<String> debug) {
+        List<SetData> newSets = new ArrayList<>();
+        boolean createdSet = true;
+        while (createdSet) {
+            createdSet = false;
+            //System.out.println("=====");
+            //System.out.println("BIG LOOP");
+            for (UserData udata : users) {
+                //System.out.println("USER LOOP");
+                //System.out.println("user "+udata);
+                if (hasEnoughSets.invoke(udata, newSets)) continue;
+                int[] ksort = LeagueData.getClosestUserIndexsByScore(udata, users);
+                //UtilDebug.printIntArray("K LOOP index sort", ksort);
                 for (int j : ksort) {
-                    UserData userk = activeUsers.get(j);
+                    UserData userk = users.get(j);
                     long id1 = udata.getId(), id2 = userk.getId();
                     if (id1 == id2) continue;
                     //System.out.println("user k "+userk);
-                    if (hasEnoughSets(userk)) continue;
-                    if (willSetRepeat(udata, userk)) continue;
+                    if (hasEnoughSets.invoke(userk, newSets)) continue;
+                    if (willSetRepeat.invoke(udata, userk, newSets)) continue;
                     SetData newSet = createSet(id1, id2);
                     if (newSet != null) {
                         //System.out.println("created set "+newSet);
@@ -1254,12 +1276,12 @@ public class LeagueData implements Storable {
                         break;
                     }
                 }
-			}
-		}
-		for (SetData set : newSets) set.displaySet(pairsChannel);
-		if (!newSets.isEmpty()) debugChannel.sendMessage("Generated "+newSets.size()+" new Pairings!").queue();
-		else debugChannel.sendMessage("No new pairings were generated!").queue();
-	}
+            }
+        }
+        for (SetData set : newSets) set.displaySet(pairsChannel);
+        if (!newSets.isEmpty()) debug.accept("Generated "+newSets.size()+" new Pairings!");
+        else debug.accept("No new pairings were generated!");
+    }
 	
 	public boolean hasEnoughSets(UserData udata) {
 		List<SetData> incompleteSets = getIncompleteOrCurrentSetsByPlayer(udata.getId());
@@ -1568,6 +1590,22 @@ public class LeagueData implements Storable {
 	public int getPenaltyScore() {
 		return penaltyScore;
 	}
+
+    public int getDefaultNumSetsPerQueue() {
+        return defaultNumSetsPerQueue;
+    }
+
+    public void setDefaultNumSetsPerQueue(int defaultNumSetsPerQueue) {
+        this.defaultNumSetsPerQueue = defaultNumSetsPerQueue;
+    }
+
+    public QueueType getDefaultQueueType() {
+        return defaultQueueType;
+    }
+
+    public void setDefaultQueueType(QueueType defaultQueueType) {
+        this.defaultQueueType = defaultQueueType;
+    }
 
 	public int setPenaltyScore(int penaltyScore) {
 		if (penaltyScore < 0) penaltyScore = 0;

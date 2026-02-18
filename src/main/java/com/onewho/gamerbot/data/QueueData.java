@@ -48,6 +48,9 @@ public class QueueData implements Storable {
     private boolean ifEnoughPlayersAutoStart;
     private boolean allowJoinViaDiscord;
     private boolean closeIfEmpty;
+    // TODO autoCheckIn
+    private int numSetsPerQueue = 1;
+    private QueueType queueType = QueueType.BIG_TEAM;
 
     protected QueueData(int id, @NotNull String startTime) {
         this.id = id;
@@ -68,6 +71,7 @@ public class QueueData implements Storable {
         ifEnoughPlayersAutoStart = ParseData.getBoolean(data, "ifEnoughPlayersAutoStart", true);
         allowJoinViaDiscord = ParseData.getBoolean(data, "allowJoinViaDiscord", true);
         closeIfEmpty = ParseData.getBoolean(data, "closeIfEmpty", false);
+        numSetsPerQueue = ParseData.getInt(data, "numSetsPerQueue", 1);
         resolved = ParseData.getBoolean(data, "resolved", false);
         recentJoinTime = ParseData.getString(data, "recentJoinTime", "");
         pregameStartTime = ParseData.getString(data, "pregameStartTime", "");
@@ -76,6 +80,8 @@ public class QueueData implements Storable {
         closed = ParseData.getBoolean(data, "closed", false);
         String queueStateStr = ParseData.getString(data, "queueState", "NONE");
         queueState = QueueState.valueOf(queueStateStr);
+        String queueTypeStr = ParseData.getString(data, "queueType", "BIG_TEAM");
+        queueType = QueueType.valueOf(queueTypeStr);
         readMembers(data);
     }
 
@@ -330,21 +336,52 @@ public class QueueData implements Storable {
             return;
         }
 
+        queueType.resolver.resolve(this, guild, league, contestants, pairsChannel, debug);
+
+        resolved = true;
+        isDirty = true;
+        GlobalData.markReadyToSave();
+    }
+
+    protected void createTeamSet(Guild guild, LeagueData league, List<Contestant> contestants,
+                                 TextChannel pairsChannel, Consumer<String> debug) {
         UtilUsers.Result result = UtilUsers.balanceTeams(contestants, preferredTeams.values());
         TeamData team1 = UtilUsers.getCreateTeam(guild, league, result.team1());
         TeamData team2 = UtilUsers.getCreateTeam(guild, league, result.team2());
         SetData set = league.createTeamSet(team1.getName(), team2.getName());
         if (set == null) {
             debug.accept(Important.getError()+" Queue **"+id+"** Failed to gen pairings!"
-                            +" __Attempted to make "+team1.getName()+" and "+team2.getName()+" fight each other!__");
+                    +" __Attempted to make "+team1.getName()+" and "+team2.getName()+" fight each other!__");
             return;
         }
         set.displaySet(pairsChannel);
         debug.accept("Successfully Created Set "+set.getId()+" for Queue "+getId());
-        resolved = true;
-        isDirty = true;
         resolvedSetId = set.getId();
-        GlobalData.markReadyToSave();
+    }
+
+    protected void createMultipleSoloSets(Guild guild, LeagueData league, List<Contestant> contestants,
+                                          TextChannel pairsChannel, Consumer<String> debug) {
+        List<UserData> users = new ArrayList<>();
+        for (Contestant cont : contestants) if (cont.isIndividual()) users.add((UserData) cont);
+        league.genPairsWithUsers(users,
+                (user, newSets) -> {
+                    int k = 0;
+                    for (SetData set : newSets) {
+                        if (set.hasPlayer(user.getId()) && ++k >= getNumSetsPerQueue()) {
+                            return true;
+                        }
+                    }
+                    return false;
+                },
+                (user1, user2, newSets) -> {
+                    for (SetData set : newSets) {
+                        if (set.hasPlayer(user1.getId()) && set.hasPlayer(user2.getId())) {
+                            return true;
+                        }
+                    }
+                    return false;
+                },
+                pairsChannel, debug);
     }
 
     protected void filterContestants(List<Contestant> contestants) {
@@ -504,6 +541,8 @@ public class QueueData implements Storable {
         data.addProperty("ifEnoughPlayersAutoStart", ifEnoughPlayersAutoStart);
         data.addProperty("allowJoinViaDiscord", allowJoinViaDiscord);
         data.addProperty("closeIfEmpty", closeIfEmpty);
+        data.addProperty("numSetsPerQueue", numSetsPerQueue);
+        data.addProperty("queueType", queueType.name());
         data.addProperty("resolved", resolved);
         data.addProperty("recentJoinTime", recentJoinTime);
         data.addProperty("pregameStartTime", pregameStartTime);
@@ -764,5 +803,21 @@ public class QueueData implements Storable {
 
     public void setCloseIfEmpty(boolean closeIfEmpty) {
         this.closeIfEmpty = closeIfEmpty;
+    }
+
+    public int getNumSetsPerQueue() {
+        return numSetsPerQueue;
+    }
+
+    public void setNumSetsPerQueue(int numSetsPerQueue) {
+        this.numSetsPerQueue = numSetsPerQueue;
+    }
+
+    public QueueType getQueueType() {
+        return queueType;
+    }
+
+    public void setQueueType(QueueType type) {
+        queueType = type;
     }
 }
