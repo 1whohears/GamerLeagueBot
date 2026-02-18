@@ -73,6 +73,7 @@ public class LeagueData implements Storable {
     private boolean defaultQueueEnoughPlayersAutoStart = true;
     private boolean defaultQueueAllowJoinViaDiscord = true;
 	private boolean defaultCloseIfEmpty = false;
+    private boolean defaultAutoCheckIn = false;
     private QueueType defaultQueueType = QueueType.BIG_TEAM;
 	
 	/**
@@ -128,6 +129,7 @@ public class LeagueData implements Storable {
         defaultQueueEnoughPlayersAutoStart = ParseData.getBoolean(data, "defaultQueueEnoughPlayersAutoStart", defaultQueueEnoughPlayersAutoStart);
         defaultQueueAllowJoinViaDiscord = ParseData.getBoolean(data, "defaultQueueAllowJoinViaDiscord", defaultQueueAllowJoinViaDiscord);
 		defaultCloseIfEmpty = ParseData.getBoolean(data, "defaultCloseIfEmpty", defaultCloseIfEmpty);
+        defaultAutoCheckIn = ParseData.getBoolean(data, "defaultAutoCheckIn", defaultAutoCheckIn);
         String queueTypeStr = ParseData.getString(data, "defaultQueueType", "BIG_TEAM");
         defaultQueueType = QueueType.valueOf(queueTypeStr);
 	}
@@ -181,6 +183,7 @@ public class LeagueData implements Storable {
 		data.addProperty("defaultQueueEnoughPlayersAutoStart", defaultQueueEnoughPlayersAutoStart);
 		data.addProperty("defaultQueueAllowJoinViaDiscord", defaultQueueAllowJoinViaDiscord);
 		data.addProperty("defaultCloseIfEmpty", defaultCloseIfEmpty);
+		data.addProperty("defaultAutoCheckIn", defaultAutoCheckIn);
 		data.addProperty("defaultQueueType", defaultQueueType.name());
 		return data;
 	}
@@ -403,6 +406,7 @@ public class LeagueData implements Storable {
 		queue.setCloseIfEmpty(defaultCloseIfEmpty);
         queue.setNumSetsPerQueue(defaultNumSetsPerQueue);
         queue.setQueueType(defaultQueueType);
+        queue.setAutoCheckIn(defaultAutoCheckIn);
     }
 
     private int getNewQueueId() {
@@ -1605,6 +1609,14 @@ public class LeagueData implements Storable {
 
     public void setDefaultQueueType(QueueType defaultQueueType) {
         this.defaultQueueType = defaultQueueType;
+    }
+
+    public boolean isDefaultAutoCheckIn() {
+        return defaultAutoCheckIn;
+    }
+
+    public void setDefaultAutoCheckIn(boolean defaultAutoCheckIn) {
+        this.defaultAutoCheckIn = defaultAutoCheckIn;
     }
 
 	public int setPenaltyScore(int penaltyScore) {

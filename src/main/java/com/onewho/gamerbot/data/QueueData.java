@@ -48,7 +48,7 @@ public class QueueData implements Storable {
     private boolean ifEnoughPlayersAutoStart;
     private boolean allowJoinViaDiscord;
     private boolean closeIfEmpty;
-    // TODO autoCheckIn
+    private boolean autoCheckIn;
     private int numSetsPerQueue = 1;
     private QueueType queueType = QueueType.BIG_TEAM;
 
@@ -71,6 +71,7 @@ public class QueueData implements Storable {
         ifEnoughPlayersAutoStart = ParseData.getBoolean(data, "ifEnoughPlayersAutoStart", true);
         allowJoinViaDiscord = ParseData.getBoolean(data, "allowJoinViaDiscord", true);
         closeIfEmpty = ParseData.getBoolean(data, "closeIfEmpty", false);
+        autoCheckIn = ParseData.getBoolean(data, "autoCheckIn", false);
         numSetsPerQueue = ParseData.getInt(data, "numSetsPerQueue", 1);
         resolved = ParseData.getBoolean(data, "resolved", false);
         recentJoinTime = ParseData.getString(data, "recentJoinTime", "");
@@ -307,6 +308,7 @@ public class QueueData implements Storable {
         pregameStartTime = UtilCalendar.getCurrentDateTimeString();
         queueState = QueueState.PREGAME;
         isDirty = true;
+        if (isAutoCheckIn()) members.forEach((id, member) -> member.setCheckedIn(true));
         debug.accept("Pre-Game for Queue "+getId()+" has started! All players must check in to their queue!");
     }
 
@@ -541,6 +543,7 @@ public class QueueData implements Storable {
         data.addProperty("ifEnoughPlayersAutoStart", ifEnoughPlayersAutoStart);
         data.addProperty("allowJoinViaDiscord", allowJoinViaDiscord);
         data.addProperty("closeIfEmpty", closeIfEmpty);
+        data.addProperty("autoCheckIn", autoCheckIn);
         data.addProperty("numSetsPerQueue", numSetsPerQueue);
         data.addProperty("queueType", queueType.name());
         data.addProperty("resolved", resolved);
@@ -819,5 +822,13 @@ public class QueueData implements Storable {
 
     public void setQueueType(QueueType type) {
         queueType = type;
+    }
+
+    public boolean isAutoCheckIn() {
+        return autoCheckIn;
+    }
+
+    public void setAutoCheckIn(boolean autoCheckIn) {
+        this.autoCheckIn = autoCheckIn;
     }
 }

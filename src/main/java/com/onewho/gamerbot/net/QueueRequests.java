@@ -171,6 +171,16 @@ public class QueueRequests {
                 }
             }
 
+            String autoCheckInStr = req.queryParams("autoCheckIn");
+            if (autoCheckInStr != null) {
+                if (autoCheckInStr.equals("true")) queue.setAutoCheckIn(true);
+                else if (autoCheckInStr.equals("false")) queue.setAutoCheckIn(false);
+                else {
+                    res.status(400);
+                    return getGson().toJson(Map.of("error", autoCheckInStr + "is not true or false"));
+                }
+            }
+
             String numSetsPerQueueStr = req.queryParams("numSetsPerQueue");
             if (numSetsPerQueueStr != null) {
                 try {
