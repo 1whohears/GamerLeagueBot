@@ -217,7 +217,8 @@ public class QueueData implements Storable {
                     } else {
                         member.setQueueStatus(QueueStatus.CHECKED_IN_SUB);
                     }
-                    if (!isAllowOddNum() && (i == filteredQueueMembers.size()-1) && i % 2 != 0) {
+                    // must be i % 2 == 0 because i = 1 is the 2nd player, i = 2 is the 3rd (odd) player
+                    if (!isAllowOddNum() && (i == filteredQueueMembers.size()-1) && i % 2 == 0) {
                         member.setQueueStatus(QueueStatus.CHECKED_IN_SUB);
                     }
                     time = member.getCheckInTime();
