@@ -239,7 +239,7 @@ public class QueueRequests {
 
             QueueResult result = queue.addIndividual(user);
 
-            return getGson().toJson(Map.of("result", result.name(), "queue", queue.getJson()));
+            return getGson().toJson(Map.of("result", result.name(), "queue", queue.getJson(), "userId", user.getId()));
         });
 
         // leave queue
@@ -275,7 +275,7 @@ public class QueueRequests {
 
             boolean result = queue.removeFromQueue(user.getId());
 
-            return getGson().toJson(Map.of("result", result ? "REMOVED" : "ALREADY_REMOVED", "queue", queue.getJson()));
+            return getGson().toJson(Map.of("result", result ? "REMOVED" : "ALREADY_REMOVED", "queue", queue.getJson(), "userId", user.getId()));
         });
 
         // check in queue
@@ -311,7 +311,7 @@ public class QueueRequests {
 
             QueueResult result = queue.checkIn(user.getId());
 
-            return getGson().toJson(Map.of("result", result.name(), "queue", queue.getJson()));
+            return getGson().toJson(Map.of("result", result.name(), "queue", queue.getJson(), "userId", user.getId()));
         });
 
         // check out queue
@@ -347,7 +347,7 @@ public class QueueRequests {
 
             QueueResult result = queue.checkOut(user.getId());
 
-            return getGson().toJson(Map.of("result", result.name(), "queue", queue.getJson()));
+            return getGson().toJson(Map.of("result", result.name(), "queue", queue.getJson(), "userId", user.getId()));
         });
 
         // check queue state
