@@ -41,6 +41,7 @@ public class GlobalData {
 	 * @throws IOException
 	 */
 	public static JsonObject readJsonData() throws IOException {
+        // TODO instead of saving all guilds into one file, each guild should have its own file in a data folder
 		getGson();
 		JsonObject json = new JsonObject();
         Path path = Paths.get(dataFileName);
@@ -73,6 +74,7 @@ public class GlobalData {
      * {@link #markReadyToSave()} and the scheduler will run this once every couple seconds.
      */
     public static void saveData() {
+        // TODO each guild should have its own isReadyToSave() before writing to its file
         if (!readyToSave) return;
         JsonObject json = new JsonObject();
         JsonArray gs = new JsonArray();

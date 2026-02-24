@@ -28,10 +28,17 @@ public class Scheduler {
         }
     }
 
-    private static void runOften() {
+    private static void runSave() {
+        try {
+            GlobalData.saveData();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void runUpdateQueues() {
         try {
             GlobalData.updateQueuesForAllLeagues();
-            GlobalData.saveData();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -47,7 +54,8 @@ public class Scheduler {
 	}
 
     private static void scheduleOften(ScheduledExecutorService service) {
-        service.scheduleAtFixedRate(Scheduler::runOften, 0L, 10L, TimeUnit.SECONDS);
+        service.scheduleAtFixedRate(Scheduler::runSave, 0L, 15L, TimeUnit.SECONDS);
+        service.scheduleAtFixedRate(Scheduler::runUpdateQueues, 0L, 2L, TimeUnit.SECONDS);
     }
 	
 }
