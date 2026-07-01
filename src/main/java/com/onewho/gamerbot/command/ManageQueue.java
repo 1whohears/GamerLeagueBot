@@ -26,7 +26,8 @@ public class ManageQueue extends LeagueCommand {
                 + " `join_player`, `remove_player`, `check_in_player`, `check_out_player`,"
                 + " `min_players`, `team_size`, `allow_larger_teams`, `allow_odd_num`,"
                 + " `timeout_time`, `sub_request_time`, `pregame_time`, `reset_timeout_on_join`,"
-                + " `if_enough_players_auto_start`, `allow_join_via_discord`, `close_if_empty`,"
+                + " `if_enough_players_auto_start_pregame`, `if_enough_players_auto_start_set`,"
+                + " `allow_join_via_discord`, `close_if_empty`,"
                 + " `auto_check_in`, `num_sets_per_queue`, `queue_type` (`BIG_TEAM`,`MULTI_SOLO`)";
 	}
 
@@ -237,13 +238,25 @@ public class ManageQueue extends LeagueCommand {
                     GlobalData.markReadyToSave();
                     return true;
                 })));
-        addSubCommand(new QueueSubCommand("if_enough_players_auto_start",
+        addSubCommand(new QueueSubCommand("if_enough_players_auto_start_pregame",
                 ((QueueSubComBoolRun)(event, params, gdata, league, queue, value) -> {
                     if (queue == null) {
-                        league.setDefaultQueueEnoughPlayersAutoStart(value);
+                        league.setDefaultQueueAutoStartPreGame(value);
                         event.getChannel().sendMessage("Set Default Auto Start if Enough Players for new queues to " + value).queue();
                     } else {
-                        queue.setEnoughPlayersAutoStart(value);
+                        queue.setAutoStartPreGame(value);
+                        event.getChannel().sendMessage("Set Auto Start if Enough Players for queue " + queue.getId() + " to " + value).queue();
+                    }
+                    GlobalData.markReadyToSave();
+                    return true;
+                })));
+        addSubCommand(new QueueSubCommand("if_enough_players_auto_start_set",
+                ((QueueSubComBoolRun)(event, params, gdata, league, queue, value) -> {
+                    if (queue == null) {
+                        league.setDefaultQueueAutoStartSet(value);
+                        event.getChannel().sendMessage("Set Default Auto Start if Enough Players for new queues to " + value).queue();
+                    } else {
+                        queue.setAutoStartSet(value);
                         event.getChannel().sendMessage("Set Auto Start if Enough Players for queue " + queue.getId() + " to " + value).queue();
                     }
                     GlobalData.markReadyToSave();

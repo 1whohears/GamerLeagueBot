@@ -141,13 +141,23 @@ public class QueueRequests {
                 }
             }
 
-            String ifEnoughPlayersAutoStartStr = req.queryParams("ifEnoughPlayersAutoStart");
-            if (ifEnoughPlayersAutoStartStr != null) {
-                if (ifEnoughPlayersAutoStartStr.equals("true")) queue.setEnoughPlayersAutoStart(true);
-                else if (ifEnoughPlayersAutoStartStr.equals("false")) queue.setEnoughPlayersAutoStart(false);
+            String ifEnoughPlayersAutoStartPreGameStr = req.queryParams("ifEnoughPlayersAutoStartPreGame");
+            if (ifEnoughPlayersAutoStartPreGameStr != null) {
+                if (ifEnoughPlayersAutoStartPreGameStr.equals("true")) queue.setAutoStartPreGame(true);
+                else if (ifEnoughPlayersAutoStartPreGameStr.equals("false")) queue.setAutoStartPreGame(false);
                 else {
                     res.status(400);
-                    return getGson().toJson(Map.of("error", ifEnoughPlayersAutoStartStr + "is not true or false"));
+                    return getGson().toJson(Map.of("error", ifEnoughPlayersAutoStartPreGameStr + "is not true or false"));
+                }
+            }
+
+            String ifEnoughPlayersAutoStartSetStr = req.queryParams("ifEnoughPlayersAutoStartSet");
+            if (ifEnoughPlayersAutoStartSetStr != null) {
+                if (ifEnoughPlayersAutoStartSetStr.equals("true")) queue.setAutoStartSet(true);
+                else if (ifEnoughPlayersAutoStartSetStr.equals("false")) queue.setAutoStartSet(false);
+                else {
+                    res.status(400);
+                    return getGson().toJson(Map.of("error", ifEnoughPlayersAutoStartSetStr + "is not true or false"));
                 }
             }
 

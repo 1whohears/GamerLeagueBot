@@ -45,7 +45,8 @@ public class QueueData implements Storable {
     private int subRequestTime;
     private int pregameTime;
     private boolean resetTimeoutOnJoin;
-    private boolean ifEnoughPlayersAutoStart;
+    private boolean autoStartPreGame;
+    private boolean autoStartSet;
     private boolean allowJoinViaDiscord;
     private boolean closeIfEmpty;
     private boolean autoCheckIn;
@@ -68,7 +69,8 @@ public class QueueData implements Storable {
         subRequestTime = ParseData.getInt(data, "subRequestTime", 2);
         pregameTime = ParseData.getInt(data, "pregameTime", 2);
         resetTimeoutOnJoin = ParseData.getBoolean(data, "resetTimeoutOnJoin", true);
-        ifEnoughPlayersAutoStart = ParseData.getBoolean(data, "ifEnoughPlayersAutoStart", true);
+        autoStartPreGame = ParseData.getBoolean(data, "autoStartPreGame", true);
+        autoStartSet = ParseData.getBoolean(data, "autoStartSet", true);
         allowJoinViaDiscord = ParseData.getBoolean(data, "allowJoinViaDiscord", true);
         closeIfEmpty = ParseData.getBoolean(data, "closeIfEmpty", false);
         autoCheckIn = ParseData.getBoolean(data, "autoCheckIn", false);
@@ -156,7 +158,7 @@ public class QueueData implements Storable {
         }
         if (isEnroll()) {
             if (members.size() >= minPlayers) {
-                if (isEnoughPlayersAutoStart() || getQueueState() == QueueState.FINAL_ENROLL_TICK) {
+                if (isAutoStartPreGame() || getQueueState() == QueueState.FINAL_ENROLL_TICK) {
                     startPreGame(debug);
                 }
             } else if (getQueueState() == QueueState.FINAL_ENROLL_TICK) {
@@ -170,7 +172,7 @@ public class QueueData implements Storable {
         filterQueueMembers(filteredQueueMembers);
         if (getQueueState() == QueueState.FINAL_PREGAME_TICK) {
             if (filteredQueueMembers.size() >= minPlayers) {
-                if (isEnoughPlayersAutoStart()) {
+                if (isAutoStartSet()) {
                     createSet(guild, league, debug);
                 }
             } else {
@@ -541,7 +543,8 @@ public class QueueData implements Storable {
         data.addProperty("subRequestTime", subRequestTime);
         data.addProperty("pregameTime", pregameTime);
         data.addProperty("resetTimeoutOnJoin", resetTimeoutOnJoin);
-        data.addProperty("ifEnoughPlayersAutoStart", ifEnoughPlayersAutoStart);
+        data.addProperty("autoStartPreGame", autoStartPreGame);
+        data.addProperty("autoStartSet", autoStartSet);
         data.addProperty("allowJoinViaDiscord", allowJoinViaDiscord);
         data.addProperty("closeIfEmpty", closeIfEmpty);
         data.addProperty("autoCheckIn", autoCheckIn);
@@ -768,12 +771,21 @@ public class QueueData implements Storable {
         isDirty = true;
     }
 
-    public boolean isEnoughPlayersAutoStart() {
-        return ifEnoughPlayersAutoStart;
+    public boolean isAutoStartPreGame() {
+        return autoStartPreGame;
     }
 
-    public void setEnoughPlayersAutoStart(boolean ifEnoughPlayersAutoStart) {
-        this.ifEnoughPlayersAutoStart = ifEnoughPlayersAutoStart;
+    public void setAutoStartPreGame(boolean autoStartPreGame) {
+        this.autoStartPreGame = autoStartPreGame;
+        isDirty = true;
+    }
+
+    public boolean isAutoStartSet() {
+        return autoStartSet;
+    }
+
+    public void setAutoStartSet(boolean autoStartSet) {
+        this.autoStartSet = autoStartSet;
         isDirty = true;
     }
 

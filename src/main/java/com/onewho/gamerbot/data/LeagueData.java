@@ -70,7 +70,8 @@ public class LeagueData implements Storable {
     private boolean defaultQueueAllowLargerTeams = true;
     private boolean defaultQueueAllowOddNum = true;
     private boolean defaultQueueResetTimeoutOnJoin = true;
-    private boolean defaultQueueEnoughPlayersAutoStart = true;
+    private boolean defaultQueueAutoStartPreGame = true;
+    private boolean defaultQueueAutoStartSet = true;
     private boolean defaultQueueAllowJoinViaDiscord = true;
 	private boolean defaultCloseIfEmpty = false;
     private boolean defaultAutoCheckIn = false;
@@ -126,7 +127,8 @@ public class LeagueData implements Storable {
         defaultQueueAllowLargerTeams = ParseData.getBoolean(data, "defaultQueueAllowLargerTeams", defaultQueueAllowLargerTeams);
         defaultQueueAllowOddNum = ParseData.getBoolean(data, "defaultQueueAllowOddNum", defaultQueueAllowOddNum);
         defaultQueueResetTimeoutOnJoin = ParseData.getBoolean(data, "defaultQueueResetTimeoutOnJoin", defaultQueueResetTimeoutOnJoin);
-        defaultQueueEnoughPlayersAutoStart = ParseData.getBoolean(data, "defaultQueueEnoughPlayersAutoStart", defaultQueueEnoughPlayersAutoStart);
+        defaultQueueAutoStartPreGame = ParseData.getBoolean(data, "defaultQueueAutoStartPreGame", defaultQueueAutoStartPreGame);
+        defaultQueueAutoStartSet = ParseData.getBoolean(data, "defaultQueueAutoStartSet", defaultQueueAutoStartSet);
         defaultQueueAllowJoinViaDiscord = ParseData.getBoolean(data, "defaultQueueAllowJoinViaDiscord", defaultQueueAllowJoinViaDiscord);
 		defaultCloseIfEmpty = ParseData.getBoolean(data, "defaultCloseIfEmpty", defaultCloseIfEmpty);
         defaultAutoCheckIn = ParseData.getBoolean(data, "defaultAutoCheckIn", defaultAutoCheckIn);
@@ -180,7 +182,8 @@ public class LeagueData implements Storable {
 		data.addProperty("defaultQueueAllowLargerTeams", defaultQueueAllowLargerTeams);
 		data.addProperty("defaultQueueAllowOddNum", defaultQueueAllowOddNum);
 		data.addProperty("defaultQueueResetTimeoutOnJoin", defaultQueueResetTimeoutOnJoin);
-		data.addProperty("defaultQueueEnoughPlayersAutoStart", defaultQueueEnoughPlayersAutoStart);
+		data.addProperty("defaultQueueAutoStartPreGame", defaultQueueAutoStartPreGame);
+		data.addProperty("defaultQueueAutoStartSet", defaultQueueAutoStartSet);
 		data.addProperty("defaultQueueAllowJoinViaDiscord", defaultQueueAllowJoinViaDiscord);
 		data.addProperty("defaultCloseIfEmpty", defaultCloseIfEmpty);
 		data.addProperty("defaultAutoCheckIn", defaultAutoCheckIn);
@@ -401,7 +404,8 @@ public class LeagueData implements Storable {
         queue.setSubRequestTime(defaultQueueSubRequestTime);
         queue.setPregameTime(defaultQueuePregameTime);
         queue.setResetTimeoutOnJoin(defaultQueueResetTimeoutOnJoin);
-        queue.setEnoughPlayersAutoStart(defaultQueueEnoughPlayersAutoStart);
+        queue.setAutoStartPreGame(defaultQueueAutoStartPreGame);
+        queue.setAutoStartSet(defaultQueueAutoStartSet);
         queue.setAllowJoinViaDiscord(defaultQueueAllowJoinViaDiscord);
 		queue.setCloseIfEmpty(defaultCloseIfEmpty);
         queue.setNumSetsPerQueue(defaultNumSetsPerQueue);
@@ -1567,12 +1571,20 @@ public class LeagueData implements Storable {
         this.defaultQueueResetTimeoutOnJoin = defaultQueueResetTimeoutOnJoin;
     }
 
-    public boolean isDefaultQueueEnoughPlayersAutoStart() {
-        return defaultQueueEnoughPlayersAutoStart;
+    public boolean isDefaultQueueAutoStartPreGame() {
+        return defaultQueueAutoStartPreGame;
     }
 
-    public void setDefaultQueueEnoughPlayersAutoStart(boolean defaultQueueEnoughPlayersAutoStart) {
-        this.defaultQueueEnoughPlayersAutoStart = defaultQueueEnoughPlayersAutoStart;
+    public void setDefaultQueueAutoStartPreGame(boolean defaultQueueAutoStartPreGame) {
+        this.defaultQueueAutoStartPreGame = defaultQueueAutoStartPreGame;
+    }
+
+    public boolean isDefaultQueueAutoStartSet() {
+        return defaultQueueAutoStartSet;
+    }
+
+    public void setDefaultQueueAutoStartSet(boolean defaultQueueAutoStartSet) {
+        this.defaultQueueAutoStartSet = defaultQueueAutoStartSet;
     }
 
     public boolean isDefaultQueueAllowJoinViaDiscord() {
